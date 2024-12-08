@@ -49,7 +49,7 @@ const Page = () => {
     // Get the pasted content
     const pastedContent = e.clipboardData.getData("text/plain");
 
-    document.execCommand("insertText", false, pastedContent); 
+    document.execCommand("insertText", false, pastedContent);
   };
   const handleThemeChange = (value: ThemeName) => {
     setTheme(value);
@@ -62,10 +62,10 @@ const Page = () => {
         if (point.startsWith(">>")) {
           return (
             <div key={idx} className="flex items-center space-x-2 text-lg mb-4">
-              <div className="text-gray-700 mr-3">{idx + 1}.</div>
+              <div className={`${currentTheme.text} mr-3`}>{idx + 1}.</div>
 
               <div
-                className="text-gray-700"
+                className={`${currentTheme.text}`}
                 contentEditable="true"
                 onPaste={handlePaste}
               >
@@ -76,7 +76,11 @@ const Page = () => {
         } else {
           return (
             <div key={idx} className="mb-2 pl-6 flex items-center">
-              <div contentEditable="true" onPaste={handlePaste} className="text-lg">
+              <div
+                contentEditable="true"
+                onPaste={handlePaste}
+                className={`text-lg ${currentTheme.text}`}
+              >
                 {point}
               </div>
             </div>
@@ -86,7 +90,9 @@ const Page = () => {
         // Handle nested bullet points
         return (
           <div key={idx} className="ml-6 mb-4">
-            <div className="font-semibold text-lg">{point.heading}</div>
+            <div className={`font-semibold text-lg ${currentTheme.text} `}>
+              {point.heading}
+            </div>
             <div contentEditable="true" onPaste={handlePaste}>
               {renderBulletPoints(point.bullet_points)}
             </div>
@@ -99,7 +105,7 @@ const Page = () => {
   return (
     <div>
       {/* Navbar */}
-      <nav className="bg-white shadow-md fixed top-0 left-0 w-full z-50">
+      <nav className="dark:bg-zinc-900 bg-zinc-100 border-b border:bg-zinc-300 shadow-md fixed top-0 left-0 w-full z-50">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="text-2xl font-bold text-indigo-700">Amaverese.ai</div>
           <div className="flex items-center space-x-4">
@@ -130,7 +136,7 @@ const Page = () => {
           {title}
         </div>
 
-        <div className="w-full max-w-[70%]  mx-auto space-y-12">
+        <div className="w-full lg:max-w-[70%]  mx-auto space-y-12">
           {slides.map((slide: any, index: any) => (
             <div
               key={index}

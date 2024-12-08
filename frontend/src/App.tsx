@@ -11,7 +11,7 @@ function App() {
 
   return (
     <div className={`${theme === "dark" ? "dark" : ""}`}>
-      <div className="dark:bg-slate-900 dark:text-white">
+      <div className="dark:bg-black dark:text-white">
         <ConfigProvider
           theme={{
             algorithm:

@@ -41,7 +41,7 @@ const page = () => {
   };
   return (
     <div className="flex items-center justify-center h-screen ">
-      <div className="w-full max-w-md  p-8 rounded-xl shadow-lg dark:bg-slate-700">
+      <div className="w-full max-w-md  p-8 rounded-xl shadow-lg dark:bg-slate-700 border-2 border-stone-700">
         <h1 className="text-2xl font-bold text-center mb-4">
           Generate AI Slides
         </h1>
@@ -50,7 +50,7 @@ const page = () => {
           placeholder="Enter prompt for slides..."
           value={prompt}
           onChange={handlePromptChange}
-          className="w-full p-3 border border-stone-300 rounded-md mb-4 text-black"
+          className="w-full p-3 border border-stone-300 rounded-md mb-4 text-black focus:outline-none"
         />
         <div className="flex justify-between items-center">
           <button
