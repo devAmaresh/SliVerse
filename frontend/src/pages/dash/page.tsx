@@ -43,6 +43,14 @@ const Page = () => {
   const title = state?.content?.title || "";
 
   const [theme, setTheme] = useState<ThemeName>("classic");
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault(); // Prevent default paste behavior
+
+    // Get the pasted content
+    const pastedContent = e.clipboardData.getData("text/plain");
+
+    document.execCommand("insertText", false, pastedContent); 
+  };
   const handleThemeChange = (value: ThemeName) => {
     setTheme(value);
   };
@@ -52,12 +60,15 @@ const Page = () => {
     return points.map((point: any, idx: number) => {
       if (typeof point === "string") {
         if (point.startsWith(">>")) {
-          // Render sequential block with arrows
           return (
             <div key={idx} className="flex items-center space-x-2 text-lg mb-4">
               <div className="text-gray-700 mr-3">{idx + 1}.</div>
 
-              <div className="text-gray-700" contentEditable="true">
+              <div
+                className="text-gray-700"
+                contentEditable="true"
+                onPaste={handlePaste}
+              >
                 {point.replace(">>", "").trim()}
               </div>
             </div>
@@ -65,7 +76,9 @@ const Page = () => {
         } else {
           return (
             <div key={idx} className="mb-2 pl-6 flex items-center">
-              <div contentEditable="true">{point}</div>
+              <div contentEditable="true" onPaste={handlePaste} className="text-lg">
+                {point}
+              </div>
             </div>
           );
         }
@@ -74,7 +87,7 @@ const Page = () => {
         return (
           <div key={idx} className="ml-6 mb-4">
             <div className="font-semibold text-lg">{point.heading}</div>
-            <div contentEditable="true">
+            <div contentEditable="true" onPaste={handlePaste}>
               {renderBulletPoints(point.bullet_points)}
             </div>
           </div>
