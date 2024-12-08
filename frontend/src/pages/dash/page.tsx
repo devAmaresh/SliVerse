@@ -150,6 +150,10 @@ const Page = () => {
 
               <div className="pl-0">
                 {renderBulletPoints(slide.bullet_points)}
+                {/* {slide.img_keywords}
+                <div>
+                {slide.key_message}
+                </div> */}
               </div>
             </div>
           ))}
