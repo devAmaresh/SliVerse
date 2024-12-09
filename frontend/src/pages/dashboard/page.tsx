@@ -1,5 +1,5 @@
 import { Search, Filter, Plus } from "lucide-react";
-import PresentationCard from "./PresentationCard";
+import PresentationCard from "../../components/PresentationCard";
 
 const Dashboard = () => {
   const recentPresentations = [

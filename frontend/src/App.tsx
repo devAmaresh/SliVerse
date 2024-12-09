@@ -11,7 +11,7 @@ import GenerateSlide from "./pages/generate_slide/page";
 import Favorites from "./pages/favorites/page";
 import Settings from "./pages/settings/page";
 import useTheme from "./store/theme";
-import Dashboard from "./components/dash";
+import Dashboard from "./pages/dashboard/page";
 function App() {
   const theme = useTheme((state: any) => state.theme);
 
