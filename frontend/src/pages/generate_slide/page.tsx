@@ -5,6 +5,7 @@ import useSlidesStore from "../../store/useSlidesStore";
 import { backend_url } from "../../utils/backend";
 import { Home } from "lucide-react";
 import { Button } from "antd";
+import Cookies from "js-cookie";
 const page = () => {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,16 +15,24 @@ const page = () => {
   const handlePromptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPrompt(e.target.value);
   };
-
+  const token = Cookies.get("token");
   const handleGenerateSlides = async () => {
     if (!prompt) return;
     setLoading(true);
     setError(null);
 
     try {
-      const response = await axios.post(`${backend_url}/api/generate_slide/`, {
-        prompt,
-      });
+      const response = await axios.post(
+        `${backend_url}/api/generate_slide/`,
+        {
+          prompt,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       // Update slides in Zustand
       setSlides(response.data.slides || []);

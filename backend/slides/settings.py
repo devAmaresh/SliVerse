@@ -42,7 +42,16 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework_simplejwt",
 ]
-
+ALLOWED_HEADERS = [
+    "Accept",
+    "Accept-Encoding",
+    "Authorization",
+    "Content-Type",
+    "DNT",
+    "Origin",
+    "User-Agent",
+    "X-Requested-With",
+]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
