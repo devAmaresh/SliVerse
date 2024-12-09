@@ -1,21 +1,21 @@
-import { Select } from "antd";
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import useSlidesStore from "../../store/useSlidesStore";
 import { themes } from "../../utils/theme";
 import Markdown from "react-markdown";
-
+import Dash_nav from "../../components/dash_nav";
 type ThemeName = keyof typeof themes;
 
 const Page: React.FC = () => {
   const { state } = useLocation();
-  const { slides, setSlides } = useSlidesStore(); // Zustand Store
+  const { slides, setSlides, setTitle } = useSlidesStore(); // Zustand Store
   const title = state?.content?.title || "";
 
   // Load slides into the Zustand store
   useEffect(() => {
     if (state?.content?.slides) setSlides(state.content.slides);
+    if (title) setTitle(state.content.title);
   }, [state, setSlides]);
 
   const [theme, setTheme] = useState<ThemeName>("classic");
@@ -107,27 +107,7 @@ const Page: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
         {/* Navbar */}
-        <nav className="bg-zinc-100 dark:bg-zinc-900 border-b border-zinc-300 shadow-md fixed top-0 left-0 w-full z-50">
-          <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-            <div className="text-2xl font-bold bg-gradient-to-r from-teal-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              Amaverse.ai
-            </div>
-            <div className="flex items-center space-x-4">
-              <label htmlFor="theme" className="font-medium">
-                Theme:
-              </label>
-              <Select
-                defaultValue="classic"
-                style={{ width: 120 }}
-                onChange={handleThemeChange}
-                options={Object.keys(themes).map((key) => ({
-                  value: key,
-                  label: key.charAt(0).toUpperCase() + key.slice(1),
-                }))}
-              />
-            </div>
-          </div>
-        </nav>
+        <Dash_nav handleThemeChange={handleThemeChange} />
 
         {/* Slide Content */}
         <div className={`min-h-screen pt-[86px] p-8 ${currentTheme.text}`}>
@@ -165,7 +145,7 @@ const Page: React.FC = () => {
             {currentSlide?.content?.style === "default" && (
               <div className="w-[40%] flex items-center justify-center">
                 <img
-                  src="https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg" 
+                  src="https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"
                   alt="Slide Visual"
                   className="max-w-full rounded-lg shadow-lg max-h-[50vh]"
                 />

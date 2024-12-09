@@ -11,7 +11,7 @@ const page = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { setSlides } = useSlidesStore();
+  const { setSlides, setTitle } = useSlidesStore();
   const handlePromptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPrompt(e.target.value);
   };
@@ -36,6 +36,7 @@ const page = () => {
 
       // Update slides in Zustand
       setSlides(response.data.slides || []);
+      setTitle(response.data.title || "");
 
       // Navigate to the Page component
       navigate("/dash", { state: { content: response.data } });
