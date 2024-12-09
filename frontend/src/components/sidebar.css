@@ -1,0 +1,11 @@
+/* Default (Light Mode) Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: #93979d; 
+}
+
+
