@@ -47,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   // const theme = useTheme((state: any) => state.theme);
   return (
     <aside
-      className={`w-1/4 bg-gray-100 dark:bg-stone-800 overflow-y-auto mt-[70px]`}
+      className={`w-1/4 bg-gray-100 dark:bg-stone-800 overflow-y-auto mt-[70px] custom-sidebar`}
     >
       <div className="p-4">
         <div className="space-y-4">

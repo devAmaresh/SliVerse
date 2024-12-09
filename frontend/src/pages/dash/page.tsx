@@ -96,17 +96,17 @@ const Page: React.FC = () => {
           <div
             className={`text-4xl font-extrabold text-center ${currentTheme.accent} mb-12`}
           >
-            {title}
+            {/* {title} */}
           </div>
 
           <div
             className={`min-h-[70vh] mx-auto w-full p-10 rounded-lg shadow-lg ${currentTheme.gradient} hover:shadow-2xl transition-shadow duration-300`}
           >
-            <h2
+            <div
               className={`text-2xl font-semibold mb-4 ${currentTheme.accent}`}
             >
               {currentSlide?.heading || `Slide ${currentSlideIndex + 1}`}
-            </h2>
+            </div>
             <div className="pl-0">
               {bulletPoints.length > 0 ? (
                 bulletPoints.map((point, idx) => renderBulletPoint(point, idx))

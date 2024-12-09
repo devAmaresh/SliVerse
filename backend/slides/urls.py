@@ -16,12 +16,15 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
-from django.urls import include
+from django.urls import include, path
 from django.http import HttpResponse
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("ai.urls")),
     path("", lambda request: HttpResponse("Hello, world!")),
+    path("login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
 ]
