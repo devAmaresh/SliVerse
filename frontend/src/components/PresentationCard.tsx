@@ -1,19 +1,23 @@
+// PresentationCard.tsx
 import React from "react";
 import { MoreVertical, Clock } from "lucide-react";
+import { formatTimeAgo } from "../utils/formatTimeAgo"; // Import the utility function
 
 interface PresentationCardProps {
   title: string;
   thumbnail: string;
-  date: string;
+  dateTime: string;
 }
 
 const PresentationCard: React.FC<PresentationCardProps> = ({
   title,
   thumbnail,
-  date,
+  dateTime,
 }) => {
+  const lastUpdated = formatTimeAgo(dateTime); // Use the utility function to calculate the time ago
+
   return (
-    <div className="bg-zinc-50 dark:bg-zinc-800 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div className="bg-zinc-50 dark:bg-zinc-800 rounded-xl shadow-lg hover:shadow-md transition-shadow duration-200">
       <div className="relative group">
         <img
           src={thumbnail}
@@ -33,7 +37,8 @@ const PresentationCard: React.FC<PresentationCardProps> = ({
         </div>
         <div className="flex items-center mt-2 text-sm text-zinc-500 dark:text-zinc-400">
           <Clock className="w-4 h-4 mr-1" />
-          <span>{date}</span>
+          <span>Last updated {lastUpdated}</span>{" "}
+          {/* Display the formatted time */}
         </div>
       </div>
     </div>

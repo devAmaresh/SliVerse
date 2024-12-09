@@ -4,7 +4,7 @@ from rest_framework import status
 from .gemini import generate_ai_content
 import json
 from .models import Project, Slide
-from .serializers import SlideSerializer  # Importing the Slide serializer
+from .serializers import SlideSerializer, ProjectSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -75,3 +75,13 @@ class GenerateSlideView(APIView):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+class ProjectsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        projects = Project.objects.filter(user=request.user)
+        serialized_projects = ProjectSerializer(projects, many=True).data
+
+        return Response(serialized_projects, status=status.HTTP_200_OK)
