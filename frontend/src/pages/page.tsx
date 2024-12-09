@@ -1,44 +1,40 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
-
+import useSlidesStore from "../store/useSlidesStore";
 const page = () => {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-
+  const { setSlides } = useSlidesStore();
   const handlePromptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPrompt(e.target.value);
   };
 
   const handleGenerateSlides = async () => {
-    if (!prompt) {
-      return;
-    }
+    if (!prompt) return;
     setLoading(true);
     setError(null);
 
     try {
-      // Send a POST request to the backend with the user's prompt
       const response = await axios.post(
         "http://localhost:8000/api/generate_slide/",
-        {
-          prompt: prompt,
-        }
+        { prompt }
       );
 
-      // Navigate to Dash page and pass the response as props
-      navigate("/dash", {
-        state: { content: response.data },
-      });
+      // Update slides in Zustand
+      setSlides(response.data.slides || []);
+
+      // Navigate to the Page component
+      navigate("/dash", { state: { content: response.data } });
     } catch (err) {
       setError("Error generating slides. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <div className="flex items-center justify-center h-screen ">
       <div className="w-full max-w-md  p-8 rounded-xl shadow-lg dark:bg-slate-700 border-2 border-stone-700">
