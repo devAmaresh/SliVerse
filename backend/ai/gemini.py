@@ -25,6 +25,7 @@ def generate_ai_content(prompt: str):
 
     Create the slides for a presentation on the given topic.
     Include main headings for each slide, detailed bullet points for each slide.
+    In a slide max 4 bullet points allowed.
     Add relevant, detailed content to each slide. When relevant, add one or two EXAMPLES to illustrate the concept.
     For two or three important slides, generate the key message that those slides convey.
 
@@ -35,7 +36,7 @@ def generate_ai_content(prompt: str):
     In addition, for each slide, add image keywords based on the content of the respective slides.
     These keywords will be later used to search for images from the Web relevant to the slide content.
 
-    In addition, create one slide containing 4 TO 6 icons (pictograms) illustrating some key ideas/aspects/concepts relevant to the topic.
+    In addition, create one slide containing 4 icons (pictograms) illustrating some key ideas/aspects/concepts relevant to the topic.
     In this slide, each line of text will begin with the name of a relevant icon enclosed between [[ and ]], e.g., [[machine-learning]] and [[fairness]].
     Insert icons only in this slide.
 
@@ -43,7 +44,7 @@ def generate_ai_content(prompt: str):
     Each bullet point should be detailed and explanatory, not just short phrases.
 
     ALWAYS add a concluding slide at the end, containing a list of the key takeaways and an optional call-to-action if relevant to the context.
-    Unless explicitly instructed with the topic, create 10 TO 12 SLIDES in total. You must never create more than 15 slides.
+    Unless explicitly instructed with the topic, create 10 SLIDES in total. You must never create more than 15 slides.
 
     ### Topic:
     {prompt}

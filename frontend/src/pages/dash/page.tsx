@@ -107,7 +107,7 @@ const Page = () => {
       {/* Navbar */}
       <nav className="dark:bg-zinc-900 bg-zinc-100 border-b border:bg-zinc-300 shadow-md fixed top-0 left-0 w-full z-50">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-indigo-700">Amaverese.ai</div>
+          <div className="text-2xl font-bold text-indigo-700">Amaverse.ai</div>
           <div className="flex items-center space-x-4">
             <label htmlFor="theme" className="font-medium">
               Theme:

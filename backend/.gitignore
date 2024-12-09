@@ -1,3 +1,4 @@
 .env
 /myvenv
 db.sqlite3
+/ai/__pycache__/
