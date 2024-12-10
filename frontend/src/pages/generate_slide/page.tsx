@@ -1,32 +1,31 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import useSlidesStore from "../../store/useSlidesStore";
 import { backend_url } from "../../utils/backend";
 import { Home } from "lucide-react";
-import { Button } from "antd";
+import { Button, Input, Form } from "antd";
 import Cookies from "js-cookie";
-const page = () => {
-  const [prompt, setPrompt] = useState("");
+
+const Page = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { setSlides, setTitle } = useSlidesStore();
-  const handlePromptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPrompt(e.target.value);
-  };
   const token = Cookies.get("token");
-  const handleGenerateSlides = async () => {
-    if (!prompt) return;
+
+  const handleGenerateSlides = async (values: any) => {
+    const { prompt } = values;
+
+    if (!prompt.trim()) return;
+
     setLoading(true);
     setError(null);
 
     try {
       const response = await axios.post(
         `${backend_url}/api/generate_slide/`,
-        {
-          prompt,
-        },
+        { prompt },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -48,45 +47,66 @@ const page = () => {
     }
   };
 
+  const { TextArea } = Input;
+
   return (
-    <>
-      <div className="h-screen">
-        <div className="flex justify-start p-4">
-          <Button
-            type="default"
-            icon={<Home strokeWidth="1" size={"19"} />}
-            onClick={() => navigate("/")}
+    <div className="h-screen">
+      <div className="flex justify-start p-4">
+        <Button
+          type="default"
+          icon={<Home strokeWidth="1" size={"19"} />}
+          onClick={() => navigate("/")}
+        >
+          Home
+        </Button>
+      </div>
+      <div className="mt-20 flex items-center justify-center">
+        <div className="w-full max-w-md p-8 rounded-xl shadow-lg dark:bg-zinc-900 border-2 border-zinc-200 dark:border-stone-700">
+          <div className="text-2xl font-bold text-center mb-4">
+            Generate Slides
+          </div>
+
+          <Form
+            name="generateSlides"
+            onFinish={handleGenerateSlides}
+            layout="vertical"
           >
-            Home
-          </Button>
-        </div>
-        <div className="mt-20 flex items-center justify-center">
-          <div className="w-full max-w-md  p-8 rounded-xl shadow-lg dark:bg-zinc-900 border-2 border-stone-700">
-            <h1 className="text-2xl font-bold text-center mb-4">
-              Generate AI Slides
-            </h1>
-            <input
-              type="text"
-              placeholder="Enter prompt for slides..."
-              value={prompt}
-              onChange={handlePromptChange}
-              className="w-full p-3 border border-stone-300 rounded-md mb-4 text-black focus:outline-none"
-            />
-            <div className="flex justify-between items-center">
-              <button
-                onClick={handleGenerateSlides}
+            <Form.Item
+              name="prompt"
+              rules={[
+                {
+                  required: true,
+                  message: "Please enter a prompt for generating slides!",
+                },
+                { min: 20, message: "Prompt must be at least 20 characters!" },
+              ]}
+              className="mb-8"
+            >
+              <TextArea
+                placeholder="Enter prompt for slides..."
+                style={{ maxHeight: "200px" }} 
+              />
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
                 disabled={loading}
-                className="w-full bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 disabled:bg-blue-300"
+                loading={loading}
+                size="large"
+                className="w-full text-white p-3 rounded-md"
               >
                 {loading ? "Generating..." : "Generate Slides"}
-              </button>
-            </div>
-            {error && <p className="text-red-500 text-center mt-4">{error}</p>}
-          </div>
+              </Button>
+            </Form.Item>
+          </Form>
+
+          {error && <p className="text-red-500 text-center mt-4">{error}</p>}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
-export default page;
+export default Page;
