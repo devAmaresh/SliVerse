@@ -85,6 +85,7 @@ const Page = () => {
               <TextArea
                 placeholder="Enter prompt for slides..."
                 style={{ maxHeight: "200px" }} 
+                className="p-3"
               />
             </Form.Item>
 
