@@ -2,3 +2,4 @@
 /myvenv
 db.sqlite3
 /ai/__pycache__/
+/slides/__pycache__/
