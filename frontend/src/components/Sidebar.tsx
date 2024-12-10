@@ -47,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   // const theme = useTheme((state: any) => state.theme);
   return (
     <aside
-      className={`w-1/4 bg-gray-100 dark:bg-stone-800 overflow-y-auto mt-[70px] custom-sidebar`}
+      className={`w-1/4 bg-gray-100 dark:bg-stone-800 overflow-y-auto mt-[70px] custom-sidebar mb-3 rounded-br-lg rounded-tr-lg`}
     >
       <div className="p-4">
         <div className="space-y-4">
@@ -72,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               {/* Slide Content */}
               <div className="flex-1 truncate text-ellipsis">
                 <div className="text-sm font-medium mb-2 text-gray-900 dark:text-gray-200">
-                  {slide.heading || `Slide ${index + 1}`}
+                  {slide?.content?.heading || `Slide ${index + 1}`}
                 </div>
                 <div
                   className="text-xs text-gray-600 dark:text-gray-400"
@@ -82,7 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     textOverflow: "ellipsis",
                   }}
                 >
-                  {slide.key_message || "No content available"}
+                  {slide?.content?.key_message || "No content available"}
                 </div>
               </div>
             </div>
