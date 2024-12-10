@@ -2,7 +2,7 @@
 import { Search, Filter } from "lucide-react";
 import PresentationCard from "../../components/PresentationCard";
 import { useProject } from "../../hooks/useProjects";
-import { message } from "antd";
+import { message, Skeleton } from "antd";
 
 const Dashboard = () => {
   const [messageApi, contextHolder] = message.useMessage();
@@ -38,9 +38,11 @@ const Dashboard = () => {
           <div className="mb-12">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {loading ? (
-                <div className="text-center col-span-3 text-zinc-500 dark:text-zinc-400">
-                  Loading...
-                </div>
+                <>
+                  <Skeleton.Node active style={{ width: 350, height: 270 }} />
+                  <Skeleton.Node active style={{ width: 350, height: 270 }} />
+                  <Skeleton.Node active style={{ width: 350, height: 270 }} />
+                </>
               ) : error ? (
                 <div className="text-center col-span-3 text-red-500 dark:text-red-400">
                   {error}
@@ -49,6 +51,7 @@ const Dashboard = () => {
                 projects.map((presentation: any) => (
                   <PresentationCard
                     key={presentation.id}
+                    project_id={presentation.id}
                     title={presentation.title}
                     thumbnail="https://img.freepik.com/free-photo/business-graphics-presentation-illustration_23-2151876393.jpg"
                     dateTime={presentation.updated_at}

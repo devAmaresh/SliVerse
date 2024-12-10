@@ -49,7 +49,7 @@ function App() {
                 element={<ProtectedRoute element={<GenerateSlide />} />}
               />
               <Route
-                path="/dash"
+                path="/dash/:id"
                 element={<ProtectedRoute element={<Dash />} />}
               />
               <Route

@@ -70,6 +70,7 @@ class GenerateSlideView(APIView):
 
         # Construct response matching the structure of slides_data
         response_data = {
+            "project_id": project.id,
             "title": slides_data.get("title", "Untitled"),
             "slides": serialized_slides,
         }
@@ -80,8 +81,33 @@ class GenerateSlideView(APIView):
 class ProjectsView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        projects = Project.objects.filter(user=request.user)
+    def get(self, request, project_id=None):
+        # Case where project_id is provided (single project with slides)
+        if project_id:
+            try:
+                # Get the project
+                project = Project.objects.get(id=project_id, user=request.user)
+            except Project.DoesNotExist:
+                return Response(
+                    {"detail": "Project not found."}, status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Get the slides for the project
+            slides = Slide.objects.filter(project=project)
+
+            serialized_slides = SlideSerializer(
+                slides, many=True
+            ).data  # Serialize slides
+            response_data = {
+                "project_id": project_id,
+                "title": project.title,
+                "slides": serialized_slides,
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        # Case where no project_id is provided (list all projects)
+        projects = Project.objects.filter(user=request.user).order_by("-updated_at")
         serialized_projects = ProjectSerializer(projects, many=True).data
 
         return Response(serialized_projects, status=status.HTTP_200_OK)

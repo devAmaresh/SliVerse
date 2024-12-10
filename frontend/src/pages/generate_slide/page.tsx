@@ -37,9 +37,10 @@ const page = () => {
       // Update slides in Zustand
       setSlides(response.data.slides || []);
       setTitle(response.data.title || "");
+      const project_id = response.data.project_id;
 
       // Navigate to the Page component
-      navigate("/dash", { state: { content: response.data } });
+      navigate(`/dash/${project_id}`);
     } catch (err) {
       setError("Error generating slides. Please try again.");
     } finally {
