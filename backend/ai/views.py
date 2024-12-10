@@ -111,3 +111,14 @@ class ProjectsView(APIView):
         serialized_projects = ProjectSerializer(projects, many=True).data
 
         return Response(serialized_projects, status=status.HTTP_200_OK)
+    
+    def delete(self, request, project_id):
+        try:
+            project = Project.objects.get(id=project_id, user=request.user)
+        except Project.DoesNotExist:
+            return Response(
+                {"detail": "Project not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        project.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
