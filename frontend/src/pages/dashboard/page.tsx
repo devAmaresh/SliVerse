@@ -1,15 +1,40 @@
 // Dashboard.tsx
 import { Search, Filter } from "lucide-react";
 import PresentationCard from "../../components/PresentationCard";
-import { useProject } from "../../hooks/useProjects";
+import Cookies from "js-cookie";
 import { message, Skeleton } from "antd";
+import axios from "axios";
+import { backend_url } from "../../utils/backend";
+import { useEffect, useState } from "react";
+import useProjectStore from "../../store/projectStore";
 
 const Dashboard = () => {
   const [messageApi, contextHolder] = message.useMessage();
-  const { projects, loading, error } = useProject();
-  if (error) {
-    messageApi.error(error);
-  }
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { projects, setProject } = useProjectStore();
+  useEffect(() => {
+    const fetchProjects = async () => {
+      const token = Cookies.get("token");
+
+      setLoading(true);
+      try {
+        const response = await axios.get(`${backend_url}/api/projects/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("Fetched Slides:", response.data);
+        setProject(response.data);
+      } catch (err) {
+        console.error("Error fetching slides:", err);
+        setError("Failed to load presentations.");
+        messageApi.error("Failed to load presentations.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
   return (
     <>
       {contextHolder}
@@ -47,7 +72,7 @@ const Dashboard = () => {
                 <div className="text-center col-span-3 text-red-500 dark:text-red-400">
                   {error}
                 </div>
-              ) : Array.isArray(projects) && projects.length > 0 ? (
+              ) : projects.length > 0 ? (
                 projects.map((presentation: any) => (
                   <PresentationCard
                     key={presentation.id}
