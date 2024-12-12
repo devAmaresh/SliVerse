@@ -30,7 +30,7 @@ const Sidebar = () => {
         <ul className="space-y-2">
           <li>
             <Link
-              to="/"
+              to="/dashboard"
               className={`flex items-center gap-3 px-4 py-2 ${
                 isActive("/dashboard")
                   ? "bg-indigo-600 text-white"

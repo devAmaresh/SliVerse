@@ -4,6 +4,7 @@ import { themes } from "../utils/theme";
 import { ChevronRight, Home } from "lucide-react";
 import useSlidesStore from "../store/useSlidesStore";
 import { useNavigate } from "react-router-dom";
+import { ThemeToggle } from "../pages/landing/components/ThemeToggle";
 const dash_nav = ({ handleThemeChange }: any) => {
   const title = useSlidesStore((state: any) => state.title);
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ const dash_nav = ({ handleThemeChange }: any) => {
           </div>
         </div>
         <div className="flex items-center space-x-4">
+          <ThemeToggle />
           <label htmlFor="theme" className="font-medium">
             Theme:
           </label>

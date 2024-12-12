@@ -4,7 +4,6 @@ import Dash from "./pages/dash/page";
 import Login from "./pages/login/page";
 import { ConfigProvider } from "antd";
 import { theme as theme1 } from "antd";
-import ThemeToggler from "./components/ThemeToggler";
 import ProtectedRoute from "./ProtectedRoute";
 import Logout from "./pages/logout/page";
 import GenerateSlide from "./pages/generate_slide/page";
@@ -60,7 +59,7 @@ function App() {
             </Routes>
           </Router>
         </ConfigProvider>
-        <ThemeToggler />
+      
       </div>
     </div>
   );

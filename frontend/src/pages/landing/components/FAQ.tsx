@@ -1,4 +1,3 @@
-import React from 'react';
 import { Collapse, type CollapseProps } from 'antd';
 import { Plus, Minus } from 'lucide-react';
 
@@ -87,11 +86,12 @@ export function FAQ() {
             items={items}
             expandIcon={({ isActive }) => 
               isActive ? (
-                <Minus className="text-purple-600 dark:text-purple-400" />
+                <Minus className="text-purple-600 dark:text-purple-400 mt-2" />
               ) : (
-                <Plus className="text-purple-600 dark:text-purple-400" />
+                <Plus className="text-purple-600 dark:text-purple-400 mt-2" />
               )
             }
+            expandIconPosition='right'
             ghost
             className=""
           />

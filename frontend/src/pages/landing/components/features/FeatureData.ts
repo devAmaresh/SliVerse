@@ -44,16 +44,16 @@ export const mainFeatures = [
     title: 'Smart Image Enhancement',
     description: 'Automatically enhance and style images to match your presentation theme.'
   },
-  {
-    icon: LineChart,
-    title: 'Data Visualization',
-    description: 'Convert complex data into beautiful, easy-to-understand visualizations.'
-  },
-  {
-    icon: Lock,
-    title: 'Enterprise Security',
-    description: 'Bank-grade encryption and security features to protect your content.'
-  }
+  // {
+  //   icon: LineChart,
+  //   title: 'Data Visualization',
+  //   description: 'Convert complex data into beautiful, easy-to-understand visualizations.'
+  // },
+  // {
+  //   icon: Lock,
+  //   title: 'Enterprise Security',
+  //   description: 'Bank-grade encryption and security features to protect your content.'
+  // }
 ];
 
 export const aiExamples = [

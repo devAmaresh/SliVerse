@@ -7,6 +7,7 @@ import axios from "axios";
 import { backend_url } from "../../utils/backend";
 import { useEffect, useState } from "react";
 import useProjectStore from "../../store/projectStore";
+import ThemeToggler from "../../components/ThemeToggler";
 
 const Dashboard = () => {
   const [messageApi, contextHolder] = message.useMessage();
@@ -38,6 +39,7 @@ const Dashboard = () => {
   return (
     <>
       {contextHolder}
+      <ThemeToggler />
       <div className="flex-1 bg-zinc-50 dark:bg-zinc-900 p-8">
         <div className="max-w-6xl mx-auto ">
           <div className="flex items-center justify-between mb-12">

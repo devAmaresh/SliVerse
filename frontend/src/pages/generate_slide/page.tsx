@@ -6,6 +6,7 @@ import { backend_url } from "../../utils/backend";
 import { Home } from "lucide-react";
 import { Button, Input, Form } from "antd";
 import Cookies from "js-cookie";
+import ThemeToggler from "../../components/ThemeToggler";
 
 const Page = () => {
   const [loading, setLoading] = useState(false);
@@ -51,6 +52,7 @@ const Page = () => {
 
   return (
     <div className="h-screen">
+      <ThemeToggler />
       <div className="flex justify-start p-4">
         <Button
           type="default"

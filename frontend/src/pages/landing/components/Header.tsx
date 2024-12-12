@@ -1,8 +1,9 @@
-import React from 'react';
-import { Presentation } from 'lucide-react';
-import { ThemeToggle } from './ThemeToggle';
+import { Presentation } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
+import { useNavigate } from "react-router-dom";
 
 export function Header() {
+  const navigate = useNavigate();
   return (
     <header className="fixed top-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-50 border-b border-gray-100 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,15 +15,47 @@ export function Header() {
             </span>
           </div>
           <nav className="hidden md:flex space-x-8">
-            <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Features</a>
-            <a href="#how-it-works" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">How it Works</a>
-            <a href="#why-us" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Why Us</a>
-            <a href="#pricing" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Pricing</a>
+            <a
+              href="#features"
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            >
+              Features
+            </a>
+            <a
+              href="#how-it-works"
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            >
+              How it Works
+            </a>
+            <a
+              href="#why-us"
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            >
+              Why Us
+            </a>
+            <a
+              href="#pricing"
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            >
+              Pricing
+            </a>
           </nav>
           <div className="flex items-center space-x-4">
             <ThemeToggle />
-            <button className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Sign In</button>
-            <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 transition">
+            <button
+              className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              onClick={() => {
+                navigate("/login");
+              }}
+            >
+              Sign In
+            </button>
+            <button
+              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 transition"
+              onClick={() => {
+                navigate("/login");
+              }}
+            >
               Get Started
             </button>
           </div>
