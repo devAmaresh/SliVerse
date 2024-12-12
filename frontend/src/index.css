@@ -1,3 +1,43 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Ant Design Dark Mode Overrides */
+/* .dark .ant-collapse {
+ background: transparent;
+}
+
+.dark .ant-collapse-header {
+ color: white !important;
+}
+
+.dark .ant-collapse-content {
+ background: transparent !important;
+}
+
+.ant-collapse-header {
+ padding: 1.5rem !important;
+}
+
+.ant-collapse-content-box {
+ padding: 0 1.5rem 1.5rem 1.5rem !important;
+}
+
+.ant-collapse-item {
+ margin-bottom: 1rem !important;
+ border: 1px solid #e5e7eb !important;
+ border-radius: 0.5rem !important;
+ overflow: hidden;
+}
+
+.dark .ant-collapse-item {
+ border-color: #374151 !important;
+}
+
+.ant-collapse-item:last-child {
+ margin-bottom: 0 !important;
+}
+
+.ant-collapse-header-text {
+ width: 100%;
+} */

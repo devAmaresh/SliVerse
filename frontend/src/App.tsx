@@ -12,6 +12,7 @@ import Favorites from "./pages/favorites/page";
 import Settings from "./pages/settings/page";
 import useTheme from "./store/theme";
 import Dashboard from "./pages/dashboard/page";
+import Landing from "./pages/landing/page";
 function App() {
   const theme = useTheme((state: any) => state.theme);
 
@@ -28,19 +29,19 @@ function App() {
             <Routes>
               {/* Login route (accessible to everyone) */}
               <Route path="/login" element={<Login />} />
-
+              <Route path="/" element={<Landing />} />
               {/* Protected routes */}
-              <Route path="/" element={<ProtectedRoute element={<Home />} />}>
+              <Route path="/dashboard" element={<ProtectedRoute element={<Home />} />}>
                 <Route
-                  path=""
+                  path="/dashboard"
                   element={<ProtectedRoute element={<Dashboard />} />}
                 />
                 <Route
-                  path="/favorites"
+                  path="/dashboard/favorites"
                   element={<ProtectedRoute element={<Favorites />} />}
                 />
                 <Route
-                  path="/settings"
+                  path="/dashboard/settings"
                   element={<ProtectedRoute element={<Settings />} />}
                 />
               </Route>

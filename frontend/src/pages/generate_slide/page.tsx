@@ -55,7 +55,7 @@ const Page = () => {
         <Button
           type="default"
           icon={<Home strokeWidth="1" size={"19"} />}
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/dashboard")}
         >
           Home
         </Button>

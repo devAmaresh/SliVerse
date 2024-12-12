@@ -17,7 +17,7 @@ const dash_nav = ({ handleThemeChange }: any) => {
           <Home
             size={20}
             onClick={() => {
-              navigate("/");
+              navigate("/dashboard");
             }}
             className="hover:cursor-pointer hover:opacity-80 mr-4"
           />

@@ -32,7 +32,7 @@ const Sidebar = () => {
             <Link
               to="/"
               className={`flex items-center gap-3 px-4 py-2 ${
-                isActive("/")
+                isActive("/dashboard")
                   ? "bg-indigo-600 text-white"
                   : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700"
               } rounded-lg`}
@@ -43,9 +43,9 @@ const Sidebar = () => {
           </li>
           <li>
             <Link
-              to="/favorites"
+              to="/dashboard/favorites"
               className={`flex items-center gap-3 px-4 py-2 ${
-                isActive("/favorites")
+                isActive("/dashboard/favorites")
                   ? "bg-indigo-600 text-white"
                   : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700"
               } rounded-lg`}
@@ -56,9 +56,9 @@ const Sidebar = () => {
           </li>
           <li>
             <Link
-              to="/settings"
+              to="/dashboard/settings"
               className={`flex items-center gap-3 px-4 py-2 ${
-                isActive("/settings")
+                isActive("/dashboard/settings")
                   ? "bg-indigo-600 text-white"
                   : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700"
               } rounded-lg`}
