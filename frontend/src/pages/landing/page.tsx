@@ -4,6 +4,7 @@ import { Features } from "./components/Features";
 import { HowItWorks } from "./components/HowItWorks";
 import { WhyUs } from "./components/WhyUs";
 import { FAQ } from "./components/FAQ";
+import Footer from "./components/Footer";
 const page = () => {
   return (
     <>
@@ -16,6 +17,7 @@ const page = () => {
           <WhyUs />
           <FAQ />
         </main>
+        <Footer />
       </div>
     </>
   );
