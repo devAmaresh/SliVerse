@@ -1,4 +1,4 @@
-import { FolderOpen, Home, Settings, Star, Plus, LogOut } from "lucide-react";
+import { Home, Settings, Star, Plus, LogOut, Presentation } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const Sidebar = () => {
@@ -10,8 +10,8 @@ const Sidebar = () => {
   return (
     <div className="w-64 bg-zinc-50 dark:bg-zinc-900 h-screen border-r border-zinc-200 dark:border-zinc-700 p-6 flex flex-col">
       <div className="flex items-center gap-2 mb-8">
-        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-          <FolderOpen className="w-5 h-5 text-white" />
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center">
+          <Presentation className="h-7 w-7 dark:text-white" />
         </div>
         <h1 className="text-xl font-bold text-zinc-800 dark:text-zinc-100">
           Amaverse.ai
