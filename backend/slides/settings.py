@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-(9vu4$uqyrvbi(ewbh_khw9+hv9+db79jzeqfbsa^14pz6x*y$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [".vercel.app", ".now.sh", "localhost"]
+ALLOWED_HOSTS = [".vercel.app", ".now.sh", "localhost", "127.0.0.1"]
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
 # Application definition
@@ -182,6 +182,7 @@ REST_FRAMEWORK = {
 }
 import os
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "ui/static")]
-STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "ui/staticfiles")
+STATIC_URL = 'static/'
+STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+
