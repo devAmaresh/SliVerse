@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-(9vu4$uqyrvbi(ewbh_khw9+hv9+db79jzeqfbsa^14pz6x*y$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [".vercel.app", ".now.sh", "localhost"]
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
 # Application definition
@@ -180,3 +180,8 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
+import os
+
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "ui/static")]
+STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "ui/staticfiles")
