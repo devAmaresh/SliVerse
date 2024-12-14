@@ -8,19 +8,19 @@
       }
     },
     {
-      "src": "/slides/wsgi.py",
+      "src": "slides/wsgi.py",
       "use": "@vercel/python",
       "config": { "maxLambdaSize": "15mb" }
     }
   ],
   "routes": [
     {
-      "src": "/(.*)",
-      "dest": "slides/wsgi.py"
-    },
-    {
       "src": "/static/(.*)",
       "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "slides/wsgi.py"
     }
   ]
 }
