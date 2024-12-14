@@ -9,7 +9,7 @@
     },
     {
       "src": "slides/wsgi.py",
-      "use": "@vercel/python3.12",
+      "use": "@vercel/python",
       "config": { "maxLambdaSize": "15mb" }
     }
   ],
