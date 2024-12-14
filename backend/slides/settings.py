@@ -182,7 +182,11 @@ REST_FRAMEWORK = {
 }
 import os
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+# Static URL
+STATIC_URL = "/static/"
 
+# Static files directories - Ensure it's a list/tuple
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+
+# Static root for `collectstatic` to output files
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles_build")
