@@ -1,3 +1,3 @@
 #!/bin/bash
-python3.12 -m install -r requirements.txt
-python3.12 manage.py collectstatic
+pip install -r requirements.txt  # Install dependencies
+python3.12 manage.py collectstatic --noinput  # Collect static files
