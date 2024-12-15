@@ -84,11 +84,13 @@ export function FAQ() {
         <div className="max-w-4xl mx-auto">
           <Collapse
             items={items}
+            accordion
+            size='large'
             expandIcon={({ isActive }) => 
               isActive ? (
-                <Minus className="text-purple-600 dark:text-purple-400 mt-2" />
+                <Minus className="text-purple-600 dark:text-purple-400 mt-1" />
               ) : (
-                <Plus className="text-purple-600 dark:text-purple-400 mt-2" />
+                <Plus className="text-purple-600 dark:text-purple-400 mt-1" />
               )
             }
             expandIconPosition='right'
