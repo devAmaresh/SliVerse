@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Svg from "./svg";
 const PricingCard = ({
   children,
@@ -15,18 +16,18 @@ const PricingCard = ({
           <span className="mb-3 block text-lg font-semibold text-primary dark:text-primary-light">
             {type}
           </span>
-          <h2 className="mb-5 text-[42px] font-bold text-dark dark:text-white">
+          <div className="mb-5 text-[42px] font-bold text-dark dark:text-white">
             {price}
             <span className="text-base font-medium text-body-color dark:text-dark-6">
               / {subscription}
             </span>
-          </h2>
+          </div>
           <p className="mb-8 border-b border-stroke pb-8 text-base text-body-color dark:border-dark-3 dark:text-dark-6">
             {description}
           </p>
           <div className="mb-9 flex flex-col gap-[14px]">{children}</div>
-          <a
-            href="#"
+          <Link
+            to="/login"
             className={` ${
               active
                 ? "block w-full rounded-md border border-blue-500 bg-primary p-3 text-center text-base font-medium dark:text-white transition hover:bg-opacity-90"
@@ -34,7 +35,7 @@ const PricingCard = ({
             } `}
           >
             {buttonText}
-          </a>
+          </Link>
           <div>
             <Svg />
           </div>
