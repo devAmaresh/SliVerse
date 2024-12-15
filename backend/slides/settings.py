@@ -11,11 +11,13 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-
+import dj_database_url
+import os
+from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+load_dotenv()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -23,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-(9vu4$uqyrvbi(ewbh_khw9+hv9+db79jzeqfbsa^14pz6x*y$"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [".vercel.app", ".now.sh", "localhost", "127.0.0.1"]
 
@@ -131,7 +133,16 @@ DATABASES = {
     }
 }
 
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
+if not DEBUG:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            os.getenv("POSTGRES_URL"),
+            conn_max_age=600,  # Connection persistence
+            ssl_require=True,  # Enforce SSL
+        )
+    }
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -180,7 +191,7 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
-import os
+
 
 # Static URL
 STATIC_URL = "/static/"
