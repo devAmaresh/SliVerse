@@ -137,7 +137,7 @@ DATABASES = {
 if not DEBUG:
     DATABASES = {
         "default": dj_database_url.parse(
-            os.getenv("POSTGRES_URL"),
+            os.getenv("POSTGRES_URL1"),
             conn_max_age=600,  # Connection persistence
             ssl_require=True,  # Enforce SSL
         )
