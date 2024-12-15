@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Button, Form, Input, message } from "antd";
-import { GoogleOutlined } from "@ant-design/icons";
+import { GoogleOutlined, HomeOutlined } from "@ant-design/icons";
 import { login } from "../../hooks/login";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import ThemeToggler from "../../components/ThemeToggler";
+
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -124,6 +125,13 @@ const LoginPage = () => {
               </div>
               <Button block icon={<GoogleOutlined />} size="large">
                 Sign in with Google
+              </Button>
+              <div className="my-4"></div>
+              <Button block icon={<HomeOutlined />} size="large"
+              type="text"
+              onClick={() => navigate("/")}
+              >
+                Back To Home
               </Button>
             </div>
           </div>
