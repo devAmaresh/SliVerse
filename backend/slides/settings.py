@@ -133,7 +133,6 @@ DATABASES = {
     }
 }
 
-DEBUG = os.getenv("DEBUG", "True") == "True"
 
 if not DEBUG:
     DATABASES = {
