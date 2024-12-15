@@ -15,7 +15,7 @@ const LoginPage = () => {
     if (token) {
       navigate("/dashboard");
     }
-  }, [navigate]);
+  }, []);
 
   const [loading, setLoading] = useState(false);
 
