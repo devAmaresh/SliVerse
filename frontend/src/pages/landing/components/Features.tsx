@@ -1,4 +1,3 @@
-import React from 'react';
 import { FeatureCard } from './features/FeatureCard';
 import { AIExampleCard } from './features/AIExampleCard';
 import { mainFeatures, aiExamples } from './features/FeatureData';

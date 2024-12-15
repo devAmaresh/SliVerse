@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { FileText, Wand2, PresentationIcon } from 'lucide-react';
 
 const steps = [

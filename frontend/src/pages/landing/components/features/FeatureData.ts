@@ -1,6 +1,6 @@
 import { 
   Wand2, Clock, Layout, Palette, Brain, Sparkles, 
-  PenTool, Image, LineChart, Lock
+  PenTool, Image,
 } from 'lucide-react';
 
 export const mainFeatures = [
