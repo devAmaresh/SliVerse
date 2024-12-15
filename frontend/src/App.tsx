@@ -12,6 +12,7 @@ import Settings from "./pages/settings/page";
 import useTheme from "./store/theme";
 import Dashboard from "./pages/dashboard/page";
 import Landing from "./pages/landing/page";
+import Pricing from "./pages/pricing/page";
 function App() {
   const theme = useTheme((state: any) => state.theme);
 
@@ -28,6 +29,7 @@ function App() {
             <Routes>
               {/* Login route (accessible to everyone) */}
               <Route path="/login" element={<Login />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/" element={<Landing />} />
               {/* Protected routes */}
               <Route path="/dashboard" element={<ProtectedRoute element={<Home />} />}>
