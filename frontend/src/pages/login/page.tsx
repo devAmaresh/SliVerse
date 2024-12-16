@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Button, Form, Input, message } from "antd";
-import { GoogleOutlined, HomeOutlined } from "@ant-design/icons";
+import { HomeOutlined } from "@ant-design/icons";
 import { login } from "../../hooks/login";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 import ThemeToggler from "../../components/ThemeToggler";
-
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import axios from "axios";
+import { backend_url } from "../../utils/backend";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -19,6 +21,27 @@ const LoginPage = () => {
   }, []);
 
   const [loading, setLoading] = useState(false);
+  const handleGoogleLogin = async (credentialResponse: any) => {
+    try {
+      setLoading(true);
+      const res = await axios.post(`${backend_url}/api/google-auth/`, {
+        clientId: credentialResponse?.clientId,
+        token: credentialResponse?.credential,
+      });
+      if (res.status === 200) {
+        messageApi.success("Login successful!");
+        Cookies.set("token", res.data.access);
+        navigate("/dashboard");
+      } else {
+        messageApi.error("Login failed! Please check your credentials.");
+      }
+    } catch (error) {
+      console.log(error);
+      messageApi.error("Login failed!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onFinish = async (values: { email: string; password: string }) => {
     const { email, password } = values;
@@ -123,13 +146,28 @@ const LoginPage = () => {
                 <span className="px-2 text-gray-400 text-sm">or</span>
                 <div className="flex-grow h-px bg-gray-600"></div>
               </div>
-              <Button block icon={<GoogleOutlined />} size="large">
+              {/* <Button block icon={<GoogleOutlined />} size="large">
                 Sign in with Google
-              </Button>
+              </Button> */}
+              <GoogleOAuthProvider
+                clientId={`${import.meta.env.VITE_GOOGLE_CLIENT_ID}`}
+              >
+                <GoogleLogin
+                  onSuccess={(credentialResponse) => {
+                    handleGoogleLogin(credentialResponse);
+                  }}
+                  onError={() => {
+                    console.log("Login Failed");
+                  }}
+                />
+              </GoogleOAuthProvider>
               <div className="my-4"></div>
-              <Button block icon={<HomeOutlined />} size="large"
-              type="text"
-              onClick={() => navigate("/")}
+              <Button
+                block
+                icon={<HomeOutlined />}
+                size="large"
+                type="text"
+                onClick={() => navigate("/")}
               >
                 Back To Home
               </Button>

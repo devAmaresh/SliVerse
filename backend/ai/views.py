@@ -5,7 +5,14 @@ from .gemini import generate_ai_content
 import json
 from .models import Project, Slide
 from .serializers import SlideSerializer, ProjectSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.models import User
+import os
+import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class GenerateSlideView(APIView):
@@ -111,7 +118,7 @@ class ProjectsView(APIView):
         serialized_projects = ProjectSerializer(projects, many=True).data
 
         return Response(serialized_projects, status=status.HTTP_200_OK)
-    
+
     def delete(self, request, project_id):
         try:
             project = Project.objects.get(id=project_id, user=request.user)
@@ -122,3 +129,62 @@ class ProjectsView(APIView):
 
         project.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GoogleAuthView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        token = request.data.get("token")
+        sys_client_id = os.getenv("GOOGLE_CLIENT_ID")
+
+        if not token:
+            return Response(
+                {"error": "Token is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Verify token with Google
+        google_token_info_url = (
+            f"https://oauth2.googleapis.com/tokeninfo?id_token={token}"
+        )
+        response = requests.get(google_token_info_url)
+        if response.status_code != 200:
+            return Response(
+                {"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        google_data = response.json()
+        if google_data.get("aud") != sys_client_id:
+            return Response(
+                {"error": "Invalid client ID"}, status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        email = google_data.get("email")
+        if not email:
+            return Response(
+                {"error": "Email not found in token"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Check if user already exists
+        print(google_data)
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={
+                "username": email,
+                "first_name": google_data.get("given_name", ""),
+                "last_name": google_data.get("family_name", ""),
+            },
+        )
+
+        # Generate JWT Token
+        refresh = RefreshToken.for_user(user)
+        return Response(
+            {
+                "access": str(refresh.access_token),
+                "username": user.username,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    queryset = None
