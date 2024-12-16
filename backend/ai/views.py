@@ -167,7 +167,7 @@ class GoogleAuthView(APIView):
             )
 
         # Check if user already exists
-        print(google_data)
+        # print(google_data)
         user, created = User.objects.get_or_create(
             email=email,
             defaults={
