@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-html{
+html {
   scroll-behavior: smooth;
 }
 /* Ant Design Dark Mode Overrides */
@@ -44,3 +44,9 @@ html{
 .ant-collapse-header-text {
  width: 100%;
 } */
+
+@layer base {
+  body {
+    font-family: "Inter", sans-serif;
+  }
+}
