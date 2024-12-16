@@ -159,6 +159,8 @@ const LoginPage = () => {
                   onError={() => {
                     console.log("Login Failed");
                   }}
+                  theme="filled_black"
+                  shape="rectangular"
                 />
               </GoogleOAuthProvider>
               <div className="my-4"></div>
