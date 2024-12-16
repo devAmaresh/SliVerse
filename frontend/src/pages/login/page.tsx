@@ -158,6 +158,7 @@ const LoginPage = () => {
                   }}
                   onError={() => {
                     console.log("Login Failed");
+                    messageApi.error("Login failed!");
                   }}
                   theme="filled_black"
                   shape="rectangular"
