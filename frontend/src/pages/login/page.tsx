@@ -162,6 +162,8 @@ const LoginPage = () => {
                   }}
                   theme="filled_black"
                   shape="rectangular"
+                  auto_select={false}
+                  use_fedcm_for_prompt={false}
                 />
               </GoogleOAuthProvider>
               <div className="my-4"></div>
