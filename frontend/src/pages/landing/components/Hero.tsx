@@ -8,7 +8,7 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 opacity-50" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center">
-          <div className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight">
+          <div className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold md:tracking-tight">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400">
               Transform Ideas
             </span>
@@ -27,14 +27,14 @@ export function Hero() {
           </div>
           <div className="mt-10 flex justify-center gap-4">
             <button
-              className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 transition flex items-center gap-2"
+              className="px-4 sm:px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:opacity-90 transition flex items-center gap-2"
               onClick={() => {
                 navigate("/login");
               }}
             >
               Try for free <ArrowRight className="h-5 w-5" />
             </button>
-            <button className="px-8 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition flex items-center gap-2">
+            <button className="px-4 sm:px-8 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition flex items-center gap-2">
               <Play className="h-5 w-5" /> Watch demo
             </button>
           </div>
