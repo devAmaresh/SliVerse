@@ -3,7 +3,6 @@ import Cookies from "js-cookie";
 import { Form, Input, Button, message } from "antd"; // Import Ant Design components
 import { backend_url } from "../utils/backend";
 import useSlidesStore from "../store/useSlidesStore";
-import useMessage from "antd/es/message/useMessage";
 
 const ImgChange = ({
   index_id,
