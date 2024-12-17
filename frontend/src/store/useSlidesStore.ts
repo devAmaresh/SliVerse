@@ -7,7 +7,6 @@ interface NestedPoint {
 
 interface Slide {
   content: {
-    slide_number: number;
     style: string;
     heading: string;
     key_message: string;
@@ -17,6 +16,8 @@ interface Slide {
     img_keywords: string[];
   };
   img_url: string;
+  slide_number: number;
+  id: string;
 }
 
 interface SlidesState {

@@ -8,7 +8,8 @@ import Dash_nav from "../../components/dash_nav";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { backend_url } from "../../utils/backend";
-import { Spin } from "antd";
+import { Popover, Spin } from "antd";
+import ImgChange from "../../components/imgChange";
 type ThemeName = keyof typeof themes;
 
 const Page: React.FC = () => {
@@ -184,11 +185,22 @@ const Page: React.FC = () => {
                 </div>
                 {currentSlide?.content?.style === "default" && (
                   <div className="w-[40%] flex items-center justify-center">
-                    <img
-                      src={currentSlide?.img_url}
-                      alt="Slide Visual"
-                      className="max-w-full rounded-lg shadow-lg max-h-[50vh]"
-                    />
+                    <Popover
+                      title="Change the image"
+                      trigger="click"
+                      content={
+                        <ImgChange
+                          index_id={currentSlideIndex}
+                          slide_id={currentSlide?.id}
+                        />
+                      }
+                    >
+                      <img
+                        src={currentSlide?.img_url}
+                        alt="Slide Visual"
+                        className="max-w-full rounded-lg shadow-lg max-h-[50vh] hover:border-2 hover:border-zinc-500 cursor-pointer"
+                      />
+                    </Popover>
                   </div>
                 )}
               </div>

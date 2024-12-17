@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.shortcuts import get_object_or_404
 from .gemini import generate_ai_content
 import json
 from .models import Project, Slide
@@ -60,7 +61,7 @@ class GenerateSlideView(APIView):
                 img_keywords = slide.get("img_keywords", [])
 
                 # Call DeepAI API to generate an image if img_keywords are available
-                if img_keywords:  
+                if img_keywords:
                     img_url = "https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"  # Continue without image if API fails
 
                 # Create Slide object with image URL
@@ -69,6 +70,7 @@ class GenerateSlideView(APIView):
                     "heading": slide.get("heading", ""),
                     "body": slide.get("body", {}),
                     "key_message": slide.get("key_message", ""),
+                    "img_keywords": img_keywords,
                 }
                 slides.append(
                     Slide(
@@ -208,3 +210,22 @@ class GoogleAuthView(APIView):
         )
 
     queryset = None
+
+
+class SlideEditView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, id, *args, **kwargs):
+        # Retrieve the slide object based on the primary key
+        slide = get_object_or_404(Slide, pk=id, project__user=request.user)
+
+        # Deserialize and validate input data
+        serializer = SlideSerializer(slide, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Slide updated successfully", "slide": serializer.data},
+                status=status.HTTP_200_OK,
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

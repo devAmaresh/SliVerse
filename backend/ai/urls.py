@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import GenerateSlideView, ProjectsView ,GoogleAuthView
+from .views import GenerateSlideView, ProjectsView, GoogleAuthView, SlideEditView
 from django.urls import include
 
 urlpatterns = [
@@ -7,4 +7,5 @@ urlpatterns = [
     path("projects/", ProjectsView.as_view(), name="projects"),
     path("project/<int:project_id>/", ProjectsView.as_view(), name="project_slides"),
     path("google-auth/", GoogleAuthView.as_view(), name="google_auth"),
+    path("slide-edit/<int:id>/", SlideEditView.as_view(), name="slide_edit"),
 ]
