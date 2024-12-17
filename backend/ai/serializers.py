@@ -5,7 +5,7 @@ from .models import Slide, Project
 class SlideSerializer(serializers.ModelSerializer):
     class Meta:
         model = Slide
-        fields = ["slide_number", "content"]  # Include only necessary fields
+        fields = ["slide_number", "content","img_url"]  # Include only necessary fields
 
 
 class ProjectSerializer(serializers.ModelSerializer):

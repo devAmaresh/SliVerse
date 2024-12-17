@@ -126,7 +126,7 @@ const Page: React.FC = () => {
     <div className="flex h-screen">
       {/* Loading State */}
       {loading && (
-        <Spin fullscreen size="large" tip="Loading slides..." spinning/>
+        <Spin fullscreen size="large" tip="Loading slides..." spinning />
       )}
 
       {/* Error State */}
@@ -185,7 +185,7 @@ const Page: React.FC = () => {
                 {currentSlide?.content?.style === "default" && (
                   <div className="w-[40%] flex items-center justify-center">
                     <img
-                      src="https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"
+                      src={currentSlide?.img_url}
                       alt="Slide Visual"
                       className="max-w-full rounded-lg shadow-lg max-h-[50vh]"
                     />

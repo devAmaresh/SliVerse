@@ -16,6 +16,7 @@ interface Slide {
     };
     img_keywords: string[];
   };
+  img_url: string;
 }
 
 interface SlidesState {

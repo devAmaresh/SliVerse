@@ -41,6 +41,7 @@ class Slide(models.Model):
     content = models.JSONField()  # Content of the slide (title, body, images, etc.)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    img_url = models.URLField(blank=True, null=True)
 
     class Meta:
         ordering = ["slide_number"]  # Ensure slides are always ordered by their number

@@ -28,10 +28,11 @@ class GenerateSlideView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        response = generate_ai_content(prompt,num_slides)
+        response = generate_ai_content(prompt, num_slides)
 
         try:
             slides_data = json.loads(response)
+            print(slides_data)
         except json.JSONDecodeError:
             return Response(
                 {"error": "Failed to decode JSON response."},
@@ -53,20 +54,50 @@ class GenerateSlideView(APIView):
                 description=prompt,  # Assuming 'description' refers to the prompt
             )
 
-            slides = [
-                Slide(
-                    project=project,
-                    slide_number=i + 1,
-                    content=slide,
+            slides = []
+            for i, slide in enumerate(slides_data["slides"]):
+                img_url = None
+                img_keywords = slide.get("img_keywords", [])
+
+                # Call DeepAI API to generate an image if img_keywords are available
+                if img_keywords:
+                    try:
+                        response = requests.post(
+                            "https://api.deepai.org/api/text2img",
+                            data={"text": ", ".join(img_keywords)},
+                            headers={"Api-Key": "ff886122-b010-4034-b827-c6627700c3f4"},
+                        )
+                        response_data = response.json()
+                        print(response_data)
+                        img_url = response_data.get("output_url")  # Get image URL
+                    except Exception as img_err:
+                        print(f"Failed to generate image: {img_err}")
+                        img_url = "https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"  # Continue without image if API fails
+                if not img_url:
+                    img_url = "https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"
+                # Create Slide object with image URL
+                slide_content = {
+                    "style": slide.get("style", "default"),
+                    "heading": slide.get("heading", ""),
+                    "body": slide.get("body", {}),
+                    "key_message": slide.get("key_message", ""),
+                }
+                slides.append(
+                    Slide(
+                        project=project,
+                        slide_number=i + 1,
+                        content=slide_content,
+                        img_url=img_url,  # Save generated image URL
+                    )
                 )
-                for i, slide in enumerate(slides_data["slides"])
-            ]
+
             Slide.objects.bulk_create(slides)  # Bulk create for efficiency
 
             # Fetch the slides from the database
             saved_slides = Slide.objects.filter(project=project).order_by(
                 "slide_number"
             )
+
             serialized_slides = SlideSerializer(
                 saved_slides, many=True
             ).data  # Serialize slides
@@ -159,7 +190,7 @@ class GoogleAuthView(APIView):
             return Response(
                 {"error": "Invalid client ID"}, status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         email = google_data.get("email")
         if not email:
             return Response(

@@ -2,4 +2,5 @@
 /myvenv
 db.sqlite3
 /ai/__pycache__/
+/ai/migrations/
 /slides/__pycache__/
