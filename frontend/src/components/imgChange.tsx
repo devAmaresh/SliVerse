@@ -3,6 +3,7 @@ import Cookies from "js-cookie";
 import { Form, Input, Button, message } from "antd"; // Import Ant Design components
 import { backend_url } from "../utils/backend";
 import useSlidesStore from "../store/useSlidesStore";
+import { useState } from "react";
 
 const ImgChange = ({
   index_id,
@@ -12,6 +13,7 @@ const ImgChange = ({
   slide_id: string;
 }) => {
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
   const updateSlide = useSlidesStore((state: any) => state.updateSlide);
   const [messageApi, contextHolder] = message.useMessage();
   const onFinish = async (values: { img_url: string }) => {
@@ -20,6 +22,7 @@ const ImgChange = ({
     const token = Cookies.get("token");
 
     try {
+      setLoading(true);
       const response = await axios.patch(
         `${backend_url}/api/slide-edit/${slide_id}/`,
         { img_url },
@@ -36,6 +39,8 @@ const ImgChange = ({
     } catch (error) {
       messageApi.error("Error updating the image. Please try again.");
       console.error("Error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,7 +59,14 @@ const ImgChange = ({
           <Input placeholder="Enter Image URL" />
         </Form.Item>
 
-        <Button type="primary" htmlType="submit" block className="shadow-md">
+        <Button
+          type="primary"
+          htmlType="submit"
+          block
+          className="shadow-md"
+          disabled={loading}
+          loading={loading}
+        >
           Change Image
         </Button>
       </Form>
