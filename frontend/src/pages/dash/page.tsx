@@ -17,6 +17,7 @@ const Page: React.FC = () => {
   const { slides, setSlides, setTitle } = useSlidesStore(); // Zustand Store
   const [loading, setLoading] = useState(true); // Track loading state
   const [error, setError] = useState<string | null>(null); // Track error state
+  const [imageLoaded, setImageLoaded] = useState(false);
   const token = Cookies.get("token");
   // Load slides into the Zustand store
   useEffect(() => {
@@ -119,8 +120,7 @@ const Page: React.FC = () => {
                 alt="icon"
                 onError={(e: any) => {
                   e.target.onerror = null;
-                  e.target.src =
-                    "https://img.icons8.com/color/idea.png"; // Default image URL
+                  e.target.src = "https://img.icons8.com/color/idea.png"; // Default image URL
                 }}
                 className="w-full h-full object-center object-contain"
               />
@@ -210,7 +210,10 @@ const Page: React.FC = () => {
                       <img
                         src={currentSlide?.img_url}
                         alt="Slide Visual"
-                        className="max-w-full rounded-lg shadow-lg max-h-[50vh] hover:border-2 hover:border-zinc-500 cursor-pointer"
+                        className={`max-w-full rounded-lg shadow-lg max-h-[50vh] hover:border-2 hover:border-zinc-500 cursor-pointer ${
+                          imageLoaded ? "blur-0" : "blur-md"
+                        }`}
+                        onLoad={() => setImageLoaded(true)}
                       />
                     </Popover>
                   </div>
