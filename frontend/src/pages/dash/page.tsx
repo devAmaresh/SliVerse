@@ -10,11 +10,12 @@ import Cookies from "js-cookie";
 import { backend_url } from "../../utils/backend";
 import { Popover, Spin } from "antd";
 import ImgChange from "../../components/imgChange";
+import pptxgen from "pptxgenjs";
 type ThemeName = keyof typeof themes;
 
 const Page: React.FC = () => {
   const { id } = useParams(); // Fetch the project ID from the URL params
-  const { slides, setSlides, setTitle } = useSlidesStore(); // Zustand Store
+  const { slides, setSlides, setTitle, title } = useSlidesStore(); // Zustand Store
   const [loading, setLoading] = useState(true); // Track loading state
   const [error, setError] = useState<string | null>(null); // Track error state
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -60,16 +61,16 @@ const Page: React.FC = () => {
   const renderBulletPoint = (point: any, idx: number) => {
     if (typeof point === "string") {
       return (
-        <div key={idx} className="mb-2 text-lg">
+        <li key={idx} className="mb-2 text-lg py-4">
           <Markdown>{point}</Markdown>
-        </div>
+        </li>
       );
     }
 
     if (typeof point === "object" && point.heading) {
       return (
         <div key={idx} className="ml-4">
-          <h3 className="font-semibold text-lg">{point.heading}</h3>
+          <div className="font-semibold text-lg">{point.heading}</div>
           <ul className="list-disc pl-6 text-lg">
             {point.points?.map((nestedPoint: any, nestedIdx: number) =>
               renderBulletPoint(nestedPoint, nestedIdx)
@@ -135,6 +136,175 @@ const Page: React.FC = () => {
     );
   };
 
+  const renderSequential = (points: any[]) => {
+    return (
+      <>
+        <ul className="list-disc pl-6">
+          {points?.map((point, idx) => (
+            <div key={idx} className="mb-2 text-lg flex space-x-2 items-center">
+              <div className="w-14 h-14 bg-zinc-100 rounded-lg flex items-center justify-center">
+                <img
+                  src={`https://img.icons8.com/color/${idx + 1}.png`}
+                  alt="icon"
+                  className="w-full h-full object-center object-contain"
+                />
+              </div>
+              <div>
+                <Markdown>{point}</Markdown>
+              </div>
+            </div>
+          ))}
+        </ul>
+      </>
+    );
+  };
+  const [loadingPPT, setLoadingPPT] = useState(false);
+  const handleDownloadPPT = () => {
+    setLoadingPPT(true);
+    const pptx = new pptxgen();
+    pptx.author = "Sliverse";
+    pptx.company = "Sliverse";
+    pptx.title = `${title}`;
+
+    // Define current theme colors dynamically
+    const themeTextColor = currentTheme.text_hex || "#3B3B3B";
+    const themeAccentColor = currentTheme.accent_hex || "#5A5A5A";
+
+    // Dimensions
+    const textWidth = 6.8; // 68% of slide width
+    const imageWidth = 3; // 30% of slide width
+    const paddingX = 0.2; // Horizontal padding
+    const listItemPadding = 0.2; // Padding between each list item
+
+    slides.forEach((slide: any, _idx: number) => {
+      const pptSlide = pptx.addSlide();
+
+      // Set slide background
+      pptSlide.background = { fill: currentTheme.background_hex };
+
+      // Add Slide Heading
+      if (slide?.content?.heading) {
+        pptSlide.addText(slide.content.heading, {
+          x: 0.5,
+          y: 0.3,
+          fontSize: 28,
+          bold: true,
+          color: themeAccentColor,
+          w: textWidth, // Constrain heading width
+        });
+      }
+
+      const body = slide?.content?.body?.points || [];
+      let textStartY = 1; // Initial Y position for text content
+
+      // Handle Double Column Layout
+      if (slide?.content?.style === "double_column") {
+        body.forEach((column: any, colIdx: number) => {
+          const colX = colIdx === 0 ? 0.5 : textWidth / 2 + 0.5;
+
+          pptSlide.addText(column?.heading || "", {
+            x: colX,
+            y: 1.5,
+            fontSize: 20,
+            bold: true,
+            color: themeAccentColor,
+          });
+
+          column.points?.forEach((point: string, pointIdx: number) => {
+            pptSlide.addText(`• ${point}`, {
+              x: colX,
+              y: 2 + pointIdx * (0.5 + listItemPadding),
+              fontSize: 16,
+              color: themeTextColor,
+            });
+          });
+        });
+      }
+
+      // Handle Icon Slide Layout
+      else if (slide?.content?.style === "icon") {
+        body.forEach((point: string, idx: number) => {
+          const iconMatch = point.match(/\[\[(.*?)\]\]/)?.[1] || "idea";
+          const text = point.replace(/\[\[(.*?)\]\]/, "").trim();
+          const yPosition = textStartY + idx * (1 + listItemPadding);
+
+          pptSlide.addImage({
+            path: `https://img.icons8.com/color/${iconMatch}.png`,
+            x: 0.5,
+            y: yPosition,
+            w: 0.7,
+            h: 0.7,
+          });
+
+          pptSlide.addText(text, {
+            x: 1.5,
+            y: yPosition + 0.2,
+            fontSize: 18,
+            color: themeTextColor,
+            w: textWidth - 1.5,
+          });
+        });
+      }
+
+      // Handle Sequential Slide Layout
+      else if (slide?.content?.style === "sequential") {
+        body.forEach((point: string, idx: number) => {
+          const yPosition = textStartY + idx * (1 + listItemPadding);
+
+          pptSlide.addImage({
+            path: `https://img.icons8.com/color/${idx + 1}.png`,
+            x: 0.5,
+            y: yPosition,
+            w: 0.7,
+            h: 0.7,
+          });
+
+          pptSlide.addText(point, {
+            x: 1.5,
+            y: yPosition + 0.2,
+            fontSize: 18,
+            color: themeTextColor,
+            w: textWidth - 1.5,
+          });
+        });
+      }
+
+      // Handle Default Layout
+      else {
+        body.forEach((point: string, pointIdx: number) => {
+          pptSlide.addText(`• ${point}`, {
+            x: 0.5,
+            y: textStartY + pointIdx * (0.5 + listItemPadding),
+            fontSize: 18,
+            color: themeTextColor,
+            w: textWidth,
+          });
+        });
+      }
+
+      // Add Slide Image to the remaining 30% area
+      if (slide?.img_url) {
+        pptSlide.addImage({
+          path: slide.img_url,
+          x: textWidth + paddingX, // Place the image after text width + padding
+          y: 1, // Align the image vertically starting at 1 inch
+          w: imageWidth, // Set image width
+          h: 3, // Set a fixed height
+        });
+      }
+    });
+
+    // Save the presentation
+    pptx
+      .writeFile({ fileName: `${title}.pptx` })
+      .then(() => {
+        setLoadingPPT(false); 
+      })
+      .catch(() => {
+        setLoadingPPT(false);
+      });
+  };
+
   return (
     <div className="flex h-screen">
       {/* Loading State */}
@@ -160,18 +330,22 @@ const Page: React.FC = () => {
           {/* Main Content */}
           <main className="flex-1 overflow-y-auto">
             {/* Navbar */}
-            <Dash_nav handleThemeChange={handleThemeChange} />
+            <Dash_nav
+              handleThemeChange={handleThemeChange}
+              download_ppt={handleDownloadPPT}
+              loading_ppt={loadingPPT}
+            />
 
             {/* Slide Content */}
-            <div className={`min-h-screen pt-[86px] p-8 ${currentTheme.text}`}>
+            <div className={`min-h-screen p-8 ${currentTheme.text}`}>
               <div className="text-4xl font-extrabold text-center mb-12">
                 {/* {title} */}
               </div>
 
               <div
-                className={`min-h-[70vh] mx-auto w-full p-10 rounded-lg shadow-lg ${currentTheme.gradient} hover:shadow-2xl transition-shadow duration-300 flex`}
+                className={`min-h-[82vh] mx-auto w-full p-10 rounded-lg shadow-lg ${currentTheme.gradient} hover:shadow-2xl transition-shadow duration-300 flex`}
               >
-                <div className="flex-1">
+                <div className="flex-[68%] pr-4">
                   {/* Slide Heading */}
                   <div
                     className={`text-4xl font-semibold mb-6 ${currentTheme.accent}`}
@@ -182,11 +356,15 @@ const Page: React.FC = () => {
 
                   {/* Slide Body */}
                   <div>
-                    {currentSlide?.content?.style === "double_column" ? (
-                      renderDoubleColumn(currentSlide?.content?.body.points)
-                    ) : currentSlide?.content?.style === "icon" ? (
-                      renderIconSlide(currentSlide?.content?.body.points)
-                    ) : (
+                    {currentSlide?.content?.style === "double_column" &&
+                      renderDoubleColumn(currentSlide?.content?.body.points)}
+
+                    {currentSlide?.content?.style === "icon" &&
+                      renderIconSlide(currentSlide?.content?.body.points)}
+
+                    {currentSlide?.content?.style === "sequential" &&
+                      renderSequential(currentSlide?.content?.body.points)}
+                    {currentSlide?.content?.style === "default" && (
                       <ul className="list-disc pl-6">
                         {currentSlide?.content?.body.points?.map((point, idx) =>
                           renderBulletPoint(point, idx)
@@ -195,29 +373,27 @@ const Page: React.FC = () => {
                     )}
                   </div>
                 </div>
-                {currentSlide?.content?.style === "default" && (
-                  <div className="w-[40%] flex items-center justify-center">
-                    <Popover
-                      title="Change the image"
-                      trigger="click"
-                      content={
-                        <ImgChange
-                          index_id={currentSlideIndex}
-                          slide_id={currentSlide?.id}
-                        />
-                      }
-                    >
-                      <img
-                        src={currentSlide?.img_url}
-                        alt="Slide Visual"
-                        className={`max-w-full rounded-lg shadow-lg max-h-[50vh] hover:border-2 hover:border-zinc-500 cursor-pointer ${
-                          imageLoaded ? "blur-0" : "blur-md"
-                        }`}
-                        onLoad={() => setImageLoaded(true)}
+                <div className="w-[30%] flex items-center justify-center">
+                  <Popover
+                    title="Change the image"
+                    trigger="click"
+                    content={
+                      <ImgChange
+                        index_id={currentSlideIndex}
+                        slide_id={currentSlide?.id}
                       />
-                    </Popover>
-                  </div>
-                )}
+                    }
+                  >
+                    <img
+                      src={currentSlide?.img_url}
+                      alt="Slide Visual"
+                      className={`max-w-full rounded-lg shadow-lg max-h-[50vh] hover:border-2 hover:border-zinc-500 cursor-pointer ${
+                        imageLoaded ? "blur-0" : "blur-md"
+                      }`}
+                      onLoad={() => setImageLoaded(true)}
+                    />
+                  </Popover>
+                </div>
               </div>
             </div>
           </main>

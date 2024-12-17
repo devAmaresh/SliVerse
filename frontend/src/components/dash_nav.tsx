@@ -1,11 +1,20 @@
-import { Select } from "antd";
-
+import { Button, Select } from "antd";
+import { DownloadOutlined } from "@ant-design/icons";
 import { themes } from "../utils/theme";
 import { ChevronRight, Home } from "lucide-react";
 import useSlidesStore from "../store/useSlidesStore";
 import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "../pages/landing/components/ThemeToggle";
-const dash_nav = ({ handleThemeChange }: any) => {
+import { useEffect } from "react";
+const dash_nav = ({
+  handleThemeChange,
+  download_ppt,
+  loading_ppt,
+}: {
+  handleThemeChange: any;
+  download_ppt: any;
+  loading_ppt: boolean;
+}) => {
   const title = useSlidesStore((state: any) => state.title);
   const navigate = useNavigate();
   return (
@@ -42,6 +51,14 @@ const dash_nav = ({ handleThemeChange }: any) => {
               label: key.charAt(0).toUpperCase() + key.slice(1),
             }))}
           />
+          <Button
+            onClick={download_ppt}
+            icon={<DownloadOutlined />}
+            disabled={loading_ppt}
+            loading={loading_ppt}
+          >
+            PPT
+          </Button>
         </div>
       </div>
     </nav>
