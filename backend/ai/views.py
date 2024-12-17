@@ -12,6 +12,7 @@ from django.contrib.auth.models import User
 import os
 import requests
 from dotenv import load_dotenv
+from .pexel import get_img_link
 
 load_dotenv()
 
@@ -33,7 +34,6 @@ class GenerateSlideView(APIView):
 
         try:
             slides_data = json.loads(response)
-            print(slides_data)
         except json.JSONDecodeError:
             return Response(
                 {"error": "Failed to decode JSON response."},
@@ -60,9 +60,11 @@ class GenerateSlideView(APIView):
                 img_url = None
                 img_keywords = slide.get("img_keywords", [])
 
-                # Call DeepAI API to generate an image if img_keywords are available
                 if img_keywords:
-                    img_url = "https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"  # Continue without image if API fails
+                    img_query = " ".join(img_keywords)
+                    img_url = get_img_link(img_query)
+                if img_url is None:
+                    img_url = "https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"
 
                 # Create Slide object with image URL
                 slide_content = {
@@ -228,4 +230,3 @@ class SlideEditView(APIView):
                 status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
