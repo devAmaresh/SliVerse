@@ -22,7 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     if (currentSlideElement) {
       currentSlideElement.scrollIntoView({
         behavior: "smooth",
-        block: "start",
+        block: "center",
       });
     }
   }, [currentSlideIndex]);
