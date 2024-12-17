@@ -5,7 +5,6 @@ import { ChevronRight, Home } from "lucide-react";
 import useSlidesStore from "../store/useSlidesStore";
 import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "../pages/landing/components/ThemeToggle";
-import { useEffect } from "react";
 const dash_nav = ({
   handleThemeChange,
   download_ppt,
