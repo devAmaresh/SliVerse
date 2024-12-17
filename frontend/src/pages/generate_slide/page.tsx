@@ -4,7 +4,7 @@ import axios from "axios";
 import useSlidesStore from "../../store/useSlidesStore";
 import { backend_url } from "../../utils/backend";
 import { Home } from "lucide-react";
-import { Button, Input, Form } from "antd";
+import { Button, Input, Form, Slider } from "antd";
 import Cookies from "js-cookie";
 import ThemeToggler from "../../components/ThemeToggler";
 
@@ -16,7 +16,8 @@ const Page = () => {
   const token = Cookies.get("token");
 
   const handleGenerateSlides = async (values: any) => {
-    const { prompt } = values;
+    const { prompt, num_pages } = values;
+    console.log(values);
 
     if (!prompt.trim()) return;
 
@@ -26,7 +27,7 @@ const Page = () => {
     try {
       const response = await axios.post(
         `${backend_url}/api/generate_slide/`,
-        { prompt },
+        { prompt, num_pages },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -86,11 +87,23 @@ const Page = () => {
             >
               <TextArea
                 placeholder="Enter prompt for slides..."
-                style={{ maxHeight: "200px" }} 
+                style={{ maxHeight: "200px" }}
                 className="p-3"
               />
             </Form.Item>
-
+            <Form.Item
+              name="num_pages"
+              label="Number of Slides"
+              rules={[
+                {
+                  required: true,
+                },
+              ]}
+              className="mb-8"
+              initialValue={10}
+            >
+              <Slider min={10} max={30} step={1} />
+            </Form.Item>
             <Form.Item>
               <Button
                 type="primary"

@@ -8,7 +8,7 @@ from django.conf import settings
 dotenv.load_dotenv()
 
 
-def generate_ai_content(prompt: str):
+def generate_ai_content(prompt: str, num_slides: str):
     # Retrieve the API key from the environment variable
     api_key = os.getenv("GEMINI_API")
     if not api_key:
@@ -30,6 +30,7 @@ def generate_ai_content(prompt: str):
 
         # Format the slide prompt with the provided topic
         slide_prompt = slide_prompt.replace("{prompt}", prompt)
+        slide_prompt = slide_prompt.replace("{num_slides}", str(num_slides))
 
         # Send the slide generation request to the model
         response = model.generate_content(slide_prompt)

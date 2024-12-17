@@ -21,13 +21,14 @@ class GenerateSlideView(APIView):
     def post(self, request):
         # Generate AI content based on the prompt
         prompt = request.data.get("prompt")
+        num_slides = request.data.get("num_pages")
         if not prompt:
             return Response(
                 {"error": "Prompt is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        response = generate_ai_content(prompt)
+        response = generate_ai_content(prompt,num_slides)
 
         try:
             slides_data = json.loads(response)
