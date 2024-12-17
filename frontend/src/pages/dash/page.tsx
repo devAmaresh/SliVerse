@@ -111,9 +111,21 @@ const Page: React.FC = () => {
               boxShadow: `2px 2px 2px 2px rgba(0, 0, 0, 0.1)`,
             }}
           >
-            <span className="w-6 h-6 bg-zinc-100 rounded-lg flex items-center justify-center p-4 text-ellipsis truncate">
-              {point.match(/\[\[(.*?)\]\]/)?.[1] || "🎯"} {/* Extract icon */}
+            <span className="w-12 h-12 bg-zinc-100 rounded-lg flex items-center justify-center">
+              <img
+                src={`https://img.icons8.com/color/${
+                  point.match(/\[\[(.*?)\]\]/)?.[1] || "🎯"
+                }.png`}
+                alt="icon"
+                onError={(e: any) => {
+                  e.target.onerror = null;
+                  e.target.src =
+                    "https://img.icons8.com/color/idea.png"; // Default image URL
+                }}
+                className="w-full h-full object-center object-contain"
+              />
             </span>
+
             <p className="text-lg">
               <Markdown>{point.replace(/\[\[(.*?)\]\]/, "").trim()}</Markdown>
             </p>
