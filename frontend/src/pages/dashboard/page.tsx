@@ -63,7 +63,7 @@ const Dashboard = () => {
           </div>
 
           <div className="mb-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-7">
               {loading ? (
                 <>
                   <Skeleton.Node active style={{ width: 350, height: 270 }} />
@@ -82,6 +82,7 @@ const Dashboard = () => {
                     title={presentation.title}
                     thumbnail="https://img.freepik.com/free-photo/business-graphics-presentation-illustration_23-2151876393.jpg"
                     dateTime={presentation.updated_at}
+                    is_public={presentation.is_public}
                   />
                 ))
               ) : (

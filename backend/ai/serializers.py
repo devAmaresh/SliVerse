@@ -22,4 +22,5 @@ class ProjectSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "updated_at",
+            "is_public",
         ]  # Include only necessary fields

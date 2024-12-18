@@ -5,6 +5,7 @@ interface Project {
   title: string;
   description: string;
   updated_at: string;
+  is_public: boolean;
 }
 
 interface ProjectStore {
