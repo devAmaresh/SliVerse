@@ -299,7 +299,7 @@ class SlideEditView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserProfileView(generics.RetrieveAPIView):
+class UserProfileView(generics.RetrieveDestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
