@@ -1,12 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics
 from django.shortcuts import get_object_or_404
 from .gemini import generate_ai_content
 import json
 from .models import Project, Slide
 from .serializers import SlideSerializer, ProjectSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import User
 import os
@@ -110,7 +111,7 @@ class GenerateSlideView(APIView):
 
 
 class ProjectsView(APIView):
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
 
     def get(self, request, project_id=None):
         # Case where project_id is provided (single project with slides)
@@ -148,6 +149,48 @@ class ProjectsView(APIView):
             {"detail": "Project ID is required."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class ProjectUpdateView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Project.objects.all()  # Use all projects as the base queryset
+    serializer_class = (
+        ProjectSerializer  # Specify the serializer to use for updating the project
+    )
+
+    def get_object(self):
+        """
+        Override the get_object method to get the project based on the pk (primary key)
+        and ensure the project belongs to the authenticated user.
+        """
+        # Use the default get_object method, which looks up by 'pk' automatically
+        project = super().get_object()
+
+        # Check if the project belongs to the authenticated user
+        if project.user != self.request.user:
+            raise PermissionDenied("You do not have permission to edit this project.")
+        return project
+
+    def patch(self, request, *args, **kwargs):
+        """
+        Handle partial updates (PATCH request) using the ProjectSerializer.
+        """
+        project = self.get_object()  # Get the project instance based on pk
+
+        # Serialize the incoming data for validation and update
+        serializer = self.get_serializer(
+            project, data=request.data, partial=True
+        )  # partial=True allows partial updates
+
+        if serializer.is_valid():
+            serializer.save()  # Save the updated project
+            return Response(
+                serializer.data, status=status.HTTP_200_OK
+            )  # Return the updated project data
+        else:
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )  # Return validation errors
 
 
 class ProjectsListView(APIView):
