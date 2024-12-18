@@ -66,9 +66,11 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-7">
               {loading ? (
                 <>
-                  <Skeleton.Node active style={{ width: 350, height: 270 }} />
-                  <Skeleton.Node active style={{ width: 350, height: 270 }} />
-                  <Skeleton.Node active style={{ width: 350, height: 270 }} />
+                  <Skeleton.Node active style={{ width: 210, height: 250 }} />
+                  <Skeleton.Node active style={{ width: 210, height: 250 }} />
+                  <Skeleton.Node active style={{ width: 210, height: 250 }} />
+                  <Skeleton.Node active style={{ width: 210, height: 250 }} />
+                  <Skeleton.Node active style={{ width: 210, height: 250 }} />
                 </>
               ) : error ? (
                 <div className="text-center col-span-3 text-red-500 dark:text-red-400">

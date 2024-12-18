@@ -110,25 +110,31 @@ class GenerateSlideView(APIView):
 
 
 class ProjectsView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny] 
 
     def get(self, request, project_id=None):
         # Case where project_id is provided (single project with slides)
         if project_id:
             try:
-                # Get the project
-                project = Project.objects.get(id=project_id, user=request.user)
+                # First, check if the user is authenticated
+                if request.user.is_authenticated:
+                    # If the user is authenticated, get the project belonging to that user
+                    project = Project.objects.get(id=project_id, user=request.user)
+                else:
+                    # If the user is not authenticated, check if the project is public
+                    project = Project.objects.get(id=project_id, is_public=True)
+
             except Project.DoesNotExist:
                 return Response(
-                    {"detail": "Project not found."}, status=status.HTTP_404_NOT_FOUND
+                    {"detail": "Project not found or not accessible."},
+                    status=status.HTTP_404_NOT_FOUND,
                 )
 
             # Get the slides for the project
             slides = Slide.objects.filter(project=project)
 
-            serialized_slides = SlideSerializer(
-                slides, many=True
-            ).data  # Serialize slides
+            # Serialize the slides
+            serialized_slides = SlideSerializer(slides, many=True).data
             response_data = {
                 "project_id": project_id,
                 "title": project.title,
@@ -137,7 +143,17 @@ class ProjectsView(APIView):
 
             return Response(response_data, status=status.HTTP_200_OK)
 
-        # Case where no project_id is provided (list all projects)
+        # If no project_id is provided, return an error or another appropriate response
+        return Response(
+            {"detail": "Project ID is required."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+class ProjectsListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
         projects = Project.objects.filter(user=request.user).order_by("-updated_at")
         serialized_projects = ProjectSerializer(projects, many=True).data
 

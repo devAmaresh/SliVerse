@@ -1,9 +1,9 @@
 import { Button, Select } from "antd";
-import { DownloadOutlined } from "@ant-design/icons";
+import { DownloadOutlined, PlayCircleOutlined } from "@ant-design/icons";
 import { themes } from "../utils/theme";
 import { ChevronRight, Home } from "lucide-react";
 import useSlidesStore from "../store/useSlidesStore";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ThemeToggle } from "../pages/landing/components/ThemeToggle";
 const dash_nav = ({
   handleThemeChange,
@@ -16,6 +16,7 @@ const dash_nav = ({
 }) => {
   const title = useSlidesStore((state: any) => state.title);
   const navigate = useNavigate();
+  const id = useParams().id;
   return (
     <nav className="bg-zinc-100 dark:bg-zinc-900 border-b border-zinc-300 shadow-md fixed top-0 left-0 w-full z-50">
       <div className="container mx-auto px-6 py-3 flex justify-between items-center">
@@ -50,6 +51,14 @@ const dash_nav = ({
               label: key.charAt(0).toUpperCase() + key.slice(1),
             }))}
           />
+          <Button
+            onClick={() => {
+              window.open(`/present/${id}`, "_blank");
+            }}
+            icon={<PlayCircleOutlined />}
+          >
+            Present
+          </Button>
           <Button
             onClick={download_ppt}
             icon={<DownloadOutlined />}
