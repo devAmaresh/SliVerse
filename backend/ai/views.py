@@ -4,8 +4,8 @@ from rest_framework import status, generics
 from django.shortcuts import get_object_or_404
 from .gemini import generate_ai_content
 import json
-from .models import Project, Slide
-from .serializers import SlideSerializer, ProjectSerializer
+from .models import Project, Slide, UserProfile
+from .serializers import SlideSerializer, ProjectSerializer, UserProfileSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -260,6 +260,13 @@ class GoogleAuthView(APIView):
                 "last_name": google_data.get("family_name", ""),
             },
         )
+        UserProfile.objects.get_or_create(
+            user=user,
+            profile_picture=google_data.get(
+                "picture",
+                "https://avatar.iran.liara.run/public",
+            ),
+        )
 
         # Generate JWT Token
         refresh = RefreshToken.for_user(user)
@@ -290,3 +297,12 @@ class SlideEditView(APIView):
                 status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserProfileView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = User.objects.all()
+    serializer_class = UserProfileSerializer
+
+    def get_object(self):
+        return self.request.user

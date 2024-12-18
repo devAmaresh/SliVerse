@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Slide, Project
+from .models import Slide, Project, UserProfile
+from django.contrib.auth.models import User
 
 
 class SlideSerializer(serializers.ModelSerializer):
@@ -24,3 +25,26 @@ class ProjectSerializer(serializers.ModelSerializer):
             "updated_at",
             "is_public",
         ]  # Include only necessary fields
+
+
+class UserProfileModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = [
+            "profile_picture",
+            "created_at",
+        ]
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    profile = UserProfileModelSerializer() 
+
+    class Meta:
+        model = User
+        fields = [
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "profile",  # Nested profile field
+        ]
