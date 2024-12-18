@@ -138,6 +138,7 @@ class ProjectsView(APIView):
             serialized_slides = SlideSerializer(slides, many=True).data
             response_data = {
                 "project_id": project_id,
+                "is_public": project.is_public,
                 "title": project.title,
                 "slides": serialized_slides,
             }

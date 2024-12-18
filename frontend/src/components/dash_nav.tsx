@@ -1,4 +1,4 @@
-import { Button, message, Modal, Select, Typography } from "antd";
+import { Button, Input, message, Modal, Select, Typography } from "antd";
 import {
   DownloadOutlined,
   LinkOutlined,
@@ -32,7 +32,7 @@ const dash_nav = ({
     setOpen(true);
   };
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [isPublic, setIsPublic] = useState(false);
+  const { is_public, setPublic } = useSlidesStore();
   const token = Cookies.get("token");
 
   const handleOk = async () => {
@@ -41,7 +41,7 @@ const dash_nav = ({
       const res = await axios.patch(
         `${backend_url}/api/projects/${id}/`,
         {
-          is_public: true,
+          is_public: !is_public,
         },
         {
           headers: {
@@ -50,15 +50,19 @@ const dash_nav = ({
         }
       );
       if (res.status === 200) {
-        messageApi.success("Project is now public!");
-        setIsPublic(true);
+        {
+          res.data.is_public
+            ? messageApi.success("Project is now public!")
+            : messageApi.success("Project is now private!");
+        }
+        setPublic(res.data.is_public);
         // setOpen(false);
       } else {
-        messageApi.error("Failed to make project public!");
+        messageApi.error("Failed ! Try again later.");
       }
     } catch (e) {
       console.log(e);
-      messageApi.error("Failed to make project public!");
+      messageApi.error("Failed ! Try again later.");
     } finally {
       setConfirmLoading(false);
     }
@@ -67,7 +71,7 @@ const dash_nav = ({
   const handleCancel = () => {
     setOpen(false);
   };
-
+  const shareLink = `${window.location.origin}/present/${id}`;
   return (
     <nav className="bg-zinc-100 dark:bg-zinc-900 border-b border-zinc-300 shadow-md fixed top-0 left-0 w-full z-50">
       {contextHolder}
@@ -110,29 +114,50 @@ const dash_nav = ({
             title="Share PPT Link"
             open={open}
             onOk={handleOk}
+            okButtonProps={{ disabled: is_public }}
             confirmLoading={confirmLoading}
             onCancel={handleCancel}
+            footer={null}
           >
             <div>
-              This will set the project to public and generate a link for the
-              PPT.
-            </div>
-            <div>
-              {isPublic && (
+              {!is_public && (
                 <>
-                  <Text
-                    copyable={{
-                      text: `${window.location.origin}/present/${id}`,
-                    }}
-                  >
-                    <input
-                      value={`${window.location.origin}/present/${id}`}
-                      readOnly
-                      className="dark:bg-black dark:text-white w-44 rounded-md border border-blue-500 focus:outline-none p-2"
-                    />
-                  </Text>
+                  <Paragraph>
+                    Your presentation is currently private. This means it can
+                    only be viewed by you. If you want to share it with others,
+                    click the button below to make it public.
+                  </Paragraph>
                 </>
               )}
+            </div>
+            <div>
+              {is_public && (
+                <>
+                  <Paragraph>
+                    Your presentation is public! Share the link below with
+                    anyone to allow them to view your presentation.
+                  </Paragraph>
+                  <div className="text-center">
+                    <Text
+                      copyable={{
+                        text: `${shareLink}`,
+                      }}
+                    >
+                      <Input className="p-2 w-1/2" value={shareLink} readOnly />
+                    </Text>
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="text-center mt-4">
+              <Button
+                onClick={handleOk}
+                danger={!is_public}
+                loading={confirmLoading}
+                disabled={confirmLoading}
+              >
+                {is_public ? "Make Private" : "Make Public"}
+              </Button>
             </div>
           </Modal>
           <Button

@@ -15,7 +15,7 @@ type ThemeName = keyof typeof themes;
 
 const Page: React.FC = () => {
   const { id } = useParams(); // Fetch the project ID from the URL params
-  const { slides, setSlides, setTitle, title } = useSlidesStore(); // Zustand Store
+  const { slides, setSlides, setTitle, title, setPublic } = useSlidesStore(); // Zustand Store
   const [loading, setLoading] = useState(true); // Track loading state
   const [error, setError] = useState<string | null>(null); // Track error state
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -36,6 +36,7 @@ const Page: React.FC = () => {
         // Set the slides and title in Zustand store
         setSlides(data.slides);
         setTitle(data.title);
+        setPublic(data.is_public);
       } catch (err) {
         setError("Failed to fetch data.");
       } finally {
@@ -298,7 +299,7 @@ const Page: React.FC = () => {
     pptx
       .writeFile({ fileName: `${title}.pptx` })
       .then(() => {
-        setLoadingPPT(false); 
+        setLoadingPPT(false);
       })
       .catch(() => {
         setLoadingPPT(false);
