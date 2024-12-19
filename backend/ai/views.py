@@ -68,9 +68,9 @@ class GenerateSlideView(APIView):
                     img_url = get_img_link(img_query)
                 if img_url is None:
                     img_url = "https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"
-                dominant_color = "#ffdbac"
-                if mode:
-                    dominant_color = get_dominant_color(img_url)
+                # dominant_color = "#ffdbac"
+                # if mode:
+                dominant_color = get_dominant_color(img_url)
 
                 # Create Slide object with image URL
                 slide_content = {
