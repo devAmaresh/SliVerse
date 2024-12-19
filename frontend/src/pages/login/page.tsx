@@ -150,23 +150,25 @@ const LoginPage = () => {
                 Sign in with Google
               </Button> */}
               <div className="text-center mx-auto">
-                <GoogleOAuthProvider
-                  clientId={`${import.meta.env.VITE_GOOGLE_CLIENT_ID}`}
-                >
-                  <GoogleLogin
-                    onSuccess={(credentialResponse) => {
-                      handleGoogleLogin(credentialResponse);
-                    }}
-                    onError={() => {
-                      console.log("Login Failed");
-                      messageApi.error("Login failed!");
-                    }}
-                    theme="filled_black"
-                    shape="rectangular"
-                    auto_select={false}
-                    use_fedcm_for_prompt={false}
-                  />
-                </GoogleOAuthProvider>
+                <center>
+                  <GoogleOAuthProvider
+                    clientId={`${import.meta.env.VITE_GOOGLE_CLIENT_ID}`}
+                  >
+                    <GoogleLogin
+                      onSuccess={(credentialResponse) => {
+                        handleGoogleLogin(credentialResponse);
+                      }}
+                      onError={() => {
+                        console.log("Login Failed");
+                        messageApi.error("Login failed!");
+                      }}
+                      theme="filled_black"
+                      shape="rectangular"
+                      auto_select={false}
+                      use_fedcm_for_prompt={false}
+                    />
+                  </GoogleOAuthProvider>
+                </center>
               </div>
               <div className="my-4"></div>
               <Button
