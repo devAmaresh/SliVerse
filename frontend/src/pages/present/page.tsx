@@ -126,7 +126,9 @@ const Page: React.FC = () => {
     if (typeof point === "object" && point.heading) {
       return (
         <div key={idx} className="ml-4">
-          <div className="font-semibold md:text-lg lg:text-2xl">{point.heading}</div>
+          <div className="font-semibold md:text-lg lg:text-2xl">
+            {point.heading}
+          </div>
           <ul className="list-disc pl-6 md:text-lg lg:text-2xl">
             {point.points?.map((nestedPoint: any, nestedIdx: number) =>
               renderBulletPoint(nestedPoint, nestedIdx)
@@ -145,7 +147,9 @@ const Page: React.FC = () => {
       <div className="grid grid-cols-2 gap-6">
         {columns.map((column, idx) => (
           <div key={idx}>
-            <h3 className="font-semibold md:text-lg lg:text-2xl mb-2">{column.heading}</h3>
+            <h3 className="font-semibold md:text-lg lg:text-2xl mb-2">
+              {column.heading}
+            </h3>
             <ul className="list-disc pl-6 md:text-lg lg:text-2xl">
               {column.points?.map((point: any, pointIdx: number) =>
                 renderBulletPoint(point, pointIdx)
@@ -197,7 +201,10 @@ const Page: React.FC = () => {
       <>
         <ul className="list-disc pl-6">
           {points?.map((point, idx) => (
-            <div key={idx} className="mb-2 md:text-lg lg:text-2xl flex space-x-2 items-center pb-3">
+            <div
+              key={idx}
+              className="mb-2 md:text-lg lg:text-2xl flex space-x-2 items-center pb-3"
+            >
               <div className="w-14 h-14 bg-zinc-100 rounded-lg flex items-center justify-center">
                 <img
                   src={`https://img.icons8.com/color/${idx + 1}.png`}
