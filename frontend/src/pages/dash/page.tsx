@@ -109,12 +109,12 @@ const Page: React.FC = () => {
         {points.map((point, idx) => (
           <div
             key={idx}
-            className="flex items-start space-x-2 rounded-md p-3"
+            className="flex space-x-2 rounded-md p-3"
             style={{
               boxShadow: `2px 2px 2px 2px rgba(0, 0, 0, 0.1)`,
             }}
           >
-            <span className="w-12 h-12 bg-zinc-100 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-zinc-100 rounded-lg flex items-center justify-center">
               <img
                 src={`https://img.icons8.com/color/${
                   point.match(/\[\[(.*?)\]\]/)?.[1] || "🎯"
@@ -126,11 +126,11 @@ const Page: React.FC = () => {
                 }}
                 className="w-full h-full object-center object-contain"
               />
-            </span>
+            </div>
 
-            <p className="text-lg">
+            <div className="text-lg flex-1">
               <Markdown>{point.replace(/\[\[(.*?)\]\]/, "").trim()}</Markdown>
-            </p>
+            </div>
           </div>
         ))}
       </div>
