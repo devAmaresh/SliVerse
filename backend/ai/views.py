@@ -57,7 +57,6 @@ class GenerateSlideView(APIView):
                 description=prompt,  # Assuming 'description' refers to the prompt
             )
 
-            slides = []
             for i, slide in enumerate(slides_data["slides"]):
                 img_url = None
                 img_keywords = slide.get("img_keywords", [])
@@ -68,6 +67,7 @@ class GenerateSlideView(APIView):
                 if img_url is None:
                     img_url = "https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"
                 dominant_color = get_dominant_color(img_url)
+
                 # Create Slide object with image URL
                 slide_content = {
                     "style": slide.get("style", "default"),
@@ -76,17 +76,16 @@ class GenerateSlideView(APIView):
                     "key_message": slide.get("key_message", ""),
                     "img_keywords": img_keywords,
                 }
-                slides.append(
-                    Slide(
-                        project=project,
-                        slide_number=i + 1,
-                        content=slide_content,
-                        img_url=img_url,  # Save generated image URL
-                        dominant_color=dominant_color,
-                    )
-                )
 
-            Slide.objects.bulk_create(slides)  # Bulk create for efficiency
+                # Save each slide one-by-one
+                slide_instance = Slide(
+                    project=project,
+                    slide_number=i + 1,
+                    content=slide_content,
+                    img_url=img_url,  # Save generated image URL
+                    dominant_color=dominant_color,
+                )
+                slide_instance.save()  # Save the slide one by one
 
             # Fetch the slides from the database
             saved_slides = Slide.objects.filter(project=project).order_by(
@@ -96,6 +95,7 @@ class GenerateSlideView(APIView):
             serialized_slides = SlideSerializer(
                 saved_slides, many=True
             ).data  # Serialize slides
+
         except Exception as e:
             return Response(
                 {"error": f"Failed to create slides: {str(e)}"},
