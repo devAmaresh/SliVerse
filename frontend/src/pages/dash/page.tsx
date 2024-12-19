@@ -226,7 +226,7 @@ const Page: React.FC = () => {
                 </div>
                 <div
                   className={`w-[30%] flex items-center justify-center rounded-md`}
-                  style={{ backgroundColor: currentSlide.dominant_color }}
+                  style={{ backgroundColor: currentSlide?.dominant_color }}
                 >
                   <Popover
                     title="Change the image"
