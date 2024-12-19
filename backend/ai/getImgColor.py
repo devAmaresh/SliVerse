@@ -1,7 +1,7 @@
-from PIL import Image
 import requests
 from colorthief import ColorThief
 from io import BytesIO
+from PIL import Image
 
 
 def rgb_to_hex(rgb):
@@ -11,25 +11,35 @@ def rgb_to_hex(rgb):
 
 def get_dominant_color(image_uri):
     try:
-        # Download the image with streaming to avoid holding it fully in memory
-        response = requests.get(image_uri, stream=True)
-        response.raise_for_status()  # Check for any HTTP errors
+        # Download the image from the URL
+        response = requests.get(image_uri)
+        response.raise_for_status()
 
-        # Open the image using Pillow directly from the response content
-        image = Image.open(response.raw)
+        # Open the image using PIL
+        image = Image.open(BytesIO(response.content))
 
-        # Resize the image to a smaller size to save memory (e.g., 200x200)
-        image = image.resize((200, 200))
+        # Resize the image quickly to a fixed size (e.g., 100x100) for faster processing
+        image = image.resize(
+            (100, 100), Image.Resampling.LANCZOS
+        )  # Use LANCZOS instead of ANTIALIAS
 
-        # Initialize ColorThief with the resized image
-        color_thief = ColorThief(image)
+        # Save the resized image to a BytesIO object
+        with BytesIO() as byte_io:
+            image.save(
+                byte_io, format="JPEG", quality=70
+            )  # Optional: Reduce quality for speed
+            byte_io.seek(0)  # Reset pointer to the beginning
 
-        # Get the dominant color (RGB tuple)
-        dominant_color_rgb = color_thief.get_color()
+            # Initialize ColorThief with the resized image
+            color_thief = ColorThief(byte_io)
 
-        # Convert RGB to HEX
-        dominant_color_hex = rgb_to_hex(dominant_color_rgb)
+            # Get the dominant color (RGB tuple)
+            dominant_color_rgb = color_thief.get_color()
 
+            # Convert RGB to HEX
+            dominant_color_hex = rgb_to_hex(dominant_color_rgb)
+
+        print(f"dominant_color_hex: {dominant_color_hex}")
         return dominant_color_hex
     except Exception as e:
         print(f"Error occurred: {e}")
