@@ -291,7 +291,9 @@ const Page: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <div className="w-[30%] flex items-center justify-center">
+                <div className="w-[30%] flex items-center justify-center rounded-md"
+                style={{ backgroundColor: currentSlide.dominant_color }}
+                >
                   <img
                     src={currentSlide?.img_url}
                     alt="Slide Visual"

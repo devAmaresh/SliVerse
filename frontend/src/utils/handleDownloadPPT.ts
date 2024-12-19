@@ -180,7 +180,7 @@ const handleDownloadPPT = async ({ slides, title }: any) => {
       pptSlide.addImage({
         path: slide.img_url,
         x: margin + textWidth, // Place the image next to text
-        y: margin, // Align the image vertically starting at margin
+        y: margin + 1, // Align the image vertically starting at margin
         w: imageWidth, // Set image width
         h: slideHeight * 0.5, // Set proportional height
       });
