@@ -15,6 +15,7 @@ import requests
 from dotenv import load_dotenv
 from .pexel import get_img_link
 from .getImgColor import get_dominant_color
+from django.conf import settings
 
 load_dotenv()
 
@@ -26,6 +27,7 @@ class GenerateSlideView(APIView):
         # Generate AI content based on the prompt
         prompt = request.data.get("prompt")
         num_slides = request.data.get("num_pages")
+        mode = settings.DEBUG
         if not prompt:
             return Response(
                 {"error": "Prompt is required."},
@@ -66,7 +68,9 @@ class GenerateSlideView(APIView):
                     img_url = get_img_link(img_query)
                 if img_url is None:
                     img_url = "https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"
-                dominant_color = get_dominant_color(img_url)
+                dominant_color = "#ffdbac"
+                if mode:
+                    dominant_color = get_dominant_color(img_url)
 
                 # Create Slide object with image URL
                 slide_content = {
