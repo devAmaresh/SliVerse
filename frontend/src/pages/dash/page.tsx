@@ -185,9 +185,7 @@ const Page: React.FC = () => {
           {/* Main Content */}
           <main className="flex-1 overflow-y-auto">
             {/* Navbar */}
-            <Dash_nav
-              handleThemeChange={handleThemeChange}
-            />
+            <Dash_nav handleThemeChange={handleThemeChange} />
 
             {/* Slide Content */}
             <div className={`min-h-screen p-8 ${currentTheme.text}`}>
@@ -226,7 +224,10 @@ const Page: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <div className="w-[30%] flex items-center justify-center">
+                <div
+                  className={`w-[30%] flex items-center justify-center rounded-md`}
+                  style={{ backgroundColor: currentSlide.dominant_color }}
+                >
                   <Popover
                     title="Change the image"
                     trigger="click"

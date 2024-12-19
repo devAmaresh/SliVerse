@@ -14,6 +14,7 @@ import os
 import requests
 from dotenv import load_dotenv
 from .pexel import get_img_link
+from .getImgColor import get_dominant_color
 
 load_dotenv()
 
@@ -66,7 +67,7 @@ class GenerateSlideView(APIView):
                     img_url = get_img_link(img_query)
                 if img_url is None:
                     img_url = "https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"
-
+                dominant_color = get_dominant_color(img_url)
                 # Create Slide object with image URL
                 slide_content = {
                     "style": slide.get("style", "default"),
@@ -81,6 +82,7 @@ class GenerateSlideView(APIView):
                         slide_number=i + 1,
                         content=slide_content,
                         img_url=img_url,  # Save generated image URL
+                        dominant_color=dominant_color,
                     )
                 )
 
@@ -285,8 +287,15 @@ class SlideEditView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, id, *args, **kwargs):
-        # Retrieve the slide object based on the primary key
         slide = get_object_or_404(Slide, pk=id, project__user=request.user)
+
+        # Check if 'img_url' is in the request data
+        img_url = request.data.get("img_url")
+        if img_url:
+            # Get the dominant color if the img_url is being updated
+            dominant_color = get_dominant_color(img_url)
+            if dominant_color:
+                request.data["dominant_color"] = dominant_color
 
         # Deserialize and validate input data
         serializer = SlideSerializer(slide, data=request.data, partial=True)

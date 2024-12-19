@@ -11,6 +11,7 @@ class SlideSerializer(serializers.ModelSerializer):
             "content",
             "img_url",
             "id",
+            "dominant_color",
         ]  # Include only necessary fields
 
 
@@ -37,7 +38,7 @@ class UserProfileModelSerializer(serializers.ModelSerializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    profile = UserProfileModelSerializer() 
+    profile = UserProfileModelSerializer()
 
     class Meta:
         model = User

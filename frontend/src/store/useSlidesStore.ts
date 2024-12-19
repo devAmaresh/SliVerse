@@ -18,6 +18,7 @@ interface Slide {
   img_url: string;
   slide_number: number;
   id: string;
+  dominant_color: string;
 }
 
 interface SlidesState {

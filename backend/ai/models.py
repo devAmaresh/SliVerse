@@ -52,6 +52,9 @@ class Slide(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     img_url = models.URLField(blank=True, null=True)
+    dominant_color = models.CharField(
+        max_length=7, blank=True, null=True, default="#ffdbac"
+    )
 
     class Meta:
         ordering = ["slide_number"]  # Ensure slides are always ordered by their number
