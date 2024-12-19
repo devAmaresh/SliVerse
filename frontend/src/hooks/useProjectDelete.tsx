@@ -17,7 +17,7 @@ const useProjectDelete = () => {
       const token = Cookies.get("token");
 
       const response = await axios.delete(
-        `${backend_url}/api/project/${projectId}/`,
+        `${backend_url}/api/projects/${projectId}/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

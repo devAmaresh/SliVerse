@@ -154,7 +154,7 @@ class ProjectsView(APIView):
         )
 
 
-class ProjectUpdateView(generics.UpdateAPIView):
+class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Project.objects.all()  # Use all projects as the base queryset
     serializer_class = (
