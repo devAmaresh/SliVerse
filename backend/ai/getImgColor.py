@@ -31,10 +31,3 @@ def get_dominant_color(image_uri):
         print(f"Error occurred: {e}")
         return None
 
-
-# Example usage with a URL
-image_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvkUFmp5jSF-DhrD5102bzHU7RbidetfqYfA&s"
-dominant_color = get_dominant_color(image_url)
-
-if dominant_color:
-    print("Dominant Color (Hex):", dominant_color)
