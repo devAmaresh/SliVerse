@@ -3,6 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { backend_url } from "../utils/backend";
 import useProjectStore from "../store/projectStore";
+import { message } from "antd";
 const useProjectDelete = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,9 +29,11 @@ const useProjectDelete = () => {
       if (response.status === 204) {
         setSuccess(true); // Successfully deleted
         removeProject(projectId);
+        message.success("Project deleted successfully.");
       }
     } catch (err: any) {
       setError(err.response?.data?.message || "Error deleting project.");
+      message.error("Error deleting project. Please try again later !");
     } finally {
       setLoading(false);
     }
