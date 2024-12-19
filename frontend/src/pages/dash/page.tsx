@@ -172,9 +172,9 @@ const Page: React.FC = () => {
     const themeAccentColor = currentTheme.accent_hex || "#5A5A5A";
 
     // Dimensions
-    const textWidth = 6.8; // 68% of slide width
-    const imageWidth = 3; // 30% of slide width
-    const paddingX = 0.2; // Horizontal padding
+    const padding = 0.3; // 30px padding in inches
+    const textWidth = 6.8 - 2 * padding; // Adjusted for horizontal padding
+    const imageWidth = 3; // Image width remains constant
     const listItemPadding = 0.2; // Padding between each list item
 
     slides.forEach((slide: any, _idx: number) => {
@@ -186,8 +186,8 @@ const Page: React.FC = () => {
       // Add Slide Heading
       if (slide?.content?.heading) {
         pptSlide.addText(slide.content.heading, {
-          x: 0.5,
-          y: 0.3,
+          x: 0.5 + padding,
+          y: 0.3 + padding,
           fontSize: 28,
           bold: true,
           color: themeAccentColor,
@@ -196,16 +196,17 @@ const Page: React.FC = () => {
       }
 
       const body = slide?.content?.body?.points || [];
-      let textStartY = 1; // Initial Y position for text content
+      let textStartY = 1 + padding; // Initial Y position for text content with padding
 
       // Handle Double Column Layout
       if (slide?.content?.style === "double_column") {
         body.forEach((column: any, colIdx: number) => {
-          const colX = colIdx === 0 ? 0.5 : textWidth / 2 + 0.5;
+          const colX =
+            colIdx === 0 ? 0.5 + padding : textWidth / 2 + 0.5 + padding;
 
           pptSlide.addText(column?.heading || "", {
             x: colX,
-            y: 1.5,
+            y: 1.5 + padding,
             fontSize: 20,
             bold: true,
             color: themeAccentColor,
@@ -214,7 +215,7 @@ const Page: React.FC = () => {
           column.points?.forEach((point: string, pointIdx: number) => {
             pptSlide.addText(`• ${point}`, {
               x: colX,
-              y: 2 + pointIdx * (0.5 + listItemPadding),
+              y: 2 + pointIdx * (0.5 + listItemPadding) + padding,
               fontSize: 16,
               color: themeTextColor,
             });
@@ -231,14 +232,14 @@ const Page: React.FC = () => {
 
           pptSlide.addImage({
             path: `https://img.icons8.com/color/${iconMatch}.png`,
-            x: 0.5,
+            x: 0.5 + padding,
             y: yPosition,
             w: 0.7,
             h: 0.7,
           });
 
           pptSlide.addText(text, {
-            x: 1.5,
+            x: 1.5 + padding,
             y: yPosition + 0.2,
             fontSize: 18,
             color: themeTextColor,
@@ -254,14 +255,14 @@ const Page: React.FC = () => {
 
           pptSlide.addImage({
             path: `https://img.icons8.com/color/${idx + 1}.png`,
-            x: 0.5,
+            x: 0.5 + padding,
             y: yPosition,
             w: 0.7,
             h: 0.7,
           });
 
           pptSlide.addText(point, {
-            x: 1.5,
+            x: 1.5 + padding,
             y: yPosition + 0.2,
             fontSize: 18,
             color: themeTextColor,
@@ -274,7 +275,7 @@ const Page: React.FC = () => {
       else {
         body.forEach((point: string, pointIdx: number) => {
           pptSlide.addText(`• ${point}`, {
-            x: 0.5,
+            x: 0.5 + padding,
             y: textStartY + pointIdx * (0.5 + listItemPadding),
             fontSize: 18,
             color: themeTextColor,
@@ -287,8 +288,8 @@ const Page: React.FC = () => {
       if (slide?.img_url) {
         pptSlide.addImage({
           path: slide.img_url,
-          x: textWidth + paddingX, // Place the image after text width + padding
-          y: 1, // Align the image vertically starting at 1 inch
+          x: textWidth + padding + padding, // Place the image after text width + padding
+          y: 1 + padding, // Align the image vertically starting at 1 inch
           w: imageWidth, // Set image width
           h: 3, // Set a fixed height
         });
