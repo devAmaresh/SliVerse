@@ -23,7 +23,7 @@ const Dashboard = () => {
         const response = await axios.get(`${backend_url}/api/projects/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log("Fetched Slides:", response.data);
+
         setProject(response.data);
       } catch (err) {
         console.error("Error fetching slides:", err);

@@ -13,17 +13,9 @@ import { useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { backend_url } from "../utils/backend";
-const dash_nav = ({
-  handleThemeChange,
-  download_ppt,
-  loading_ppt,
-}: {
-  handleThemeChange: any;
-  download_ppt: any;
-  loading_ppt: boolean;
-}) => {
+import handleDownloadPPT from "../utils/handleDownloadPPT";
+const dash_nav = ({ handleThemeChange }: { handleThemeChange: any }) => {
   const { Paragraph, Text } = Typography;
-  const title = useSlidesStore((state: any) => state.title);
   const [open, setOpen] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const navigate = useNavigate();
@@ -34,7 +26,19 @@ const dash_nav = ({
   const [confirmLoading, setConfirmLoading] = useState(false);
   const { is_public, setPublic } = useSlidesStore();
   const token = Cookies.get("token");
-
+  const [isPptLoading, setPptLoading] = useState(false);
+  const { slides, title } = useSlidesStore();
+  const handleDownload = async () => {
+    setPptLoading(true);
+    try {
+      await handleDownloadPPT({ slides, title });
+    } catch (error) {
+      messageApi.error("Error downloading PPT");
+      console.log(error);
+    } finally {
+      setPptLoading(false);
+    }
+  };
   const handleOk = async () => {
     setConfirmLoading(true);
     try {
@@ -169,10 +173,10 @@ const dash_nav = ({
             Present
           </Button>
           <Button
-            onClick={download_ppt}
+            onClick={handleDownload}
             icon={<DownloadOutlined />}
-            disabled={loading_ppt}
-            loading={loading_ppt}
+            disabled={isPptLoading}
+            loading={isPptLoading}
           >
             PPT
           </Button>

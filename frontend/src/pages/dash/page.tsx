@@ -10,12 +10,12 @@ import Cookies from "js-cookie";
 import { backend_url } from "../../utils/backend";
 import { Popover, Spin } from "antd";
 import ImgChange from "../../components/imgChange";
-import pptxgen from "pptxgenjs";
+
 type ThemeName = keyof typeof themes;
 
 const Page: React.FC = () => {
   const { id } = useParams(); // Fetch the project ID from the URL params
-  const { slides, setSlides, setTitle, title, setPublic } = useSlidesStore(); // Zustand Store
+  const { slides, setSlides, setTitle, setPublic } = useSlidesStore(); // Zustand Store
   const [loading, setLoading] = useState(true); // Track loading state
   const [error, setError] = useState<string | null>(null); // Track error state
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -159,153 +159,6 @@ const Page: React.FC = () => {
       </>
     );
   };
-  const [loadingPPT, setLoadingPPT] = useState(false);
-  const handleDownloadPPT = () => {
-    setLoadingPPT(true);
-    const pptx = new pptxgen();
-    pptx.author = "Sliverse";
-    pptx.company = "Sliverse";
-    pptx.title = `${title}`;
-
-    // Define current theme colors dynamically
-    const themeTextColor = currentTheme.text_hex || "#3B3B3B";
-    const themeAccentColor = currentTheme.accent_hex || "#5A5A5A";
-
-    // Dimensions
-    const padding = 0.3; // 30px padding in inches
-    const textWidth = 6.8 - 2 * padding; // Adjusted for horizontal padding
-    const imageWidth = 3; // Image width remains constant
-    const listItemPadding = 0.2; // Padding between each list item
-
-    slides.forEach((slide: any, _idx: number) => {
-      const pptSlide = pptx.addSlide();
-
-      // Set slide background
-      pptSlide.background = { fill: currentTheme.background_hex };
-
-      // Add Slide Heading
-      if (slide?.content?.heading) {
-        pptSlide.addText(slide.content.heading, {
-          x: 0.5 + padding,
-          y: 0.3 + padding,
-          fontSize: 28,
-          bold: true,
-          color: themeAccentColor,
-          w: textWidth, // Constrain heading width
-        });
-      }
-
-      const body = slide?.content?.body?.points || [];
-      let textStartY = 1 + padding; // Initial Y position for text content with padding
-
-      // Handle Double Column Layout
-      if (slide?.content?.style === "double_column") {
-        body.forEach((column: any, colIdx: number) => {
-          const colX =
-            colIdx === 0 ? 0.5 + padding : textWidth / 2 + 0.5 + padding;
-
-          pptSlide.addText(column?.heading || "", {
-            x: colX,
-            y: 1.5 + padding,
-            fontSize: 20,
-            bold: true,
-            color: themeAccentColor,
-          });
-
-          column.points?.forEach((point: string, pointIdx: number) => {
-            pptSlide.addText(`• ${point}`, {
-              x: colX,
-              y: 2 + pointIdx * (0.5 + listItemPadding) + padding,
-              fontSize: 16,
-              color: themeTextColor,
-            });
-          });
-        });
-      }
-
-      // Handle Icon Slide Layout
-      else if (slide?.content?.style === "icon") {
-        body.forEach((point: string, idx: number) => {
-          const iconMatch = point.match(/\[\[(.*?)\]\]/)?.[1] || "idea";
-          const text = point.replace(/\[\[(.*?)\]\]/, "").trim();
-          const yPosition = textStartY + idx * (1 + listItemPadding);
-
-          pptSlide.addImage({
-            path: `https://img.icons8.com/color/${iconMatch}.png`,
-            x: 0.5 + padding,
-            y: yPosition,
-            w: 0.7,
-            h: 0.7,
-          });
-
-          pptSlide.addText(text, {
-            x: 1.5 + padding,
-            y: yPosition + 0.2,
-            fontSize: 18,
-            color: themeTextColor,
-            w: textWidth - 1.5,
-          });
-        });
-      }
-
-      // Handle Sequential Slide Layout
-      else if (slide?.content?.style === "sequential") {
-        body.forEach((point: string, idx: number) => {
-          const yPosition = textStartY + idx * (1 + listItemPadding);
-
-          pptSlide.addImage({
-            path: `https://img.icons8.com/color/${idx + 1}.png`,
-            x: 0.5 + padding,
-            y: yPosition,
-            w: 0.7,
-            h: 0.7,
-          });
-
-          pptSlide.addText(point, {
-            x: 1.5 + padding,
-            y: yPosition + 0.2,
-            fontSize: 18,
-            color: themeTextColor,
-            w: textWidth - 1.5,
-          });
-        });
-      }
-
-      // Handle Default Layout
-      else {
-        body.forEach((point: string, pointIdx: number) => {
-          pptSlide.addText(`• ${point}`, {
-            x: 0.5 + padding,
-            y: textStartY + pointIdx * (0.5 + listItemPadding),
-            fontSize: 18,
-            color: themeTextColor,
-            w: textWidth,
-          });
-        });
-      }
-
-      // Add Slide Image to the remaining 30% area
-      if (slide?.img_url) {
-        pptSlide.addImage({
-          path: slide.img_url,
-          x: textWidth + padding + padding, // Place the image after text width + padding
-          y: 1 + padding, // Align the image vertically starting at 1 inch
-          w: imageWidth, // Set image width
-          h: 3, // Set a fixed height
-        });
-      }
-    });
-
-    // Save the presentation
-    pptx
-      .writeFile({ fileName: `${title}.pptx` })
-      .then(() => {
-        setLoadingPPT(false);
-      })
-      .catch(() => {
-        setLoadingPPT(false);
-      });
-  };
 
   return (
     <div className="flex h-screen">
@@ -334,8 +187,6 @@ const Page: React.FC = () => {
             {/* Navbar */}
             <Dash_nav
               handleThemeChange={handleThemeChange}
-              download_ppt={handleDownloadPPT}
-              loading_ppt={loadingPPT}
             />
 
             {/* Slide Content */}
