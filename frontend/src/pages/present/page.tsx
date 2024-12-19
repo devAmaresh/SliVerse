@@ -117,7 +117,7 @@ const Page: React.FC = () => {
   const renderBulletPoint = (point: any, idx: number) => {
     if (typeof point === "string") {
       return (
-        <li key={idx} className="mb-2 text-lg py-4">
+        <li key={idx} className="mb-2 md:text-lg lg:text-2xl py-6">
           <Markdown>{point}</Markdown>
         </li>
       );
@@ -126,8 +126,8 @@ const Page: React.FC = () => {
     if (typeof point === "object" && point.heading) {
       return (
         <div key={idx} className="ml-4">
-          <div className="font-semibold text-lg">{point.heading}</div>
-          <ul className="list-disc pl-6 text-lg">
+          <div className="font-semibold md:text-lg lg:text-2xl">{point.heading}</div>
+          <ul className="list-disc pl-6 md:text-lg lg:text-2xl">
             {point.points?.map((nestedPoint: any, nestedIdx: number) =>
               renderBulletPoint(nestedPoint, nestedIdx)
             )}
@@ -145,8 +145,8 @@ const Page: React.FC = () => {
       <div className="grid grid-cols-2 gap-6">
         {columns.map((column, idx) => (
           <div key={idx}>
-            <h3 className="font-semibold text-lg mb-2">{column.heading}</h3>
-            <ul className="list-disc pl-6 text-lg">
+            <h3 className="font-semibold md:text-lg lg:text-2xl mb-2">{column.heading}</h3>
+            <ul className="list-disc pl-6 md:text-lg lg:text-2xl">
               {column.points?.map((point: any, pointIdx: number) =>
                 renderBulletPoint(point, pointIdx)
               )}
@@ -164,7 +164,7 @@ const Page: React.FC = () => {
         {points.map((point, idx) => (
           <div
             key={idx}
-            className="flex items-start space-x-2 rounded-md p-3"
+            className="flex space-x-2 rounded-md p-3"
             style={{
               boxShadow: `2px 2px 2px 2px rgba(0, 0, 0, 0.1)`,
             }}
@@ -183,7 +183,7 @@ const Page: React.FC = () => {
               />
             </span>
 
-            <p className="text-lg">
+            <p className="md:text-lg lg:text-2xl flex-1">
               <Markdown>{point.replace(/\[\[(.*?)\]\]/, "").trim()}</Markdown>
             </p>
           </div>
@@ -197,7 +197,7 @@ const Page: React.FC = () => {
       <>
         <ul className="list-disc pl-6">
           {points?.map((point, idx) => (
-            <div key={idx} className="mb-2 text-lg flex space-x-2 items-center">
+            <div key={idx} className="mb-2 md:text-lg lg:text-2xl flex space-x-2 items-center pb-3">
               <div className="w-14 h-14 bg-zinc-100 rounded-lg flex items-center justify-center">
                 <img
                   src={`https://img.icons8.com/color/${idx + 1}.png`}
@@ -259,7 +259,7 @@ const Page: React.FC = () => {
                 <div className="flex-[68%] pr-4">
                   {/* Slide Heading */}
                   <div
-                    className={`text-4xl font-semibold mb-6 ${currentTheme.accent}`}
+                    className={`md:text-4xl lg:text-6xl font-semibold mb-6 ${currentTheme.accent}`}
                   >
                     {currentSlide?.content?.heading ||
                       `Slide ${currentSlideIndex + 1}`}
