@@ -176,10 +176,21 @@ const handleDownloadPPT = async ({ slides, title }: any) => {
     }
 
     // Add Slide Image to the remaining area
+    // Add Slide Image to the remaining area (30% section)
     if (slide?.img_url) {
+      // Set the background color of the image container to the dominant color
+      pptSlide.addShape("rect", {
+        x: margin + textWidth, // Position next to the text
+        y: margin, // Align vertically with the margin
+        w: imageWidth, // Set width of the image container
+        h: slideHeight, // Set proportional height
+        fill: { color: slide.dominant_color }, // Set background color to dominant color
+      });
+
+      // Add the image on top of the colored background
       pptSlide.addImage({
         path: slide.img_url,
-        x: margin + textWidth, // Place the image next to text
+        x: margin + textWidth, // Position next to the text
         y: margin + 1, // Align the image vertically starting at margin
         w: imageWidth, // Set image width
         h: slideHeight * 0.5, // Set proportional height
