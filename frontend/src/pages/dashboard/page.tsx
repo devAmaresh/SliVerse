@@ -1,5 +1,5 @@
 // Dashboard.tsx
-import { Search, Filter } from "lucide-react";
+// import { Search, Filter } from "lucide-react";
 import PresentationCard from "../../components/PresentationCard";
 import Cookies from "js-cookie";
 import { message, Skeleton } from "antd";
@@ -47,7 +47,7 @@ const Dashboard = () => {
               My Presentations
             </div>
             <div className="flex items-center gap-4">
-              <div className="relative">
+              {/* <div className="relative">
                 <Search className="w-5 h-5 text-zinc-400 dark:text-zinc-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
                 <input
                   type="text"
@@ -58,7 +58,7 @@ const Dashboard = () => {
               <button className="flex items-center gap-2 px-4 py-2 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700">
                 <Filter className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
                 Filter
-              </button>
+              </button> */}
             </div>
           </div>
 
