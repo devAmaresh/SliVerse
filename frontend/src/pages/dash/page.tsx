@@ -143,14 +143,14 @@ const Page: React.FC = () => {
         <ul className="list-disc pl-6">
           {points?.map((point, idx) => (
             <div key={idx} className="mb-2 text-lg flex space-x-2 items-center">
-              <div className="w-14 h-14 bg-zinc-100 rounded-lg flex items-center justify-center">
+              <div className="w-[52px] h-[52px] flex-shrink-0 bg-zinc-100 rounded-lg flex items-center justify-center">
                 <img
                   src={`https://img.icons8.com/color/${idx + 1}.png`}
                   alt="icon"
                   className="w-full h-full object-center object-contain"
                 />
               </div>
-              <div>
+              <div className="flex-1">
                 <Markdown>{point}</Markdown>
               </div>
             </div>
