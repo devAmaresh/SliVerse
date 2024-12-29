@@ -1,5 +1,5 @@
 import { Button, Modal, Tag, Tooltip } from "antd";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import "./sidebar.css";
 import { PlusOutlined } from "@ant-design/icons";
@@ -8,7 +8,6 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import { backend_url } from "../utils/backend";
-// import useTheme from "../store/theme";
 
 interface SidebarProps {
   slides: any[];
@@ -26,6 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
   const { id } = useParams();
   const token = Cookies.get("token");
+
   // Scroll the current slide into view whenever it changes
   useEffect(() => {
     const currentSlideElement = slideRefs.current[currentSlideIndex];
@@ -37,9 +37,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [currentSlideIndex]);
 
-  // Key controls for navigating slides
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
+  // Use useCallback to prevent unnecessary re-renders of this function
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
       if (event.key === "ArrowUp") {
         const previousIndex = Math.max(currentSlideIndex - 1, 0);
         handleSlideChange(previousIndex);
@@ -47,13 +47,17 @@ const Sidebar: React.FC<SidebarProps> = ({
         const nextIndex = Math.min(currentSlideIndex + 1, slides.length - 1);
         handleSlideChange(nextIndex);
       }
-    };
+    },
+    [currentSlideIndex, slides.length, handleSlideChange]
+  );
 
+  // Attach event listener only once and clean up properly
+  useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [currentSlideIndex, slides.length, handleSlideChange]);
+  }, [handleKeyDown]);
 
   const [open, setOpen] = useState(false);
 
