@@ -60,7 +60,7 @@ const AddSlide: React.FC = () => {
     try {
       setLoading(true);
       const response = await axios.post(
-        `${backend_url}/api/add-slide/b6bad314-cb64-434e-a19f-06c6f22f11ba/`,
+        `${backend_url}/api/add-slide/${id}/`,
         { title: selectedTitle },
         {
           headers: {
