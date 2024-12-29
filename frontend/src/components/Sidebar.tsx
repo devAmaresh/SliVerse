@@ -1,7 +1,9 @@
 // src/components/Sidebar.tsx
-import { Tag } from "antd";
-import React, { useEffect, useRef } from "react";
+import { Button, Modal, Tag, Tooltip } from "antd";
+import React, { useEffect, useRef, useState } from "react";
 import "./sidebar.css";
+import { PlusOutlined } from "@ant-design/icons";
+import AddSlide from "./AddSlide";
 // import useTheme from "../store/theme";
 interface SidebarProps {
   slides: any[];
@@ -45,49 +47,81 @@ const Sidebar: React.FC<SidebarProps> = ({
     };
   }, [currentSlideIndex, slides.length, handleSlideChange]);
   // const theme = useTheme((state: any) => state.theme);
+  const [open, setOpen] = useState(false);
+
+  const showModal = () => {
+    setOpen(true);
+  };
+
+  const hideModal = () => {
+    setOpen(false);
+  };
+
   return (
     <aside
-      className={`w-1/4 bg-gray-100 dark:bg-stone-800 overflow-y-auto mt-[70px] custom-sidebar mb-3 rounded-br-lg rounded-tr-lg`}
+      className={`w-1/4 bg-gray-100 dark:bg-stone-800 flex flex-col mt-[70px] mb-3 rounded-br-lg rounded-tr-lg`}
     >
-      <div className="p-4">
-        <div className="space-y-4">
-          {slides.map((slide, index) => (
-            <div
-              key={index}
-              ref={(el) => (slideRefs.current[index] = el)}
-              className={`p-4 rounded-lg shadow cursor-pointer flex items-center ${
-                index === currentSlideIndex
-                  ? "bg-zinc-200 dark:bg-neutral-900 border border-indigo-500"
-                  : "bg-white dark:bg-stone-700"
-              }`}
-              onClick={() => handleSlideChange(index)}
-            >
-              {/* Slide Number with fixed width */}
-              <div className="mr-2">
-                <Tag color="lime" className="text-center">
-                  {index + 1}
-                </Tag>
-              </div>
+      {/* Scrollable Slide List */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-sidebar ">
+        {slides.map((slide, index) => (
+          <div
+            key={index}
+            ref={(el) => (slideRefs.current[index] = el)}
+            className={`p-4 rounded-lg shadow cursor-pointer flex items-center ${
+              index === currentSlideIndex
+                ? "bg-zinc-200 dark:bg-neutral-900 border border-indigo-500"
+                : "bg-white dark:bg-stone-700"
+            }`}
+            onClick={() => handleSlideChange(index)}
+          >
+            {/* Slide Number with fixed width */}
+            <div className="mr-2">
+              <Tag color="lime" className="text-center">
+                {index + 1}
+              </Tag>
+            </div>
 
-              {/* Slide Content */}
-              <div className="flex-1 truncate text-ellipsis">
-                <div className="text-sm font-medium mb-2 text-gray-900 dark:text-gray-200">
-                  {slide?.content?.heading || `Slide ${index + 1}`}
-                </div>
-                <div
-                  className="text-xs text-gray-600 dark:text-gray-400"
-                  style={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {slide?.content?.key_message || "No content available"}
-                </div>
+            {/* Slide Content */}
+            <div className="flex-1 truncate text-ellipsis">
+              <div className="text-sm font-medium mb-2 text-gray-900 dark:text-gray-200">
+                {slide?.content?.heading || `Slide ${index + 1}`}
+              </div>
+              <div
+                className="text-xs text-gray-600 dark:text-gray-400"
+                style={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {slide?.content?.key_message || "No content available"}
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Add Slide Button */}
+      <div className="p-4 pt-2 text-center">
+        <Tooltip title="Add Slide" placement="right">
+          <Button
+            type="dashed"
+            onClick={showModal}
+            className=""
+            icon={<PlusOutlined />}
+          />
+        </Tooltip>
+        <Modal
+          title="Add Slide"
+          open={open}
+          onOk={hideModal}
+          onCancel={hideModal}
+          footer={false}
+          width={1000}
+          destroyOnClose
+        >
+          <AddSlide />
+        </Modal>
       </div>
     </aside>
   );

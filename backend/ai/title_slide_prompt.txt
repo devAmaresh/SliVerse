@@ -1,0 +1,13 @@
+I am creating a presentation titled "{presentation_title}". 
+            These are the existing slide titles: {existing_titles}.
+            Suggest 5-10 new slide titles that would complement the current slides. 
+            Please output the response in the following JSON format:
+            ```json
+            {
+                "slide_titles": [
+                    "New Title 1",
+                    "New Title 2",
+                    "New Title 3",
+                    ...
+                ]
+            }

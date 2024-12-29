@@ -7,6 +7,8 @@ from .views import (
     SlideEditView,
     ProjectRetrieveUpdateDestroyView,
     UserProfileView,
+    AddSlideView,
+    GenerateSlideTitleView,
 )
 from django.urls import include
 
@@ -22,4 +24,15 @@ urlpatterns = [
     path("google-auth/", GoogleAuthView.as_view(), name="google_auth"),
     path("slide-edit/<int:id>/", SlideEditView.as_view(), name="slide_edit"),
     path("user-profile/", UserProfileView.as_view(), name="user_profile"),
+    path(
+        "generate-title-slide/",
+        GenerateSlideTitleView.as_view(),
+        name="generate_title_slide",
+    ),
+    path("add-slide/<uuid:pk>/", AddSlideView.as_view(), name="add_slide"),
+    path(
+        "suggest-slide-title/<uuid:pk>/",
+        GenerateSlideTitleView.as_view(),
+        name="suggest_slide_title",
+    ),
 ]

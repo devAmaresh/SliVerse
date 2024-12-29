@@ -2,7 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
 from django.shortcuts import get_object_or_404
-from .gemini import generate_ai_content
+from .gemini import (
+    generate_ai_content,
+    generate_ai_content_slide,
+    generate_ai_title_slide,
+)
 import json
 from .models import Project, Slide, UserProfile
 from .serializers import SlideSerializer, ProjectSerializer, UserProfileSerializer
@@ -319,3 +323,125 @@ class UserProfileView(generics.RetrieveDestroyAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class AddSlideView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        project_id = pk
+        prompt = request.data.get("title")  # User-provided text for the new slide
+        mode = settings.DEBUG
+
+        # Validate inputs
+        if not project_id or not prompt:
+            return Response(
+                {"error": "Both 'project_id' and 'prompt' are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Fetch the project
+            project = Project.objects.get(id=project_id, user=request.user)
+            project_title = project.title
+            response = generate_ai_content_slide(prompt, project_title)
+            slide_data = response
+            # Fetch the last slide number
+            last_slide = (
+                Slide.objects.filter(project=project).order_by("-slide_number").first()
+            )
+            next_slide_number = (last_slide.slide_number if last_slide else 0) + 1
+
+            # Generate image for the slide
+            img_url = None
+            img_keywords = slide_data.get("img_keywords", [])
+            if img_keywords:
+                img_query = " ".join(img_keywords)
+                img_url = get_img_link(img_query)
+            if img_url is None:
+                img_url = "https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"
+            dominant_color = "#ffdbac"
+            if mode:
+                dominant_color = get_dominant_color(img_url)
+
+            # Save the new slide
+            slide_instance = Slide(
+                project=project,
+                slide_number=next_slide_number,
+                content=slide_data,
+                img_url=img_url,
+                dominant_color=dominant_color,
+            )
+            slide_instance.save()
+
+            # Serialize and return the updated slides
+            updated_slides = Slide.objects.filter(project=project).order_by(
+                "slide_number"
+            )
+            serialized_slides = SlideSerializer(updated_slides, many=True).data
+
+            return Response(
+                {"message": "Slide added successfully.", "slides": serialized_slides},
+                status=status.HTTP_200_OK,
+            )
+
+        except Project.DoesNotExist:
+            return Response(
+                {"error": "Project not found or access denied."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to add slide: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class GenerateSlideTitleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            # Fetch project by ID
+            project = Project.objects.get(id=pk, user=request.user)
+            project_title = project.title
+
+            # Extract existing slide titles
+            existing_slides = Slide.objects.filter(project=project).order_by(
+                "slide_number"
+            )
+            existing_titles = [
+                slide.content.get("heading", "") for slide in existing_slides
+            ]
+
+            response = generate_ai_title_slide(project_title, existing_titles)
+
+            # Parse the response and ensure it's in valid JSON format
+            try:
+                slide_titles_data = json.loads(response)
+                if "slide_titles" not in slide_titles_data:
+                    raise ValueError("Missing 'slide_titles' key in AI response.")
+            except (json.JSONDecodeError, ValueError) as e:
+                return Response(
+                    {"error": "Failed to parse AI response. Invalid format."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Return the generated slide titles
+            return Response(
+                {"slide_titles": slide_titles_data["slide_titles"]},
+                status=status.HTTP_200_OK,
+            )
+
+        except Project.DoesNotExist:
+            return Response(
+                {
+                    "error": "Project not found or you do not have permission to access it."
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"An unexpected error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
