@@ -16,7 +16,7 @@ const AddSlide: React.FC = () => {
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
   const token = Cookies.get("token");
 
-  const { setSlides, setTitle, setPublic } = useSlideStore();
+  const { setSlides } = useSlideStore();
 
   // Fetch suggested slide titles
   const fetchSlideTitles = async () => {
@@ -73,8 +73,6 @@ const AddSlide: React.FC = () => {
 
       // Update Zustand store
       setSlides(data.slides);
-      setTitle(data.title);
-      setPublic(data.is_public);
 
       message.success("Slide generated successfully!");
       setCurrentStep(3); // Move to confirmation
