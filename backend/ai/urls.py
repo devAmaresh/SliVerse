@@ -9,6 +9,7 @@ from .views import (
     UserProfileView,
     AddSlideView,
     GenerateSlideTitleView,
+    ReorderSlidesView,
 )
 from django.urls import include
 
@@ -34,5 +35,10 @@ urlpatterns = [
         "suggest-slide-title/<uuid:pk>/",
         GenerateSlideTitleView.as_view(),
         name="suggest_slide_title",
+    ),
+    path(
+        "project/<uuid:project_id>/reorder-slides/",
+        ReorderSlidesView.as_view(),
+        name="reorder-slides",
     ),
 ]

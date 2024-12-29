@@ -20,6 +20,7 @@ from dotenv import load_dotenv
 from .pexel import get_img_link
 from .getImgColor import get_dominant_color
 from django.conf import settings
+from django.db import transaction
 
 load_dotenv()
 
@@ -445,3 +446,45 @@ class GenerateSlideTitleView(APIView):
                 {"error": f"An unexpected error occurred: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class ReorderSlidesView(APIView):
+    permission_classes = [IsAuthenticated] 
+
+    def post(self, request, project_id):
+        # Get the project
+        try:
+            project = Project.objects.get(id=project_id, user=request.user)
+        except Project.DoesNotExist:
+            return Response(
+                {"detail": "Project not found or you don't have access to it."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Extract the new order of slide IDs from the request
+        new_order = request.data.get("new_order")
+        if not new_order or len(new_order) != len(project.slides.all()):
+            return Response(
+                {"detail": "Invalid slide order."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Begin a transaction to update the slides atomically
+        with transaction.atomic():
+            # For each slide in the new order, update the slide_number
+            for index, slide_id in enumerate(new_order):
+                try:
+                    slide = Slide.objects.get(id=slide_id, project=project)
+                    slide.slide_number = (
+                        index + 1
+                    )  # Set the slide number based on the new order
+                    slide.save()
+                except Slide.DoesNotExist:
+                    return Response(
+                        {"detail": f"Slide with ID {slide_id} not found."},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+
+        # Return success response
+        return Response(
+            {"detail": "Slides reordered successfully."}, status=status.HTTP_200_OK
+        )

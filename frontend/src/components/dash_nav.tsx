@@ -1,4 +1,12 @@
-import { Button, Input, message, Modal, Select, Typography } from "antd";
+import {
+  Button,
+  Input,
+  message,
+  Modal,
+  Select,
+  Tooltip,
+  Typography,
+} from "antd";
 import {
   DownloadOutlined,
   LinkOutlined,
@@ -93,8 +101,10 @@ const dash_nav = ({ handleThemeChange }: { handleThemeChange: any }) => {
           />
 
           <ChevronRight size={24} color="gray" className="mr-4" />
-          <div className="text-sm tracking-wide dark:text-zinc-300">
-            {title}
+          <div className="text-sm tracking-wide dark:text-zinc-300 max-w-44 lg:max-w-80 text-ellipsis truncate">
+            <Tooltip title={title} trigger={["click"]}>
+              {title}
+            </Tooltip>
           </div>
         </div>
         <div className="flex items-center space-x-4">

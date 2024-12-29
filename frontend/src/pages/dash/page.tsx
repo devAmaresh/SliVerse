@@ -159,6 +159,9 @@ const Page: React.FC = () => {
       </>
     );
   };
+  const handleReorderSlides = (newSlides: any[]) => {
+    setSlides(newSlides);
+  };
 
   return (
     <div className="flex h-screen">
@@ -180,6 +183,7 @@ const Page: React.FC = () => {
             slides={slides}
             currentSlideIndex={currentSlideIndex}
             handleSlideChange={handleSlideChange}
+            handleReorderSlides={handleReorderSlides}
           />
 
           {/* Main Content */}
