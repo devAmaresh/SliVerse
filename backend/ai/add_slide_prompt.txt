@@ -94,7 +94,10 @@ Include:
 - **Body**: Detailed bullet points or comparison, depending on the style.  
 - **Key Message**: A one-line summary of the main idea of the slide.  
 - **Image Keywords**: Relevant keywords to assist with generating a visual representation of the slide.
-- For each slide minimum of 3 bullet points and maximum of 4 bullet points.
+**Important Guidelines**
+- Ensure no more than 3 to 4 points in the slide.
+- Ensure the points are concise, crisp, short, and to the point.
+- Each point should clearly communicate the slide’s core message in a brief and efficient manner.
 Analyze the context of the new slide and **choose the style that fits best**.
 ### Output:
   ```json
