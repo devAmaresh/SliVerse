@@ -111,7 +111,6 @@ const Page = () => {
           type="default"
           icon={<Home strokeWidth="1" size={19} />}
           onClick={() => navigate("/dashboard")}
-          className="text-white bg-transparent hover:bg-gray-700"
         >
           Home
         </Button>
