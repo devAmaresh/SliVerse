@@ -77,11 +77,12 @@ const Page = () => {
 
   const handleGenerateSlides = async () => {
     setLoading(true);
-    if (slideTitles.map((title) => title.trim() === "")) {
+    if (slideTitles.some((title) => title.trim() === "")) {
       messageApi.error("Slide titles cannot be empty");
       setLoading(false);
       return;
     }
+
     try {
       const response = await axios.post(
         `${backend_url}/api/generate-slide/${id}/`,
@@ -183,7 +184,7 @@ const Page = () => {
                     updatedTitles[index] = e.target.value;
                     setSlideTitles(updatedTitles);
                   }}
-                 className="p-2"
+                  className="p-2"
                   placeholder={`Enter title for Slide ${index + 1}`}
                 />
               </div>
