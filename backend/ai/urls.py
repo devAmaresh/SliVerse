@@ -10,11 +10,13 @@ from .views import (
     AddSlideView,
     GenerateSlideTitleView,
     ReorderSlidesView,
+    ProjectOutlineView,
 )
 from django.urls import include
 
 urlpatterns = [
-    path("generate_slide/", GenerateSlideView.as_view(), name="generate_slide"),
+    path("generate-slide/<uuid:pk>/", GenerateSlideView.as_view(), name="generate_slide"),
+    path("generate-outline/", ProjectOutlineView.as_view(), name="generate_outline"),
     path("projects/", ProjectsListView.as_view(), name="projects"),
     path("project/<uuid:project_id>/", ProjectsView.as_view(), name="project_slides"),
     path(

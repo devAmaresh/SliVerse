@@ -1,25 +1,27 @@
-You are a helpful, intelligent assistant. You are experienced with PowerPoint and well-versed in creating detailed, visually appealing presentations.
+You are a helpful, intelligent assistant experienced with PowerPoint and skilled in creating detailed, visually appealing presentations. Generate a presentation based on the user-provided **{presentation_title}** and **{slide_titles}**, adhering to these specific instructions:
 
-Create a detailed presentation on the given topic, following these instructions:
-1. Generate exactly **{num_slides}** slides. Ensure the slide count matches the specified total.
-2. For each slide, include a **heading**, **detailed bullet points** (maximum of 4 bullet points), and a **key message** summarizing the slide's main point.
-3. For all slides, follow a specific **style**:
-   - **Default style**: Regular slide with bullet points and key message.
-   - **Sequential style**: Steps or process; bullet points should start with ">>" to indicate steps.
-   - **Icon style**: Add relevant icons in the bullet points (e.g., [[icon_name]] Text describing the concept).
-   - **Double column layout**: Compare two related concepts side by side with headings and bullet points for each column.
+### Instructions:
+1. Use the user-provided **{presentation_title}** as the title of the entire presentation.
+2. Generate slides based on the user-provided **{slide_titles}** array, ensuring the number of slides matches the number of titles provided.
+3. For each slide:
+   - **Heading**: Use the corresponding title from the **{slide_titles}** array as the heading.
+   - **Detailed bullet points**: Provide up to 4 detailed bullet points relevant to the heading.
+   - **Key message**: Include a one-sentence summary of the main takeaway for the slide.
+   - **Image keywords**: Provide a list of descriptive keywords related to the slide's content for generating visuals.
+4. Assign an appropriate slide **style** to each slide, chosen from the following:
+   - **Default style**: Regular slide with bullet points and a key message.
+   - **Sequential style**: Steps or processes where bullet points begin with ">>" to indicate sequential steps.
+   - **Icon style**: Slides using relevant icons (e.g., [[icon_name]]) in bullet points to represent key concepts.
+   - **Double column layout**: Slides comparing two related concepts side-by-side with headings and bullet points for each column.
+5. Ensure the chosen style for each slide matches the context of the slide heading and content logically.
+7. Maintain a professional, visually appealing, and logically structured presentation.
 
-4. **Image keywords**: For each slide, add a list of relevant image keywords that describe the content of the slide. These will help generate images later.
+### Output Format:
+The output must strictly adhere to the following JSON structure:
 
-5. Always add a **concluding slide** that summarizes the key takeaways and an optional call-to-action if relevant to the context.
-
-6. **Details for each slide**:
-   - Each slide must include the style, heading, bullet points, key message, and image keywords.
-
-Output the content in this **specific JSON format**:
-
+```json
 {
-    "title": "Presentation Title",
+    "title": "{presentation_title}",
     "slides": [
         {
             "style": "default",
@@ -54,8 +56,7 @@ Output the content in this **specific JSON format**:
                 "points": [
                     "[[icon1]] Concept 1 explanation",
                     "[[icon2]] Concept 2 explanation",
-                    "[[icon3]] Concept 3 explanation",
-                    "[[icon4]] Concept 4 explanation"
+                    "[[icon3]] Concept 3 explanation"
                 ]
             },
             "key_message": "An overview of concepts represented by icons.",
@@ -86,23 +87,9 @@ Output the content in this **specific JSON format**:
             },
             "key_message": "Comparison highlights key differences between old and new approaches.",
             "img_keywords": ["comparison", "old approach", "new approach"]
-        },
-        {
-            "style": "default",
-            "heading": "Conclusion and Key Takeaways",
-            "body": {
-                "points": [
-                    "First takeaway from the presentation",
-                    "Second takeaway from the presentation",
-                    "Third takeaway from the presentation"
-                ]
-            },
-            "key_message": "Summary of the main points discussed in the presentation.",
-            "img_keywords": ["summary", "conclusion", "key takeaways"]
         }
     ]
 }
+```
 
-The topic for the presentation is: {prompt}
-    ### Output:
-    ```json
+Ensure every slide adheres to one of the styles mentioned above and output the JSON for **all slides** from the provided **{slide_titles}** array.

@@ -7,6 +7,7 @@ import { theme as theme1 } from "antd";
 import ProtectedRoute from "./ProtectedRoute";
 import Logout from "./pages/logout/page";
 import GenerateSlide from "./pages/generate_slide/page";
+import GenerateSlide1 from "./pages/generate_slide/page1";
 import Favorites from "./pages/favorites/page";
 import Settings from "./pages/settings/page";
 import useTheme from "./store/theme";
@@ -53,6 +54,10 @@ function App() {
               <Route
                 path="/generate-slide"
                 element={<ProtectedRoute element={<GenerateSlide />} />}
+              />
+              <Route
+                path="/generate-slide/:id"
+                element={<ProtectedRoute element={<GenerateSlide1 />} />}
               />
               <Route
                 path="/dash/:id"

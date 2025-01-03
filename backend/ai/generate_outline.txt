@@ -1,0 +1,15 @@
+{
+    "prompt": "I am creating a presentation about '{presentation_prompt}'. Please suggest a catchy and engaging title for the entire presentation and provide slide titles that comprehensively cover the topic and align with the user's goal. Ensure the number of slide titles matches the specified number of slides ({pages}). Output the response in the following JSON format:",
+    "output_format": {
+        "title": "Catchy Title of the Whole Presentation",
+        "slide_titles": [
+            "Title 1",
+            "Title 2",
+            "Title 3",
+            ...
+        ]
+    },
+    "instructions": "Make the main title catchy and captivating to grab the audience's attention. Ensure the slide titles are engaging, informative, and logically structured for a professional presentation.
+    Ensure the slide titles are relevant to the presentation topic and align with the user's goal. The number of slide titles should match the specified number of slides ({pages}).",
+    "
+}

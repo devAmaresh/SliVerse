@@ -6,6 +6,7 @@ from .gemini import (
     generate_ai_content,
     generate_ai_content_slide,
     generate_ai_title_slide,
+    generate_ai_outline,
 )
 import json
 from .models import Project, Slide, UserProfile
@@ -28,18 +29,21 @@ load_dotenv()
 class GenerateSlideView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    def post(self, request, pk):
         # Generate AI content based on the prompt
-        prompt = request.data.get("prompt")
-        num_slides = request.data.get("num_pages")
-        mode = settings.DEBUG
-        if not prompt:
-            return Response(
-                {"error": "Prompt is required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        project_id = pk
+        slide_titles = request.data.get("slide_titles", [])
 
-        response = generate_ai_content(prompt, num_slides)
+        mode = settings.DEBUG
+        try:
+            project = Project.objects.get(id=project_id, user=request.user)
+        except Project.DoesNotExist:
+            return Response(
+                {"error": "Project not found or access denied."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        title = project.title
+        response = generate_ai_content(title, slide_titles)
 
         try:
             slides_data = json.loads(response)
@@ -58,11 +62,6 @@ class GenerateSlideView(APIView):
 
         # Create Project and associated Slides
         try:
-            project = Project.objects.create(
-                user=request.user,
-                title=slides_data.get("title", "Untitled"),
-                description=prompt,  # Assuming 'description' refers to the prompt
-            )
 
             for i, slide in enumerate(slides_data["slides"]):
                 img_url = None
@@ -152,6 +151,7 @@ class ProjectsView(APIView):
                 "is_public": project.is_public,
                 "title": project.title,
                 "slides": serialized_slides,
+                "description": project.description,
             }
 
             return Response(response_data, status=status.HTTP_200_OK)
@@ -449,7 +449,7 @@ class GenerateSlideTitleView(APIView):
 
 
 class ReorderSlidesView(APIView):
-    permission_classes = [IsAuthenticated] 
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, project_id):
         # Get the project
@@ -487,4 +487,65 @@ class ReorderSlidesView(APIView):
         # Return success response
         return Response(
             {"detail": "Slides reordered successfully."}, status=status.HTTP_200_OK
+        )
+
+
+class ProjectOutlineView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        prompt = request.data.get("prompt")
+        num_pages = request.data.get("num_pages")
+        if not prompt or not num_pages:
+            return Response(
+                {"error": "Both 'prompt' and 'num_pages' are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        project_id = request.data.get("project_id")
+
+        response = generate_ai_outline(prompt, num_pages)
+        try:
+            outline_data = json.loads(response)
+        except json.JSONDecodeError:
+            return Response(
+                {"error": "Failed to decode JSON response."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if project_id:
+            try:
+                project = Project.objects.get(id=project_id, user=request.user)
+                project.title = outline_data.get("title", "Untitled")
+                project.description = prompt
+                project.save()
+            except Project.DoesNotExist:
+                return Response(
+                    {"error": "Project not found or access denied."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            return Response(
+                {
+                    "project_id": project.id,
+                    "title": project.title,
+                    "slide_titles": outline_data.get("slide_titles", []),
+                },
+                status=status.HTTP_200_OK,
+            )
+        try:
+            project = Project.objects.create(
+                user=request.user,
+                title=outline_data.get("title", "Untitled"),
+                description=prompt,  # Assuming 'description' refers to the prompt
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to create project: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        return Response(
+            {
+                "project_id": project.id,
+                "title": project.title,
+                "slide_titles": outline_data.get("slide_titles", []),
+            },
+            status=status.HTTP_200_OK,
         )

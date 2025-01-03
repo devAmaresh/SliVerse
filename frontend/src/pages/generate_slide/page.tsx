@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import useSlidesStore from "../../store/useSlidesStore";
 import { backend_url } from "../../utils/backend";
 import { Home } from "lucide-react";
 import { Button, Input, Form, Slider } from "antd";
@@ -12,7 +11,6 @@ const Page = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { setSlides, setTitle } = useSlidesStore();
   const token = Cookies.get("token");
 
   const handleGenerateSlides = async (values: any) => {
@@ -26,7 +24,7 @@ const Page = () => {
 
     try {
       const response = await axios.post(
-        `${backend_url}/api/generate_slide/`,
+        `${backend_url}/api/generate-outline/`,
         { prompt, num_pages },
         {
           headers: {
@@ -35,13 +33,12 @@ const Page = () => {
         }
       );
 
-      // Update slides in Zustand
-      setSlides(response.data.slides || []);
-      setTitle(response.data.title || "");
       const project_id = response.data.project_id;
-
+      const slideTitles = response.data.slide_titles;
       // Navigate to the Page component
-      navigate(`/dash/${project_id}`);
+      navigate(`/generate-slide/${project_id}`, {
+        state: { slide_titles: slideTitles },
+      });
     } catch (err) {
       setError("Error generating slides. Please try again.");
     } finally {
