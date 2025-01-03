@@ -102,7 +102,7 @@ const Page = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col items-center justify-center p-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-black flex flex-col items-center justify-center p-6">
       {contextHolder}
       <ThemeToggler />
       <div className="absolute top-4 left-4">
@@ -116,7 +116,7 @@ const Page = () => {
         </Button>
       </div>
 
-      <div className="w-full max-w-3xl p-8 rounded-xl shadow-xl bg-white dark:bg-zinc-800 dark:border-zinc-700">
+      <div className="p-5 md:p-10">
         {/* Project Title */}
         <div className="text-3xl font-semibold text-center mb-6 text-gray-900 dark:text-white">
           {projectTitle}
@@ -160,7 +160,7 @@ const Page = () => {
 
         {/* Slide Titles */}
         <div className="text-2xl font-semibold text-center mb-6 text-gray-900 dark:text-white">
-          Generate Slides
+          Outline
         </div>
 
         <Form onFinish={handleGenerateSlides}>
