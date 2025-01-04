@@ -4,7 +4,17 @@ import axios from "axios";
 import useSlidesStore from "../../store/useSlidesStore";
 import { backend_url } from "../../utils/backend";
 import { Home } from "lucide-react";
-import { Button, Input, Form, InputNumber, message, Tooltip, Tag } from "antd";
+import {
+  Button,
+  Input,
+  Form,
+  InputNumber,
+  message,
+  Tooltip,
+  Tag,
+  Spin,
+  Alert,
+} from "antd";
 import Cookies from "js-cookie";
 import ThemeToggler from "../../components/ThemeToggler";
 import { AiOutlineReload } from "react-icons/ai";
@@ -12,6 +22,7 @@ import { DeleteOutlined } from "@ant-design/icons";
 
 const Page = () => {
   const [loading, setLoading] = useState(false);
+  const [generateLoading, setGenerateLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [projectTitle, setProjectTitle] = useState<string | null>(null);
   const [descriptionInput, setDescriptionInput] = useState<string>("");
@@ -50,7 +61,7 @@ const Page = () => {
   }, [id]);
 
   const handleRegenerateOutline = async () => {
-    setLoading(true);
+    setGenerateLoading(true);
     if (descriptionInput.length < 20 || descriptionInput.trim() === "") {
       messageApi.error("Description must be at least 20 characters long");
       setLoading(false);
@@ -75,7 +86,7 @@ const Page = () => {
       console.error(err);
       messageApi.error("Failed to regenerate outline");
     } finally {
-      setLoading(false);
+      setGenerateLoading(false);
     }
   };
 
@@ -137,7 +148,7 @@ const Page = () => {
             onChange={(e) => setDescriptionInput(e.target.value)}
             minLength={20}
             maxLength={500}
-            style={{ height: 60,maxHeight:150 }}
+            style={{ height: 60, maxHeight: 150 }}
             placeholder="Enter project description..."
           />
 
@@ -145,8 +156,8 @@ const Page = () => {
             <Button
               type="dashed"
               onClick={handleRegenerateOutline}
-              loading={loading}
-              disabled={loading}
+              loading={generateLoading}
+              disabled={generateLoading}
               icon={<AiOutlineReload />}
             />
           </Tooltip>
@@ -169,53 +180,67 @@ const Page = () => {
         <div className="text-2xl font-semibold text-center mb-6 text-gray-900 dark:text-white">
           Outline
         </div>
+        {generateLoading && (
+          <Spin spinning size="large">
+            <Alert
+              type="info"
+              message="Loading..."
+              description="Please wait while we generate the outline ..."
+              style={{
+                textAlign: "center",
+                height: "200px",
+              }}
+            />
+          </Spin>
+        )}
+        {!generateLoading && (
+          <Form onFinish={handleGenerateSlides}>
+            {slideTitles.map((title, index) => (
+              <Form.Item
+                key={index}
+                name={`title_${index}`}
+                initialValue={title}
+                className="mb-4"
+              >
+                <div className="flex items-center space-x-1">
+                  {/* Tag next to the input */}
+                  <Tag color="blue" className="">
+                    {index + 1}
+                  </Tag>
+                  <Input
+                    value={title}
+                    onChange={(e) => {
+                      const updatedTitles = [...slideTitles];
+                      updatedTitles[index] = e.target.value;
+                      setSlideTitles(updatedTitles);
+                    }}
+                    className="p-2"
+                    placeholder={`Enter title for Slide ${index + 1}`}
+                    suffix={
+                      <Tooltip title="Delete Slide">
+                        <DeleteOutlined
+                          onClick={() => handleDeleteSlide(index)}
+                          className="cursor-pointer text-red-500"
+                        />
+                      </Tooltip>
+                    }
+                  />
+                </div>
+              </Form.Item>
+            ))}
 
-        <Form onFinish={handleGenerateSlides}>
-          {slideTitles.map((title, index) => (
-            <Form.Item
-              key={index}
-              name={`title_${index}`}
-              initialValue={title}
-              className="mb-4"
-            >
-              <div className="flex items-center space-x-1">
-                {/* Tag next to the input */}
-                <Tag color="blue" className="">
-                  {index + 1}
-                </Tag>
-                <Input
-                  value={title}
-                  onChange={(e) => {
-                    const updatedTitles = [...slideTitles];
-                    updatedTitles[index] = e.target.value;
-                    setSlideTitles(updatedTitles);
-                  }}
-                  className="p-2"
-                  placeholder={`Enter title for Slide ${index + 1}`}
-                  suffix={
-                    <Tooltip title="Delete Slide">
-                      <DeleteOutlined
-                        onClick={() => handleDeleteSlide(index)}
-                        className="cursor-pointer text-red-500"
-                      />
-                    </Tooltip>
-                  }
-                />
-              </div>
-            </Form.Item>
-          ))}
-
-          <div className="flex justify-center">
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              disabled={loading}
-            >
-              Generate Slides
-            </Button>
-          </div>
-        </Form>
+            <div className="flex justify-center">
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                disabled={loading}
+              >
+                Generate Slides
+              </Button>
+            </div>
+          </Form>
+        )}
       </div>
     </div>
   );
