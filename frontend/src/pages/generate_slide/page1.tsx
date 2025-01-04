@@ -8,13 +8,14 @@ import { Button, Input, Form, InputNumber, message, Tooltip, Tag } from "antd";
 import Cookies from "js-cookie";
 import ThemeToggler from "../../components/ThemeToggler";
 import { AiOutlineReload } from "react-icons/ai";
+import { DeleteOutlined } from "@ant-design/icons";
 
 const Page = () => {
   const [loading, setLoading] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [projectTitle, setProjectTitle] = useState<string | null>(null);
   const [descriptionInput, setDescriptionInput] = useState<string>("");
-  const [numPages, setNumPages] = useState<number>(10);
+
   const [slideTitles, setSlideTitles] = useState<string[]>([]);
 
   const navigate = useNavigate();
@@ -22,8 +23,11 @@ const Page = () => {
   const token = Cookies.get("token");
 
   const location = useLocation();
-  const { slide_titles } = location.state || { slide_titles: [] };
-
+  const { slide_titles, num_pages } = location.state || {
+    slide_titles: [],
+    num_pages: 10,
+  };
+  const [numPages, setNumPages] = useState<number>(num_pages);
   const { id } = useParams();
 
   useEffect(() => {
@@ -101,7 +105,10 @@ const Page = () => {
       setLoading(false);
     }
   };
-
+  const handleDeleteSlide = (index: number) => {
+    const updatedTitles = slideTitles.filter((_, i) => i !== index);
+    setSlideTitles(updatedTitles);
+  };
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-black flex flex-col items-center justify-center p-6">
       {contextHolder}
@@ -116,19 +123,21 @@ const Page = () => {
         </Button>
       </div>
 
-      <div className="p-5 md:p-10">
+      <div className="p-5 mt-5 md:p-10 md:max-w-[70%]">
         {/* Project Title */}
         <div className="text-3xl font-semibold text-center mb-6 text-gray-900 dark:text-white">
           {projectTitle}
         </div>
 
         {/* Editable Description */}
+        <div className="py-1">Prompt</div>
         <div className="mb-6 flex items-center justify-between gap-4">
           <Input.TextArea
             value={descriptionInput}
             onChange={(e) => setDescriptionInput(e.target.value)}
             minLength={20}
-            style={{ height: 60 }}
+            maxLength={500}
+            style={{ height: 60,maxHeight:150 }}
             placeholder="Enter project description..."
           />
 
@@ -145,15 +154,13 @@ const Page = () => {
 
         {/* Number of Pages */}
         <div className="mb-6">
-          <Form.Item
-            label="Number of Pages"
-            className="text-gray-800 dark:text-white"
-          >
+          <Form.Item className="dark:text-white">
             <InputNumber
               value={numPages}
               onChange={(value: number | null) => setNumPages(value ?? 10)}
               min={10}
               max={30}
+              formatter={(value) => `${value} pages`}
             />
           </Form.Item>
         </div>
@@ -185,6 +192,14 @@ const Page = () => {
                   }}
                   className="p-2"
                   placeholder={`Enter title for Slide ${index + 1}`}
+                  suffix={
+                    <Tooltip title="Delete Slide">
+                      <DeleteOutlined
+                        onClick={() => handleDeleteSlide(index)}
+                        className="cursor-pointer text-red-500"
+                      />
+                    </Tooltip>
+                  }
                 />
               </div>
             </Form.Item>

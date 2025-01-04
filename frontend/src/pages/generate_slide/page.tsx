@@ -37,7 +37,7 @@ const Page = () => {
       const slideTitles = response.data.slide_titles;
       // Navigate to the Page component
       navigate(`/generate-slide/${project_id}`, {
-        state: { slide_titles: slideTitles },
+        state: { slide_titles: slideTitles, num_pages: num_pages },
       });
     } catch (err) {
       setError("Error generating slides. Please try again.");
@@ -63,7 +63,7 @@ const Page = () => {
       <div className="mt-20 flex items-center justify-center">
         <div className="w-full max-w-md p-8 rounded-xl shadow-lg dark:bg-zinc-900 border-2 border-zinc-200 dark:border-stone-700">
           <div className="text-2xl font-bold text-center mb-4">
-            Generate Slides
+            Generate Outline for Slides
           </div>
 
           <Form
