@@ -14,6 +14,7 @@ You are a helpful, intelligent assistant experienced with PowerPoint and skilled
    - **Icon style**: Slides using relevant icons (e.g., [[icon_name]]) in bullet points to represent key concepts.
    - **Double column layout**: Slides comparing two related concepts side-by-side with headings and bullet points for each column.
 5. Ensure the chosen style for each slide matches the context of the slide heading and content logically.
+6. Ensure the presentation includes at least one slide for each of the styles mentioned above, incorporating the provided content effectively into these styles.
 7. Maintain a professional, visually appealing, and logically structured presentation.
 
 ### Output Format:
