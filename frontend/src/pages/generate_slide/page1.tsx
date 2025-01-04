@@ -32,7 +32,7 @@ const Page = () => {
   const navigate = useNavigate();
   const { setSlides, setTitle } = useSlidesStore();
   const token = Cookies.get("token");
-
+  const [fetching, setFetching] = useState(true);
   const location = useLocation();
   const { slide_titles, num_pages } = location.state || {
     slide_titles: [],
@@ -54,6 +54,8 @@ const Page = () => {
       } catch (err) {
         console.error(err);
         messageApi.error("Failed to fetch project details");
+      } finally {
+        setFetching(false);
       }
     };
 
@@ -112,6 +114,7 @@ const Page = () => {
       navigate(`/dash/${project_id}`);
     } catch (err) {
       console.error(err);
+      messageApi.error("Failed to generate slides");
     } finally {
       setLoading(false);
     }
@@ -133,115 +136,125 @@ const Page = () => {
           Home
         </Button>
       </div>
+      {fetching && (
+        <Spin
+          spinning
+          size="large"
+          fullscreen
+          percent={"auto"}
+          tip="Loading..."
+        />
+      )}
+      {!fetching && (
+        <div className="p-5 mt-5 md:p-10 md:max-w-[70%]">
+          {/* Project Title */}
+          <div className="text-3xl font-semibold text-center mb-6 text-gray-900 dark:text-white">
+            {projectTitle}
+          </div>
 
-      <div className="p-5 mt-5 md:p-10 md:max-w-[70%]">
-        {/* Project Title */}
-        <div className="text-3xl font-semibold text-center mb-6 text-gray-900 dark:text-white">
-          {projectTitle}
-        </div>
-
-        {/* Editable Description */}
-        <div className="py-1">Prompt</div>
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <Input.TextArea
-            value={descriptionInput}
-            onChange={(e) => setDescriptionInput(e.target.value)}
-            minLength={20}
-            maxLength={500}
-            style={{ height: 60, maxHeight: 150 }}
-            placeholder="Enter project description..."
-          />
-
-          <Tooltip title="Regenerate Outline">
-            <Button
-              type="dashed"
-              onClick={handleRegenerateOutline}
-              loading={generateLoading}
-              disabled={generateLoading}
-              icon={<AiOutlineReload />}
+          {/* Editable Description */}
+          <div className="py-1">Prompt</div>
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <Input.TextArea
+              value={descriptionInput}
+              onChange={(e) => setDescriptionInput(e.target.value)}
+              minLength={20}
+              maxLength={500}
+              style={{ height: 60, maxHeight: 150 }}
+              placeholder="Enter project description..."
             />
-          </Tooltip>
-        </div>
 
-        {/* Number of Pages */}
-        <div className="mb-6">
-          <Form.Item className="dark:text-white">
-            <InputNumber
-              value={numPages}
-              onChange={(value: number | null) => setNumPages(value ?? 10)}
-              min={10}
-              max={30}
-              formatter={(value) => `${value} pages`}
-            />
-          </Form.Item>
-        </div>
-
-        {/* Slide Titles */}
-        <div className="text-2xl font-semibold text-center mb-6 text-gray-900 dark:text-white">
-          Outline
-        </div>
-        {generateLoading && (
-          <Spin spinning size="large">
-            <Alert
-              type="info"
-              message="Loading..."
-              description="Please wait while we generate the outline ..."
-              style={{
-                textAlign: "center",
-                height: "200px",
-              }}
-            />
-          </Spin>
-        )}
-        {!generateLoading && (
-          <Form onFinish={handleGenerateSlides}>
-            {slideTitles.map((title, index) => (
-              <Form.Item
-                key={index}
-                name={`title_${index}`}
-                initialValue={title}
-                className="mb-4"
-              >
-                <div className="flex items-center space-x-1">
-                  {/* Tag next to the input */}
-                  <Tag color="blue" className="">
-                    {index + 1}
-                  </Tag>
-                  <Input
-                    value={title}
-                    onChange={(e) => {
-                      const updatedTitles = [...slideTitles];
-                      updatedTitles[index] = e.target.value;
-                      setSlideTitles(updatedTitles);
-                    }}
-                    className="p-2"
-                    placeholder={`Enter title for Slide ${index + 1}`}
-                    suffix={
-                      <Tooltip title="Delete Slide">
-                        <DeleteOutlined
-                          onClick={() => handleDeleteSlide(index)}
-                          className="cursor-pointer text-red-500"
-                        />
-                      </Tooltip>
-                    }
-                  />
-                </div>
-              </Form.Item>
-            ))}
-
-            <div className="flex justify-center">
+            <Tooltip title="Regenerate Outline">
               <Button
-                type="primary"
-                htmlType="submit"
-                loading={loading}
-                disabled={loading}
-              >
-                Generate Slides
-              </Button>
-            </div>
-          </Form>
-        )}
-      </div>
+                type="dashed"
+                onClick={handleRegenerateOutline}
+                loading={generateLoading}
+                disabled={generateLoading}
+                icon={<AiOutlineReload />}
+              />
+            </Tooltip>
+          </div>
+
+          {/* Number of Pages */}
+          <div className="mb-6">
+            <Form.Item className="dark:text-white">
+              <InputNumber
+                value={numPages}
+                onChange={(value: number | null) => setNumPages(value ?? 10)}
+                min={10}
+                max={30}
+                formatter={(value) => `${value} pages`}
+              />
+            </Form.Item>
+          </div>
+
+          {/* Slide Titles */}
+          <div className="text-2xl font-semibold text-center mb-6 text-gray-900 dark:text-white">
+            Outline
+          </div>
+          {generateLoading && (
+            <Spin spinning size="large">
+              <Alert
+                type="info"
+                message="Loading..."
+                description="Please wait while we generate the outline ..."
+                style={{
+                  textAlign: "center",
+                  height: "200px",
+                }}
+              />
+            </Spin>
+          )}
+          {!generateLoading && (
+            <Form onFinish={handleGenerateSlides}>
+              {slideTitles.map((title, index) => (
+                <Form.Item
+                  key={index}
+                  name={`title_${index}`}
+                  initialValue={title}
+                  className="mb-4"
+                >
+                  <div className="flex items-center space-x-1">
+                    {/* Tag next to the input */}
+                    <Tag color="blue" className="">
+                      {index + 1}
+                    </Tag>
+                    <Input
+                      value={title}
+                      onChange={(e) => {
+                        const updatedTitles = [...slideTitles];
+                        updatedTitles[index] = e.target.value;
+                        setSlideTitles(updatedTitles);
+                      }}
+                      className="p-2"
+                      placeholder={`Enter title for Slide ${index + 1}`}
+                      suffix={
+                        <Tooltip title="Delete Slide">
+                          <DeleteOutlined
+                            onClick={() => handleDeleteSlide(index)}
+                            className="cursor-pointer text-red-500"
+                          />
+                        </Tooltip>
+                      }
+                    />
+                  </div>
+                </Form.Item>
+              ))}
+
+              <div className="flex justify-center">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  disabled={loading}
+                >
+                  Generate Slides
+                </Button>
+              </div>
+            </Form>
+          )}
+        </div>
+      )}
     </div>
   );
 };
