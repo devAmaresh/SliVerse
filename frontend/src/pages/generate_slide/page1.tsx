@@ -14,6 +14,7 @@ import {
   Tag,
   Spin,
   Alert,
+  notification,
 } from "antd";
 import Cookies from "js-cookie";
 import ThemeToggler from "../../components/ThemeToggler";
@@ -40,7 +41,7 @@ const Page = () => {
   };
   const [numPages, setNumPages] = useState<number>(num_pages);
   const { id } = useParams();
-
+  const [api, contextHolder1] = notification.useNotification();
   useEffect(() => {
     const fetchProjectDetails = async () => {
       try {
@@ -99,7 +100,12 @@ const Page = () => {
       setLoading(false);
       return;
     }
-
+    api.info({
+      message: "Please wait while we generate the slides ...",
+      description:
+        "This may take a few seconds to few minutes depending on the number of slides",
+      duration: 0,
+    });
     try {
       const response = await axios.post(
         `${backend_url}/api/generate-slide/${id}/`,
@@ -114,7 +120,11 @@ const Page = () => {
       navigate(`/dash/${project_id}`);
     } catch (err) {
       console.error(err);
-      messageApi.error("Failed to generate slides");
+      api.destroy();
+      api.error({
+        message: "Oops! We encountered an error ...",
+        description: "Please try again later!",
+      });
     } finally {
       setLoading(false);
     }
@@ -123,9 +133,11 @@ const Page = () => {
     const updatedTitles = slideTitles.filter((_, i) => i !== index);
     setSlideTitles(updatedTitles);
   };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-black flex flex-col items-center justify-center p-6">
       {contextHolder}
+      {contextHolder1}
       <ThemeToggler />
       <div className="absolute top-4 left-4">
         <Button
@@ -169,7 +181,7 @@ const Page = () => {
                 type="dashed"
                 onClick={handleRegenerateOutline}
                 loading={generateLoading}
-                disabled={generateLoading}
+                disabled={generateLoading || loading}
                 icon={<AiOutlineReload />}
               />
             </Tooltip>

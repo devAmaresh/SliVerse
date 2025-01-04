@@ -79,6 +79,10 @@ const Page = () => {
                   message: "Please enter a prompt for generating slides!",
                 },
                 { min: 20, message: "Prompt must be at least 20 characters!" },
+                {
+                  max: 500,
+                  message: "Prompt must be at most 500 characters!",
+                },
               ]}
               className="mb-8"
             >
@@ -110,7 +114,7 @@ const Page = () => {
                 size="large"
                 className="w-full text-white p-3 rounded-md"
               >
-                {loading ? "Generating..." : "Generate Slides"}
+                {loading ? "Generating..." : "Generate Outline"}
               </Button>
             </Form.Item>
           </Form>
