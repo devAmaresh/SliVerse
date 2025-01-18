@@ -42,7 +42,15 @@ Welcome to **Sliverse**, your intelligent assistant for crafting stunning, impac
 - **Efficient**: Saves hours of tedious work, allowing you to focus on what truly matters.
 
 ---
+## 🖼️ Screenshots
 
+### Dashboard
+![Dashboard](assets/landing.png)
+
+### Slide Generation
+![Slide Generation](assets/slide_generation.png)
+
+---
 ## 🔧 Installation
 
 To set up Sliverse locally, follow these steps:
