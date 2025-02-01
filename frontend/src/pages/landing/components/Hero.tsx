@@ -53,14 +53,14 @@ export function Hero() {
             <HeroVideoDialog
               className="dark:hidden block"
               animationStyle="top-in-bottom-out"
-              videoSrc="https://www.youtube.com/embed/qh3NGpYRG3I?si=4rb-zSdDkVK9qxxb"
+              videoSrc="https://www.loom.com/embed/2ab35b26ca054b8d86229638bd81e0a9?sid=cf5a695c-84c1-4408-95f0-06d0a727bf1f"
               thumbnailSrc="/hero-light.png"
               thumbnailAlt="Hero Video"
             />
             <HeroVideoDialog
               className="hidden dark:block"
               animationStyle="top-in-bottom-out"
-              videoSrc="https://www.youtube.com/embed/qh3NGpYRG3I?si=4rb-zSdDkVK9qxxb"
+              videoSrc="https://www.loom.com/embed/2ab35b26ca054b8d86229638bd81e0a9?sid=cf5a695c-84c1-4408-95f0-06d0a727bf1f"
               thumbnailSrc="/hero-dark.png"
               thumbnailAlt="Hero Video"
             />

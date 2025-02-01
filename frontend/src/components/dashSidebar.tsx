@@ -14,7 +14,7 @@ const Sidebar = () => {
           <Presentation className="h-7 w-7 dark:text-white" />
         </div>
         <h1 className="text-xl font-bold text-zinc-800 dark:text-zinc-100">
-          Amaverse.ai
+          SliVerse.ai
         </h1>
       </div>
 
