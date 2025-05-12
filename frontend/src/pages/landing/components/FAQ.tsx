@@ -45,7 +45,7 @@ const faqs = [
   {
     key: '9',
     question: "What about offline access?",
-    answer: "While Sliverse.ai is primarily a cloud-based solution, you can download presentations for offline viewing and editing. Changes will sync back to the cloud when you're online again. We also offer a desktop app for Windows and Mac."
+    answer: "While Sliverse is primarily a cloud-based solution, you can download presentations for offline viewing and editing. Changes will sync back to the cloud when you're online again. We also offer a desktop app for Windows and Mac."
   },
   {
     key: '10',
@@ -78,7 +78,7 @@ export function FAQ() {
             Frequently Asked Questions
           </h2>
           <p className="mt-4 text-xl text-gray-600 dark:text-gray-300">
-            Everything you need to know about Sliverse.ai
+            Everything you need to know about Sliverse
           </p>
         </div>
         <div className="max-w-4xl mx-auto">

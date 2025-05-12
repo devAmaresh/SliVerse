@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Presentation, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useNavigate } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
@@ -10,7 +10,7 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-50 border-b border-gray-100 dark:border-gray-800">
+    <header className="fixed  top-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-50 border-b border-gray-100 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 lg:px-2">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -20,9 +20,10 @@ export function Header() {
               to="/#"
               className="cursor-pointer flex items-center space-x-2"
             >
-              <Presentation className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              {/* <Presentation className="h-8 w-8 text-purple-600 dark:text-purple-400" /> */}
+              <img src="/ico.png" alt="Logo" className="h-8" />
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400">
-                Sliverse.ai
+                Sliverse
               </span>
             </HashLink>
           </div>

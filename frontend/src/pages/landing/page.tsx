@@ -5,6 +5,7 @@ import { HowItWorks } from "./components/HowItWorks";
 import { WhyUs } from "./components/WhyUs";
 import { FAQ } from "./components/FAQ";
 import Footer from "./components/Footer";
+import Cta from "./components/Cta";
 const page = () => {
   return (
     <>
@@ -17,6 +18,7 @@ const page = () => {
           <WhyUs />
           <FAQ />
         </main>
+        <Cta />
         <Footer />
       </div>
     </>

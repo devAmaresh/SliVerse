@@ -18,7 +18,7 @@ export function WhyUs() {
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white">
               Why Choose{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400">
-                Sliverse.ai
+                Sliverse
               </span>
             </h2>
             <p className="mt-6 text-lg text-gray-600 dark:text-gray-300">

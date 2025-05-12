@@ -15,6 +15,10 @@ import Dashboard from "./pages/dashboard/page";
 import Landing from "./pages/landing/page";
 import Pricing from "./pages/pricing/page";
 import Present from "./pages/present/page";
+import TermsOfService from "./pages/landing/policy/terms";
+import PrivacyPolicy from "./pages/landing/policy/privacy";
+import CookiePolicy from "./pages/landing/policy/cookie-policy";
+import PageLayout from "./pages/landing/policy/page";
 function App() {
   const theme = useTheme((state: any) => state.theme);
 
@@ -33,6 +37,13 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/" element={<Landing />} />
+              <Route path="/" element={<Landing />} />
+              <Route path="/t/" element={<PageLayout />}>
+                {/* Nested Routes render inside <Outlet /> */}
+                <Route path="terms" element={<TermsOfService />} />
+                <Route path="cookies" element={<CookiePolicy />} />
+                <Route path="privacy" element={<PrivacyPolicy />} />
+              </Route>
               {/* Protected routes */}
               <Route
                 path="/dashboard"
