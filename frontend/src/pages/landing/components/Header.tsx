@@ -4,11 +4,12 @@ import { ThemeToggle } from "./ThemeToggle";
 import { useNavigate } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import { Link } from "react-router-dom";
+import useTheme from "@/store/theme";
 
 export function Header() {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const theme = useTheme((state: any) => state.theme);
   return (
     <header className="fixed  top-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-50 border-b border-gray-100 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 lg:px-2">
@@ -21,7 +22,11 @@ export function Header() {
               className="cursor-pointer flex items-center space-x-2"
             >
               {/* <Presentation className="h-8 w-8 text-purple-600 dark:text-purple-400" /> */}
-              <img src="/ico.png" alt="Logo" className="h-8" />
+              {theme === "dark" ? (
+                <img src="/sli.png" alt="Logo" className="h-8" />
+              ) : (
+                <img src="/ico.png" alt="Logo" className="h-8" />
+              )}
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400">
                 Sliverse
               </span>
@@ -62,9 +67,9 @@ export function Header() {
           {/* Mobile Hamburger Menu Button */}
           <div className="md:hidden flex items-center">
             <div className="mr-4">
-            <ThemeToggle />
+              <ThemeToggle />
             </div>
-          
+
             <button
               className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               onClick={() => setIsMenuOpen(!isMenuOpen)}

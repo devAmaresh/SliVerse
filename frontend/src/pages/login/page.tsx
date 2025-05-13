@@ -65,10 +65,10 @@ const LoginPage = () => {
       <div className="min-h-screen flex items-center justify-center bg-black relative overflow-hidden">
         {/* Background Image */}
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-20 md:opacity-30"
+          className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage:
-              "url('https://img.freepik.com/free-photo/cheerful-3d-alien-world_23-2151879043.jpg')", // Replace with your image path
+              "url('space.jpg')", // Replace with your image path
           }}
         ></div>
         {/*Login Form */}

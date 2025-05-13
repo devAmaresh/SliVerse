@@ -9,12 +9,12 @@ const Cta = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const theme = useTheme((state: any) => state.theme);
   return (
-    <div className="relative h-[260px] md:h-[360px] lg:h-[610px] xl:h-[720px] 2xl:h-[800px] w-full overflow-hidden rounded-lg border bg-background">
+    <div className="relative h-[330px] md:h-[420px] lg:h-[620px] xl:h-[720px] 2xl:h-[820px] w-full overflow-hidden rounded-lg border bg-background">
       <div className="relative z-[48] mt-5 lg:mt-10 mb-2 lg:mb-5 flex flex-col items-center justify-center">
-        <div className="text-2xl md:text-4xl lg:text-5xl font-semibold text-zinc-800 dark:text-zinc-100">
+        <div className="p-2 text-2xl md:text-4xl lg:text-5xl font-semibold text-zinc-800 dark:text-zinc-200">
           How good ideas get into the universe
         </div>
-        <div className="pt-4 lg:pt-12">
+        <div className="pt-4 lg:pt-10 pb-5">
           <HashLink to="/login">
             <ShimmerButton
               shimmerDuration="3s"
