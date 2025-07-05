@@ -64,7 +64,7 @@ const IconsLayout: React.FC<IconsLayoutProps> = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+      <div className="flex justify-evenly space-x-6 w-full">
         {icons.map((icon: any, index: number) => (
           <div
             key={index}
