@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from "react";
 import AddSlide from "./AddSlide";
-import { Trash2, AlertTriangle, GripVertical } from "lucide-react";
+import { Trash2, AlertTriangle } from "lucide-react";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { backend_url } from "../utils/backend";
@@ -26,7 +26,7 @@ interface SlideData {
 
 interface NavigationSidebarProps {
   slides: SlideData[];
-  selectedSlide: number; // Changed from activeSlide
+  selectedSlide: number;
   onSlideClick: (index: number) => void;
   title: string;
 }
@@ -53,26 +53,18 @@ const SlideItem = memo(
     <div
       ref={provided.innerRef}
       {...provided.draggableProps}
+      {...provided.dragHandleProps}
       className={`
-      group relative rounded-xl transition-all duration-200 overflow-hidden
-      ${
-        isSelected
-          ? "bg-gray-800 ring-2 ring-blue-500 shadow-lg"
-          : "bg-gray-900 hover:bg-gray-800"
-      }
-      ${isDragging ? "shadow-2xl scale-105 rotate-2 z-50" : ""}
-    `}
+        group relative rounded-xl transition-all duration-200 overflow-hidden cursor-pointer
+        ${
+          isSelected
+            ? "bg-gray-800 ring-2 ring-blue-500 shadow-lg"
+            : "bg-gray-900 hover:bg-gray-800"
+        }
+        ${isDragging ? "shadow-2xl scale-105 rotate-2 z-50" : ""}
+      `}
+      onClick={onClick}
     >
-      {/* Drag Handle */}
-      <div
-        {...provided.dragHandleProps}
-        className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-      >
-        <div className="bg-gray-700/80 hover:bg-gray-600 backdrop-blur-sm border border-gray-600 text-gray-300 p-1 rounded cursor-grab active:cursor-grabbing">
-          <GripVertical size={12} />
-        </div>
-      </div>
-
       {/* Delete Button */}
       <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
@@ -86,39 +78,37 @@ const SlideItem = memo(
         </button>
       </div>
 
-      {/* Slide Content */}
-      <button onClick={onClick} className="w-full text-left">
-        {/* Slide Preview */}
-        <div className="aspect-[16/9] relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg m-2">
-          {slide.img_url ? (
-            <img
-              src={slide.img_url}
-              alt={`Slide ${index + 1}`}
-              className="w-full h-full object-cover rounded-lg"
-              loading="lazy"
-            />
-          ) : (
+      {/* Slide Preview */}
+      <div className="aspect-[16/9] relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg m-2">
+        {slide.img_url ? (
+          <img
+            src={slide.img_url}
+            alt={`Slide ${index + 1}`}
+            className="w-full h-full object-cover rounded-lg"
+            loading="lazy"
+          />
+        ) : (
+          <div
+            className="w-full h-full rounded-lg flex items-center justify-center"
+            style={{
+              background: `linear-gradient(135deg, ${slide.dominant_color}20, ${slide.dominant_color}10)`,
+            }}
+          >
             <div
-              className="w-full h-full rounded-lg flex items-center justify-center"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
               style={{
-                background: `linear-gradient(135deg, ${slide.dominant_color}20, ${slide.dominant_color}10)`,
+                backgroundColor: slide.dominant_color,
               }}
             >
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                style={{
-                  backgroundColor: slide.dominant_color,
-                }}
-              >
-                {index + 1}
-              </div>
+              {index + 1}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Slide Number Overlay */}
-          <div className="absolute bottom-2 left-2">
-            <div
-              className={`
+        {/* Slide Number Overlay */}
+        <div className="absolute bottom-2 left-2">
+          <div
+            className={`
               w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-200
               ${
                 isSelected
@@ -126,38 +116,45 @@ const SlideItem = memo(
                   : "bg-black/50 text-white"
               }
             `}
-            >
-              {index + 1}
-            </div>
-          </div>
-
-          {/* Layout Type Badge */}
-          <div className="absolute top-2 right-8">
-            <div className="bg-black/70 text-white text-xs px-2 py-1 rounded capitalize">
-              {slide.layout_type}
-            </div>
+          >
+            {index + 1}
           </div>
         </div>
 
-        {/* Slide Info */}
-        <div className="px-3 pb-3">
-          <h3
-            className={`
+        {/* Layout Type Badge */}
+        <div className="absolute top-2 right-8">
+          <div className="bg-black/70 text-white text-xs px-2 py-1 rounded capitalize">
+            {slide.layout_type}
+          </div>
+        </div>
+      </div>
+
+      {/* Slide Info */}
+      <div className="px-3 pb-3">
+        <h3
+          className={`
             text-sm font-medium truncate text-left transition-colors duration-200
             ${isSelected ? "text-white" : "text-gray-300"}
           `}
-          >
-            {slide.content.heading ||
-              slide.content.title ||
-              `Slide ${index + 1}`}
-          </h3>
-        </div>
+        >
+          {slide.content.heading ||
+            slide.content.title ||
+            `Slide ${index + 1}`}
+        </h3>
+        <p
+          className={`
+            text-xs mt-1 truncate text-left transition-colors duration-200
+            ${isSelected ? "text-gray-300" : "text-gray-400"}
+          `}
+        >
+          {slide.content.key_message || "No content available"}
+        </p>
+      </div>
 
-        {/* Active Indicator */}
-        {isSelected && (
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r" />
-        )}
-      </button>
+      {/* Active Indicator */}
+      {isSelected && (
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r" />
+      )}
     </div>
   )
 );
@@ -177,49 +174,20 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
   const token = Cookies.get("token");
 
   // Refs for slide elements in sidebar
-  const sidebarSlideRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const sidebarContainerRef = useRef<HTMLDivElement>(null);
+  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Only scroll sidebar when slide is manually selected (not on every scroll)
-  const scrollToSelectedSlide = useRef<number>(-1);
-
+  // Scroll the current slide into view whenever it changes
   useEffect(() => {
-    if (scrollToSelectedSlide.current !== selectedSlide) {
-      scrollToSelectedSlide.current = selectedSlide;
-
-      if (selectedSlide >= 0 && selectedSlide < slides.length) {
-        const activeSlideElement = sidebarSlideRefs.current[selectedSlide];
-        const container = sidebarContainerRef.current;
-
-        if (activeSlideElement && container) {
-          const containerRect = container.getBoundingClientRect();
-          const slideRect = activeSlideElement.getBoundingClientRect();
-
-          // Check if slide is visible in the sidebar
-          const isVisible =
-            slideRect.top >= containerRect.top &&
-            slideRect.bottom <= containerRect.bottom;
-
-          // If not visible, scroll to it
-          if (!isVisible) {
-            const containerHeight = container.clientHeight;
-            const slideTop = activeSlideElement.offsetTop;
-            const slideHeight = activeSlideElement.clientHeight;
-
-            // Center the selected slide in the sidebar
-            const targetScrollTop =
-              slideTop - (containerHeight - slideHeight) / 2;
-
-            container.scrollTo({
-              top: Math.max(0, targetScrollTop),
-              behavior: "smooth",
-            });
-            console.log(targetScrollTop);
-          }
-        }
-      }
+    const currentSlideElement = slideRefs.current[selectedSlide];
+    if (currentSlideElement) {
+      currentSlideElement.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }
-  }, [selectedSlide, slides.length]);
+  }, [selectedSlide]);
+
+
 
   const handleDeleteSlide = async (slideId: string) => {
     if (!slideId) return;
@@ -245,66 +213,46 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
     }
   };
 
+  // Handle reorder logic with improved error handling
   const handleDragEnd = async (result: DropResult) => {
-    if (!result.destination) return;
+    const { destination, source } = result;
+    if (!destination) return;
 
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
+    // If the item has been moved to a different position
+    if (destination.index !== source.index) {
+      // Create a copy of the current slides in case of a failure
+      const originalSlides = [...slides];
+      const reorderedSlides = Array.from(slides);
+      const [removed] = reorderedSlides.splice(source.index, 1);
+      reorderedSlides.splice(destination.index, 0, removed);
 
-    if (sourceIndex === destinationIndex) return;
+      // Update the slides state locally for better UX
+      setSlides(reorderedSlides);
+      onSlideClick(destination.index);
 
-    // Optimistically update the UI
-    const reorderedSlides = Array.from(slides);
-    const [movedSlide] = reorderedSlides.splice(sourceIndex, 1);
-    reorderedSlides.splice(destinationIndex, 0, movedSlide);
+      try {
+        setIsReordering(true);
+        // Make an API call to reorder the slides on the server
+        const response = await axios.post(
+          `${backend_url}/api/project/${projectId}/reorder-slides/`,
+          { new_order: reorderedSlides.map((slide) => slide.id) },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-    // Update local state immediately for better UX
-    setSlides(reorderedSlides);
-
-    // Update selected slide index if needed
-    let newSelectedSlide = selectedSlide;
-    if (sourceIndex === selectedSlide) {
-      newSelectedSlide = destinationIndex;
-    } else if (
-      sourceIndex < selectedSlide &&
-      destinationIndex >= selectedSlide
-    ) {
-      newSelectedSlide = selectedSlide - 1;
-    } else if (
-      sourceIndex > selectedSlide &&
-      destinationIndex <= selectedSlide
-    ) {
-      newSelectedSlide = selectedSlide + 1;
-    }
-
-    // Call onSlideClick with new selected index if it changed
-    if (newSelectedSlide !== selectedSlide) {
-      onSlideClick(newSelectedSlide);
-    }
-
-    // Send API request to save the new order
-    try {
-      setIsReordering(true);
-      const newOrder = reorderedSlides.map((slide) => slide.id);
-
-      await axios.post(
-        `${backend_url}/api/project/${projectId}/reorder-slides/`,
-        { new_order: newOrder },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        if (response.status === 200) {
+          console.log("Slides reordered successfully");
         }
-      );
-
-      console.log("Slides reordered successfully");
-    } catch (error) {
-      console.error("Error reordering slides:", error);
-      // Revert the changes if API call fails
-      setSlides(slides);
-      onSlideClick(selectedSlide);
-    } finally {
-      setIsReordering(false);
+      } catch (error) {
+        // If the API call fails, revert the slides to the original order
+        console.error(
+          "Failed to reorder slides. Reverting to the original order.",
+          error
+        );
+        setSlides(originalSlides);
+        onSlideClick(source.index); // Revert the current slide index back
+      } finally {
+        setIsReordering(false);
+      }
     }
   };
 
@@ -492,11 +440,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
       )}
 
       {/* Slides List with Drag and Drop */}
-      <div
-        ref={sidebarContainerRef}
-        className="flex-1 overflow-y-auto custom-scrollbar"
-        style={{ scrollBehavior: "smooth" }}
-      >
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
         <DragDropContext onDragEnd={handleDragEnd}>
           <Droppable droppableId="slides-list">
             {(provided, snapshot) => (
@@ -516,8 +460,8 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                     {(provided, snapshot) => (
                       <div
                         ref={(el) => {
+                          slideRefs.current[index] = el;
                           provided.innerRef(el);
-                          sidebarSlideRefs.current[index] = el;
                         }}
                       >
                         <SlideItem
