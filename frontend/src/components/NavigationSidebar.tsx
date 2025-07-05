@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, memo } from "react";
+import React, { useState, useEffect, useRef, memo, useCallback } from "react";
 import AddSlide from "./AddSlide";
 import { Trash2, AlertTriangle } from "lucide-react";
 import axios from "axios";
@@ -25,12 +25,10 @@ interface SlideData {
 }
 
 interface NavigationSidebarProps {
-  slides: SlideData[];
   selectedSlide: number;
   onSlideClick: (index: number) => void;
   title: string;
 }
-
 
 const SlideItem = memo(
   ({
@@ -137,11 +135,8 @@ const SlideItem = memo(
             ${isSelected ? "text-white" : "text-gray-300"}
           `}
         >
-          {slide.content.heading ||
-            slide.content.title ||
-            `Slide ${index + 1}`}
+          {slide.content.heading || slide.content.title || `Slide ${index + 1}`}
         </h3>
-       
       </div>
 
       {/* Active Indicator */}
@@ -153,7 +148,6 @@ const SlideItem = memo(
 );
 
 const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
-  slides,
   selectedSlide,
   onSlideClick,
 }) => {
@@ -163,13 +157,15 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
   const [slideToDelete, setSlideToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
-  const { slides: allSlides, setSlides } = useSlideStore();
+
+  // Get slides directly from store
+  const { slides, setSlides } = useSlideStore();
   const token = Cookies.get("token");
 
   // Refs for slide elements in sidebar
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-
+  // Scroll to selected slide
   useEffect(() => {
     const currentSlideElement = slideRefs.current[selectedSlide];
     if (currentSlideElement) {
@@ -180,25 +176,59 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
     }
   }, [selectedSlide]);
 
+  // Keyboard navigation
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "ArrowUp") {
+        const previousIndex = Math.max(selectedSlide - 1, 0);
+        onSlideClick(previousIndex);
+      } else if (event.key === "ArrowDown") {
+        const nextIndex = Math.min(selectedSlide + 1, slides.length - 1);
+        onSlideClick(nextIndex);
+      }
+    },
+    [selectedSlide, slides.length, onSlideClick]
+  );
 
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleKeyDown]);
 
   const handleDeleteSlide = async (slideId: string) => {
     if (!slideId) return;
 
     setIsDeleting(true);
     try {
-      await axios.delete(`${backend_url}/api/slide-edit/${slideId}/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await axios.delete(
+        `${backend_url}/api/slide-edit/${slideId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (res.status == 204) {
+        // Update the store directly
+        const updatedSlides = slides.filter((s) => s.id != slideId);
+        console.log(updatedSlides);
+        setSlides(updatedSlides);
 
+        // Adjust selection if needed
+        const deletedSlideIndex = slides.findIndex((s) => s.id === slideId);
+        if (deletedSlideIndex === selectedSlide && selectedSlide > 0) {
+          onSlideClick(selectedSlide - 1);
+        } else if (deletedSlideIndex < selectedSlide) {
+          onSlideClick(selectedSlide - 1);
+        } else if (updatedSlides.length === 0) {
+          onSlideClick(0);
+        }
 
-      const updatedSlides = allSlides.filter((s) => s.id !== slideId);
-      setSlides(updatedSlides);
-
-      setShowDeleteConfirm(false);
-      setSlideToDelete(null);
+        setShowDeleteConfirm(false);
+        setSlideToDelete(null);
+      }
     } catch (error) {
       console.error("Error deleting slide:", error);
     } finally {
@@ -206,26 +236,22 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
     }
   };
 
-
   const handleDragEnd = async (result: DropResult) => {
     const { destination, source } = result;
     if (!destination) return;
 
-
     if (destination.index !== source.index) {
-
       const originalSlides = [...slides];
       const reorderedSlides = Array.from(slides);
       const [removed] = reorderedSlides.splice(source.index, 1);
       reorderedSlides.splice(destination.index, 0, removed);
 
-     
       setSlides(reorderedSlides);
       onSlideClick(destination.index);
 
       try {
         setIsReordering(true);
-      
+
         const response = await axios.post(
           `${backend_url}/api/project/${projectId}/reorder-slides/`,
           { new_order: reorderedSlides.map((slide) => slide.id) },
@@ -236,13 +262,12 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
           console.log("Slides reordered successfully");
         }
       } catch (error) {
-        
         console.error(
           "Failed to reorder slides. Reverting to the original order.",
           error
         );
         setSlides(originalSlides);
-        onSlideClick(source.index); 
+        onSlideClick(source.index);
       } finally {
         setIsReordering(false);
       }
@@ -292,7 +317,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
       {/* Add Slide Modal */}
       {showAddSlide && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-[#1A1A1A] border border-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden">
+          <div className="bg-[#1A1A1A] border border-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-800">
               <div className="flex items-center space-x-3">
@@ -343,36 +368,6 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
 
             <div className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
               <AddSlide />
-            </div>
-
-            <div className="px-6 py-4 border-t border-gray-800 bg-gray-900/50">
-              <div className="flex items-center justify-between">
-                <div className="text-xs text-gray-400 flex items-center space-x-2">
-                  <span>💡</span>
-                  <span>
-                    Tip: Use descriptive titles for better AI-generated content
-                  </span>
-                </div>
-                <button
-                  onClick={() => setShowAddSlide(false)}
-                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors duration-200 flex items-center space-x-2"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                  <span>Close</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>
