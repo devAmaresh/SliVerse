@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Palette, Image, Layout, Save, X } from 'lucide-react';
-import useSlidesStore from '../store/useSlidesStore';
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import { backend_url } from '../utils/backend';
+import React, { useState, useEffect } from "react";
+import { Palette, Image, Layout, Save, X } from "lucide-react";
+import useSlidesStore from "../store/useSlidesStore";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { backend_url } from "../utils/backend";
+import { message } from "antd";
 
 interface SlideEditorProps {
   slideIndex: number;
@@ -15,7 +16,7 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
   const slide = slides[slideIndex];
   const [editedSlide, setEditedSlide] = useState({ ...slide });
   const [isSaving, setIsSaving] = useState(false);
-
+  const [messageApi, contextHolder] = message.useMessage();
   const token = Cookies.get("token");
 
   // Update local state when store slide changes
@@ -26,35 +27,54 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
   }, [slides, slideIndex]);
 
   const sectionLayouts = [
-    { value: 'vertical', label: 'Vertical', icon: '⬆️', description: 'Image on top' },
-    { value: 'left', label: 'Left', icon: '⬅️', description: 'Image on left' },
-    { value: 'right', label: 'Right', icon: '➡️', description: 'Image on right' }
+    {
+      value: "vertical",
+      label: "Vertical",
+      icon: "⬆️",
+      description: "Image on top",
+    },
+    { value: "left", label: "Left", icon: "⬅️", description: "Image on left" },
+    {
+      value: "right",
+      label: "Right",
+      icon: "➡️",
+      description: "Image on right",
+    },
   ];
 
   const predefinedColors = [
-    '#3B82F6', '#EF4444', '#10B981', '#F59E0B',
-    '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16',
-    '#F97316', '#6366F1', '#14B8A6', '#F43F5E'
+    "#3B82F6",
+    "#EF4444",
+    "#10B981",
+    "#F59E0B",
+    "#8B5CF6",
+    "#EC4899",
+    "#06B6D4",
+    "#84CC16",
+    "#F97316",
+    "#6366F1",
+    "#14B8A6",
+    "#F43F5E",
   ];
 
   const handleSectionLayoutChange = (layout: string) => {
-    setEditedSlide(prev => ({
+    setEditedSlide((prev) => ({
       ...prev,
-      section_layout: layout
+      section_layout: layout,
     }));
   };
 
   const handleColorChange = (color: string) => {
-    setEditedSlide(prev => ({
+    setEditedSlide((prev) => ({
       ...prev,
-      dominant_color: color
+      dominant_color: color,
     }));
   };
 
   const handleImageUrlChange = (url: string) => {
-    setEditedSlide(prev => ({
+    setEditedSlide((prev) => ({
       ...prev,
-      img_url: url
+      img_url: url,
     }));
   };
 
@@ -79,12 +99,14 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
       if (response.status === 200) {
         // Update the store with the new slide data
         updateSlide(slideIndex, editedSlide);
-        console.log('Slide updated successfully');
+        console.log("Slide updated successfully");
         onClose();
       }
-    } catch (error) {
-      console.error('Failed to update slide:', error);
-      // You might want to show a toast notification here
+    } catch (error: any) {
+      console.error("Failed to update slide:", error);
+      messageApi.error({
+        content: "Failed to update slide. Please try again.",
+      });
     } finally {
       setIsSaving(false);
     }
@@ -96,6 +118,7 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      {contextHolder}
       <div className="bg-[#1A1A1A] border border-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-3 border-b border-gray-800">
@@ -104,8 +127,12 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
               <Layout className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h2 className="text-white font-semibold text-lg">Edit Slide {slideIndex + 1}</h2>
-              <p className="text-gray-400 text-sm">Customize layout, image, and colors</p>
+              <h2 className="text-white font-semibold text-lg">
+                Edit Slide {slideIndex + 1}
+              </h2>
+              <p className="text-gray-400 text-sm">
+                Customize layout, image, and colors
+              </p>
             </div>
           </div>
           <button
@@ -119,10 +146,8 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
         {/* Content */}
         <div className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
             {/* Left Panel - Controls */}
             <div className="space-y-8">
-              
               {/* Section Layout */}
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
@@ -136,13 +161,15 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
                       onClick={() => handleSectionLayoutChange(layout.value)}
                       className={`p-4 rounded-xl border transition-all duration-200 text-center ${
                         editedSlide.section_layout === layout.value
-                          ? 'border-blue-500 bg-blue-500/10 text-blue-400'
-                          : 'border-gray-700 bg-gray-800/50 text-gray-400 hover:border-gray-600 hover:bg-gray-800'
+                          ? "border-blue-500 bg-blue-500/10 text-blue-400"
+                          : "border-gray-700 bg-gray-800/50 text-gray-400 hover:border-gray-600 hover:bg-gray-800"
                       }`}
                     >
                       <div className="text-2xl mb-2">{layout.icon}</div>
                       <div className="font-medium text-sm">{layout.label}</div>
-                      <div className="text-xs opacity-75 mt-1">{layout.description}</div>
+                      <div className="text-xs opacity-75 mt-1">
+                        {layout.description}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -154,18 +181,22 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
                   <Image className="w-5 h-5 text-green-400" />
                   <h3 className="text-white font-semibold">Image URL</h3>
                 </div>
-                
+
                 {/* Image URL Input */}
                 <div className="space-y-3">
-                  <label className="text-sm text-gray-400">Enter image URL</label>
+                  <label className="text-sm text-gray-400">
+                    Enter image URL
+                  </label>
                   <input
                     type="url"
-                    value={editedSlide.img_url || ''}
+                    value={editedSlide.img_url || ""}
                     onChange={(e) => handleImageUrlChange(e.target.value)}
                     placeholder="https://example.com/image.jpg"
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition-colors duration-200"
                   />
-                  <p className="text-xs text-gray-500">Paste a direct link to an image (jpg, png, gif, etc.)</p>
+                  <p className="text-xs text-gray-500">
+                    Paste a direct link to an image (jpg, png, gif, etc.)
+                  </p>
                 </div>
               </div>
 
@@ -175,7 +206,7 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
                   <Palette className="w-5 h-5 text-purple-400" />
                   <h3 className="text-white font-semibold">Dominant Color</h3>
                 </div>
-                
+
                 {/* Color Picker */}
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
@@ -202,8 +233,8 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
                       onClick={() => handleColorChange(color)}
                       className={`w-8 h-8 rounded-lg border-2 transition-all duration-200 ${
                         editedSlide.dominant_color === color
-                          ? 'border-white scale-110'
-                          : 'border-gray-600 hover:border-gray-400 hover:scale-105'
+                          ? "border-white scale-110"
+                          : "border-gray-600 hover:border-gray-400 hover:scale-105"
                       }`}
                       style={{ backgroundColor: color }}
                     />
@@ -216,18 +247,18 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
             <div className="space-y-4">
               <h3 className="text-white font-semibold flex items-center space-x-2">
                 <span>Live Preview</span>
-                <div 
+                <div
                   className="w-3 h-3 rounded-full animate-pulse"
                   style={{ backgroundColor: editedSlide.dominant_color }}
                 />
               </h3>
-              
+
               <div className="bg-black rounded-xl p-6 border border-gray-800">
                 {/* Mini slide preview */}
-                <div 
+                <div
                   className="w-full h-48 rounded-lg border border-gray-700 flex items-center justify-center relative overflow-hidden"
                   style={{
-                    background: `linear-gradient(135deg, ${editedSlide.dominant_color}20, ${editedSlide.dominant_color}05)`
+                    background: `linear-gradient(135deg, ${editedSlide.dominant_color}20, ${editedSlide.dominant_color}05)`,
                   }}
                 >
                   {editedSlide.img_url ? (
@@ -238,7 +269,7 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
                         className="w-full h-full object-cover rounded-lg"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
+                          target.style.display = "none";
                         }}
                       />
                       <div className="absolute inset-0 bg-black/20 rounded-lg" />
@@ -250,7 +281,9 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
                     <div className="text-center">
                       <Image className="w-8 h-8 text-gray-500 mx-auto mb-2" />
                       <p className="text-gray-500 text-sm">No image</p>
-                      <p className="text-xs text-gray-600 mt-1">Layout: {editedSlide.section_layout}</p>
+                      <p className="text-xs text-gray-600 mt-1">
+                        Layout: {editedSlide.section_layout}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -261,22 +294,28 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
                   <div className="space-y-1 text-xs">
                     <div className="flex justify-between">
                       <span className="text-gray-500">Layout:</span>
-                      <span className="text-white capitalize">{editedSlide.section_layout}</span>
+                      <span className="text-white capitalize">
+                        {editedSlide.section_layout}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Color:</span>
                       <div className="flex items-center space-x-2">
-                        <div 
+                        <div
                           className="w-3 h-3 rounded-full border border-gray-600"
-                          style={{ backgroundColor: editedSlide.dominant_color }}
+                          style={{
+                            backgroundColor: editedSlide.dominant_color,
+                          }}
                         />
-                        <span className="text-white">{editedSlide.dominant_color}</span>
+                        <span className="text-white">
+                          {editedSlide.dominant_color}
+                        </span>
                       </div>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Image:</span>
                       <span className="text-white">
-                        {editedSlide.img_url ? '✓ Set' : '✗ None'}
+                        {editedSlide.img_url ? "✓ Set" : "✗ None"}
                       </span>
                     </div>
                   </div>
@@ -306,7 +345,7 @@ const SlideEditor: React.FC<SlideEditorProps> = ({ slideIndex, onClose }) => {
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors duration-200 flex items-center space-x-2"
               >
                 <Save className="w-4 h-4" />
-                <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
+                <span>{isSaving ? "Saving..." : "Save Changes"}</span>
               </button>
             </div>
           </div>
