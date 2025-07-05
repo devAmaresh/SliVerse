@@ -8,7 +8,7 @@ import {
   LoadingOutlined,
   LockFilled,
   UnlockFilled,
-  StarFilled,
+
 } from "@ant-design/icons";
 import useProjectDelete from "../hooks/useProjectDelete";
 import useProjectUpdate from "../hooks/useProjectUpdate";

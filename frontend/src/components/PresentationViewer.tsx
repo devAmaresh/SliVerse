@@ -3,6 +3,7 @@ import PPTSlideRenderer from "./PPTSlideRenderer";
 import NavigationSidebar from "./NavigationSidebar";
 import DashNavbar from "./DashNavbar";
 
+
 interface SlideData {
   id: string;
   slide_number: number;
@@ -43,7 +44,8 @@ const PresentationViewer: React.FC<PresentationViewerProps> = ({
     const slideHeight = slideElement.clientHeight;
 
     // Center the slide in the viewport
-    const targetScrollTop = slideOffsetTop - (containerHeight - slideHeight) / 2;
+    const targetScrollTop =
+      slideOffsetTop - (containerHeight - slideHeight) / 2;
 
     // Smooth scroll to the target position
     container.scrollTo({
@@ -64,6 +66,7 @@ const PresentationViewer: React.FC<PresentationViewerProps> = ({
         onSlideClick={scrollToSlide}
         title={title}
       />
+     
 
       {/* Main Content Area */}
       <div className="flex-1 pt-16">

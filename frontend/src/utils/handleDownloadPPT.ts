@@ -167,7 +167,7 @@ const handleDownloadPPT = async ({ slides, title }: any) => {
 };
 
 // Layout-specific handlers with proper formatting
-function handleBulletsLayout(pptSlide: any, pptx: any, slide: any, x: number, startY: number, width: number, textColor: string, accentColor: string) {
+function handleBulletsLayout(pptSlide: any, _pptx: any, slide: any, x: number, startY: number, width: number, textColor: string, _accentColor: string) {
   const bullets = slide.content?.bullets || [];
   
   bullets.forEach((bullet: any, index: number) => {
@@ -193,7 +193,7 @@ function handleBulletsLayout(pptSlide: any, pptx: any, slide: any, x: number, st
   });
 }
 
-function handleColumnsLayout(pptSlide: any, pptx: any, slide: any, x: number, startY: number, width: number, textColor: string, accentColor: string) {
+function handleColumnsLayout(pptSlide: any, _pptx: any, slide: any, x: number, startY: number, width: number, textColor: string, accentColor: string) {
   const columns = slide.content?.columns || [];
   if (columns.length === 0) return;
   
@@ -218,7 +218,7 @@ function handleColumnsLayout(pptSlide: any, pptx: any, slide: any, x: number, st
     }
     
     const items = column.points || column.items || column.content || [];
-    items.forEach((point: any, pointIndex: number) => {
+    items.forEach((point: any, _pointIndex: number) => {
       if (currentY + 0.3 < 5.63 - 0.5) {
         const pointText = typeof point === 'string' ? point : (point.text || point.content || '');
         if (pointText && pointText.trim()) {
@@ -238,7 +238,7 @@ function handleColumnsLayout(pptSlide: any, pptx: any, slide: any, x: number, st
   });
 }
 
-function handleIconsLayout(pptSlide: any, pptx: any, slide: any, x: number, startY: number, width: number, textColor: string, accentColor: string) {
+function handleIconsLayout(pptSlide: any, _pptx: any, slide: any, x: number, startY: number, width: number, textColor: string, accentColor: string) {
   const icons = slide.content?.icons || [];
   const itemsPerRow = Math.min(2, icons.length);
   const itemWidth = (width - 0.4) / itemsPerRow;
@@ -290,7 +290,7 @@ function handleIconsLayout(pptSlide: any, pptx: any, slide: any, x: number, star
   });
 }
 
-function handleTimelineLayout(pptSlide: any, pptx: any, slide: any, x: number, startY: number, width: number, textColor: string, accentColor: string) {
+function handleTimelineLayout(pptSlide: any, _pptx: any, slide: any, x: number, startY: number, width: number, textColor: string, accentColor: string) {
   const timeline = slide.content?.timeline || [];
   
   timeline.forEach((item: any, index: number) => {
@@ -335,7 +335,7 @@ function handleTimelineLayout(pptSlide: any, pptx: any, slide: any, x: number, s
   });
 }
 
-function handleArrowsLayout(pptSlide: any, pptx: any, slide: any, x: number, startY: number, width: number, textColor: string, accentColor: string) {
+function handleArrowsLayout(pptSlide: any, _pptx: any, slide: any, x: number, startY: number, width: number, textColor: string, accentColor: string) {
   const arrows = slide.content?.arrows || [];
   if (arrows.length === 0) return;
   
@@ -384,7 +384,7 @@ function handleArrowsLayout(pptSlide: any, pptx: any, slide: any, x: number, sta
   });
 }
 
-function handleDefaultLayout(pptSlide: any, pptx: any, slide: any, x: number, startY: number, width: number, textColor: string, accentColor: string) {
+function handleDefaultLayout(pptSlide: any, _pptx: any, slide: any, x: number, startY: number, width: number, textColor: string, _accentColor: string) {
   // Handle any content as bullet points
   const content = slide.content?.bullets || slide.content?.content || slide.content?.text || [];
   

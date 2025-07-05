@@ -166,7 +166,6 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
   slides,
   selectedSlide,
   onSlideClick,
-  title,
 }) => {
   const { id: projectId } = useParams<{ id: string }>();
   const [showAddSlide, setShowAddSlide] = useState(false);
