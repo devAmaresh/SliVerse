@@ -31,7 +31,7 @@ interface NavigationSidebarProps {
   title: string;
 }
 
-// Memoized slide item to prevent unnecessary re-renders
+
 const SlideItem = memo(
   ({
     slide,
@@ -141,14 +141,7 @@ const SlideItem = memo(
             slide.content.title ||
             `Slide ${index + 1}`}
         </h3>
-        <p
-          className={`
-            text-xs mt-1 truncate text-left transition-colors duration-200
-            ${isSelected ? "text-gray-300" : "text-gray-400"}
-          `}
-        >
-          {slide.content.key_message || "No content available"}
-        </p>
+       
       </div>
 
       {/* Active Indicator */}
@@ -176,7 +169,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
   // Refs for slide elements in sidebar
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Scroll the current slide into view whenever it changes
+
   useEffect(() => {
     const currentSlideElement = slideRefs.current[selectedSlide];
     if (currentSlideElement) {
@@ -200,7 +193,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
         },
       });
 
-      // Update the slides store by removing the deleted slide
+
       const updatedSlides = allSlides.filter((s) => s.id !== slideId);
       setSlides(updatedSlides);
 
@@ -213,26 +206,26 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
     }
   };
 
-  // Handle reorder logic with improved error handling
+
   const handleDragEnd = async (result: DropResult) => {
     const { destination, source } = result;
     if (!destination) return;
 
-    // If the item has been moved to a different position
+
     if (destination.index !== source.index) {
-      // Create a copy of the current slides in case of a failure
+
       const originalSlides = [...slides];
       const reorderedSlides = Array.from(slides);
       const [removed] = reorderedSlides.splice(source.index, 1);
       reorderedSlides.splice(destination.index, 0, removed);
 
-      // Update the slides state locally for better UX
+     
       setSlides(reorderedSlides);
       onSlideClick(destination.index);
 
       try {
         setIsReordering(true);
-        // Make an API call to reorder the slides on the server
+      
         const response = await axios.post(
           `${backend_url}/api/project/${projectId}/reorder-slides/`,
           { new_order: reorderedSlides.map((slide) => slide.id) },
@@ -243,13 +236,13 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
           console.log("Slides reordered successfully");
         }
       } catch (error) {
-        // If the API call fails, revert the slides to the original order
+        
         console.error(
           "Failed to reorder slides. Reverting to the original order.",
           error
         );
         setSlides(originalSlides);
-        onSlideClick(source.index); // Revert the current slide index back
+        onSlideClick(source.index); 
       } finally {
         setIsReordering(false);
       }
