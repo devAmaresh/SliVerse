@@ -10,9 +10,9 @@ const ArrowsLayout: React.FC<ArrowsLayoutProps> = ({ content, dominantColor }) =
 
   return (
     <div className="w-full space-y-8">
-      {content.title && (
+      {(content.title || content.heading) && (
         <div className="text-center space-y-3">
-          <h2 className="text-2xl md:text-3xl font-semibold text-white">{content.title}</h2>
+          <h2 className="text-2xl md:text-3xl font-semibold text-white">{content.title || content.heading}</h2>
           <div 
             className="w-16 h-0.5 mx-auto rounded-full"
             style={{ backgroundColor: dominantColor }}
