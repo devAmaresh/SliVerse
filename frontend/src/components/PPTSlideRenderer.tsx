@@ -123,14 +123,14 @@ const ModernSlideRenderer: React.FC<ModernSlideRendererProps> = ({
           <div className="grid grid-cols-12 gap-12 ">
             <div
               className={`col-span-8 ${
-                section_layout === "right" ? "order-2" : "order-1"
+                section_layout === "right" ? "order-1" : "order-2"
               }`}
             >
               {renderLayoutContent()}
             </div>
             <div
               className={`col-span-4 ${
-                section_layout === "right" ? "order-1" : "order-2"
+                section_layout === "right" ? "order-2" : "order-1"
               } flex justify-center`}
             >
               <div className="">
