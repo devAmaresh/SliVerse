@@ -14,6 +14,26 @@ def clean_xml_content(xml_content):
         lines = xml_content.split('\n')
         xml_content = '\n'.join(lines[1:])
     
+    # Remove markdown headers and extra text
+    xml_content = re.sub(r'^##.*$', '', xml_content, flags=re.MULTILINE)
+    xml_content = re.sub(r'^#.*$', '', xml_content, flags=re.MULTILINE)
+    
+    # Remove any lines that don't contain XML tags
+    lines = xml_content.split('\n')
+    xml_lines = []
+    found_xml_start = False
+    
+    for line in lines:
+        line = line.strip()
+        if '<PRESENTATION>' in line:
+            found_xml_start = True
+        if found_xml_start and line:
+            xml_lines.append(line)
+        if '</PRESENTATION>' in line:
+            break
+    
+    xml_content = '\n'.join(xml_lines)
+    
     # Replace problematic characters
     xml_content = xml_content.replace('"', "'")
     xml_content = xml_content.replace("&", "and")
@@ -34,6 +54,7 @@ def parse_xml_presentation(xml_content, project_title):
         # Clean the XML content first
         xml_content = clean_xml_content(xml_content.strip())
         
+        # Add XML declaration if not present
         if not xml_content.startswith('<?xml'):
             xml_content = '<?xml version="1.0" encoding="UTF-8"?>\n' + xml_content
             

@@ -2,9 +2,9 @@ You are an expert presentation designer. Create a single slide in XML format.
 
 SLIDE DETAILS:
 - Title: {slide_title}
-- Project Context: {context['project_title']}
-- Project Description: {context['project_description']}
-- Existing Slides Count: {context['existing_slides_count']}
+- Project Context: {project_title}
+- Project Description: {project_description}
+- Existing Slides Count: {existing_slides_count}
 
 CRITICAL XML FORMATTING RULES:
 1. NO quotes inside text content - use apostrophes instead
@@ -21,35 +21,110 @@ REQUIREMENTS:
 6. Make content professional and substantial
 
 LAYOUT GUIDELINES:
-- bullets: For lists, key points, steps (RECOMMENDED)
-- columns: For comparisons, features, benefits
-- icons: For services, features, concepts
-- timeline: For processes, history, roadmap
-- arrows: For workflows, processes
+Three layout options for the root image:
+- layout="left" - Root image appears on the left side
+- layout="right" - Root image appears on the right side  
+- layout="vertical" - Root image appears at the top
 
-EXACT OUTPUT FORMAT (use bullets layout):
-<PRESENTATION>
-<SECTION layout="vertical">
+AVAILABLE LAYOUTS:
+## AVAILABLE LAYOUTS
+Choose ONE different layout for each slide:
+
+1. COLUMNS: For comparisons
+```xml
+<COLUMNS>
+  <DIV><H3>First Concept</H3><P>Description</P></DIV>
+  <DIV><H3>Second Concept</H3><P>Description</P></DIV>
+</COLUMNS>
+```
+
+2. BULLETS: For key points
+```xml
 <BULLETS>
-<DIV>
-<HEADING>Point Title 1</HEADING>
-<TEXT>Description without quotes or special chars</TEXT>
-</DIV>
-<DIV>
-<HEADING>Point Title 2</HEADING>
-<TEXT>Description without quotes or special chars</TEXT>
-</DIV>
-<DIV>
-<HEADING>Point Title 3</HEADING>
-<TEXT>Description without quotes or special chars</TEXT>
-</DIV>
-<DIV>
-<HEADING>Point Title 4</HEADING>
-<TEXT>Description without quotes or special chars</TEXT>
-</DIV>
+  <DIV><H3>Main Point</H3><P>Description</P></DIV>
+  <DIV><P>Second point with details</P></DIV>
 </BULLETS>
-<IMG query="simple image description">digital guidance parents teenagers</IMG>
+```
+
+3. ICONS: For concepts with symbols
+```xml
+<ICONS>
+  <DIV><ICON query="rocket" /><H3>Innovation</H3><P>Description</P></DIV>
+  <DIV><ICON query="shield" /><H3>Security</H3><P>Description</P></DIV>
+</ICONS>
+```
+
+4. CYCLE: For processes and workflows
+```xml
+<CYCLE>
+  <DIV><H3>Research</H3><P>Initial exploration phase</P></DIV>
+  <DIV><H3>Design</H3><P>Solution creation phase</P></DIV>
+  <DIV><H3>Implement</H3><P>Execution phase</P></DIV>
+  <DIV><H3>Evaluate</H3><P>Assessment phase</P></DIV>
+</CYCLE>
+```
+
+5. ARROWS: For cause-effect or flows
+```xml
+<ARROWS>
+  <DIV><H3>Challenge</H3><P>Current market problem</P></DIV>
+  <DIV><H3>Solution</H3><P>Our innovative approach</P></DIV>
+  <DIV><H3>Result</H3><P>Measurable outcomes</P></DIV>
+</ARROWS>
+```
+
+6. TIMELINE: For chronological progression
+```xml
+<TIMELINE>
+  <DIV><H3>2022</H3><P>Market research completed</P></DIV>
+  <DIV><H3>2023</H3><P>Product development phase</P></DIV>
+  <DIV><H3>2024</H3><P>Global market expansion</P></DIV>
+</TIMELINE>
+```
+
+7. PYRAMID: For hierarchical importance
+```xml
+<PYRAMID>
+  <DIV><H3>Vision</H3><P>Our aspirational goal</P></DIV>
+  <DIV><H3>Strategy</H3><P>Key approaches to achieve vision</P></DIV>
+  <DIV><H3>Tactics</H3><P>Specific implementation steps</P></DIV>
+</PYRAMID>
+```
+
+8. STAIRCASE: For progressive advancement
+```xml
+<STAIRCASE>
+  <DIV><H3>Basic</H3><P>Foundational capabilities</P></DIV>
+  <DIV><H3>Advanced</H3><P>Enhanced features and benefits</P></DIV>
+  <DIV><H3>Expert</H3><P>Premium capabilities and results</P></DIV>
+</STAIRCASE>
+```
+
+9. CHART: For data visualization
+```xml
+<CHART charttype="vertical-bar">
+  <TABLE>
+    <TR><TD type="label"><VALUE>Q1</VALUE></TD><TD type="data"><VALUE>45</VALUE></TD></TR>
+    <TR><TD type="label"><VALUE>Q2</VALUE></TD><TD type="data"><VALUE>72</VALUE></TD></TR>
+    <TR><TD type="label"><VALUE>Q3</VALUE></TD><TD type="data"><VALUE>89</VALUE></TD></TR>
+  </TABLE>
+</CHART>
+```
+
+10. IMAGES: Most slide needs at least one
+```xml
+<IMG query="futuristic smart city with renewable energy infrastructure and autonomous vehicles in morning light" />
+```
+
+EXACT OUTPUT FORMAT:
+## PRESENTATION STRUCTURE
+```xml
+<PRESENTATION>
+<SECTION layout="left" | "right" | "vertical">
+  <!-- Required: include ONE layout component -->
+  <!-- Required: include at least one detailed image query -->
 </SECTION>
 </PRESENTATION>
+```
 
 Generate content about: {slide_title}

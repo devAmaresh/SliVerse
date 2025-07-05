@@ -297,6 +297,9 @@ def generate_single_slide_xml(slide_title, context):
             project_description=context['project_description'],
             existing_slides_count=context['existing_slides_count']
         )
+        
+        # Add specific instruction for clean XML output
+        prompt += "\n\nIMPORTANT: Return ONLY the XML content starting with <PRESENTATION> and ending with </PRESENTATION>. Do not include any markdown headers, explanations, or other text."
 
     except Exception as e:
         print(f"Error reading prompt template: {e}")
@@ -324,13 +327,6 @@ REQUIREMENTS:
 5. Add IMG tags with simple descriptive queries
 6. Make content professional and substantial
 
-LAYOUT GUIDELINES:
-- bullets: For lists, key points, steps
-- columns: For comparisons, features, benefits
-- icons: For services, features, concepts
-- timeline: For processes, history, roadmap
-- arrows: For workflows, processes
-
 EXACT OUTPUT FORMAT (use bullets layout):
 <PRESENTATION>
 <SECTION layout="vertical">
@@ -356,6 +352,8 @@ EXACT OUTPUT FORMAT (use bullets layout):
 </SECTION>
 </PRESENTATION>
 
+IMPORTANT: Return ONLY the XML content starting with <PRESENTATION> and ending with </PRESENTATION>. Do not include any markdown headers, explanations, or other text.
+
 Generate content about: {slide_title}
 """
 
@@ -366,6 +364,18 @@ Generate content about: {slide_title}
         
         # Clean the XML content to remove problematic characters
         xml_content = xml_content.replace("```xml", "").replace("```", "").strip()
+        
+        # Remove any markdown headers or extra text
+        import re
+        xml_content = re.sub(r'^##.*$', '', xml_content, flags=re.MULTILINE)
+        xml_content = re.sub(r'^#.*$', '', xml_content, flags=re.MULTILINE)
+        
+        # Extract only the XML part
+        start_idx = xml_content.find('<PRESENTATION>')
+        end_idx = xml_content.find('</PRESENTATION>') + len('</PRESENTATION>')
+        
+        if start_idx != -1 and end_idx != -1:
+            xml_content = xml_content[start_idx:end_idx]
         
         # Remove XML declaration if present as it might cause issues
         if xml_content.startswith("<?xml"):
