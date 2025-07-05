@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import PPTSlideRenderer from "./PPTSlideRenderer";
 import NavigationSidebar from "./NavigationSidebar";
 import DashNavbar from "./DashNavbar";
-import useSlideStore from "../store/useSlidesStore";
+import useSlidesStore from "../store/useSlidesStore";
 
 interface SlideData {
   id: string;
@@ -28,20 +28,20 @@ const PresentationViewer: React.FC<PresentationViewerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Get slides from store instead of props
-  const { slides, setSlides } = useSlideStore();
+  // Get slides from store
+  const { slides, setSlides, setTitle } = useSlidesStore();
 
-  // Initialize store with props slides if store is empty
+  // Initialize store with props data if store is empty
   useEffect(() => {
     if (slides.length === 0 && initialSlides.length > 0) {
       setSlides(initialSlides);
     }
-  }, [initialSlides, slides.length, setSlides]);
+    if (title) {
+      setTitle(title);
+    }
+  }, [initialSlides, title, slides.length, setSlides, setTitle]);
 
-  // Use store slides, fallback to props if store is empty
-  const currentSlides = slides.length > 0 ? slides : initialSlides;
-
-  // Simple scroll to slide function - no tracking
+  // Simple scroll to slide function
   const scrollToSlide = useCallback((index: number) => {
     if (!slideRefs.current[index] || !containerRef.current) return;
 
@@ -69,10 +69,10 @@ const PresentationViewer: React.FC<PresentationViewerProps> = ({
 
   // Adjust selected slide if it's out of bounds after deletion
   useEffect(() => {
-    if (selectedSlide >= currentSlides.length && currentSlides.length > 0) {
-      setSelectedSlide(currentSlides.length - 1);
+    if (selectedSlide >= slides.length && slides.length > 0) {
+      setSelectedSlide(slides.length - 1);
     }
-  }, [currentSlides.length, selectedSlide]);
+  }, [slides.length, selectedSlide]);
 
   return (
     <div className="h-screen bg-gray-50 dark:bg-[#0A0A0A] flex overflow-hidden">
@@ -98,7 +98,7 @@ const PresentationViewer: React.FC<PresentationViewerProps> = ({
           }}
         >
           <div className="">
-            {currentSlides.map((slide, index) => (
+            {slides.map((slide, index) => (
               <div
                 key={slide.id}
                 ref={(el) => (slideRefs.current[index] = el)}
@@ -108,8 +108,8 @@ const PresentationViewer: React.FC<PresentationViewerProps> = ({
                 }}
               >
                 <PPTSlideRenderer
-                  slide={slide}
-                  isActive={true}
+                  slideIndex={index}
+                  isActive={selectedSlide === index}
                   slideNumber={index + 1}
                 />
               </div>

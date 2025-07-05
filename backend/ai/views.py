@@ -306,15 +306,6 @@ class SlideEditView(APIView):
     def patch(self, request, id, *args, **kwargs):
         slide = get_object_or_404(Slide, pk=id, project__user=request.user)
 
-        img_url = request.data.get("img_url")
-        if img_url:
-            try:
-                dominant_color = get_dominant_color(img_url)
-                if dominant_color:
-                    request.data["dominant_color"] = dominant_color
-            except Exception as e:
-                print(f"Failed to extract dominant color: {e}")
-
         serializer = SlideSerializer(slide, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
