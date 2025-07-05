@@ -35,6 +35,8 @@ class Project(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     is_public = models.BooleanField(default=False)
+    xml_content = models.TextField(blank=True, null=True)
+    is_favorite = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -52,6 +54,9 @@ class Slide(models.Model):
     )
     slide_number = models.PositiveIntegerField()  # Order in the project
     content = models.JSONField()  # Content of the slide (title, body, images, etc.)
+    xml_content = models.TextField(blank=True, null=True)  # Store XML for this slide
+    layout_type = models.CharField(max_length=50, blank=True, null=True)  # Layout type
+    section_layout = models.CharField(max_length=20, default="left")  # left, right, vertical
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     img_url = models.URLField(blank=True, null=True)

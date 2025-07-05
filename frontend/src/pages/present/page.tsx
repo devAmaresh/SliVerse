@@ -1,36 +1,55 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useSlidesStore from "../../store/useSlidesStore";
-import { themes } from "../../utils/theme";
-import Markdown from "react-markdown";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { backend_url } from "../../utils/backend";
-import { Button, Popover, Spin, Steps, StepsProps } from "antd";
-import { PlaySquareOutlined } from "@ant-design/icons";
-type ThemeName = keyof typeof themes;
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Maximize, 
+  Minimize, 
+  Grid3X3,
+  Home,
+  X
+} from "lucide-react";
 
-const Page: React.FC = () => {
-  const { id } = useParams(); // Fetch the project ID from the URL params
-  const { slides, setSlides, setTitle, title } = useSlidesStore(); // Zustand Store
-  const [loading, setLoading] = useState(true); // Track loading state
-  const [error, setError] = useState<string | null>(null); // Track error state
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false); // Fullscreen state
+// Import all layout components
+import ColumnsLayout from "../../components/layouts/ColumnsLayout";
+import BulletsLayout from "../../components/layouts/BulletsLayout";
+import IconsLayout from "../../components/layouts/IconsLayout";
+import TimelineLayout from "../../components/layouts/TimelineLayout";
+import ChartLayout from "../../components/layouts/ChartLayout";
+import CycleLayout from "../../components/layouts/CycleLayout";
+import ArrowsLayout from "../../components/layouts/ArrowsLayout";
+import PyramidLayout from "../../components/layouts/PyramidLayout";
+import StaircaseLayout from "../../components/layouts/StaircaseLayout";
+
+interface SlideData {
+  id: string;
+  slide_number: number;
+  content: any;
+  xml_content: string;
+  layout_type: string;
+  section_layout: string;
+  img_url?: string;
+  dominant_color: string;
+}
+
+const PresentPage: React.FC = () => {
+  const { id } = useParams();
+  const { slides, setSlides, setTitle, title } = useSlidesStore();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [showGrid, setShowGrid] = useState(false);
   const token = Cookies.get("token");
-  const progressDotRender: StepsProps["progressDot"] = (dot, { index }) => (
-    <Popover
-      content={
-        <>
-          <span className="mr-1">{index + 1}.</span>
-          {slides[index].content.heading}
-        </>
-      }
-    >
-      {dot}
-    </Popover>
-  );
-  // Load slides into the Zustand store
+
+  const currentSlide = slides[currentSlideIndex];
+
+  // Load slides
   useEffect(() => {
     const fetchSlideData = async () => {
       try {
@@ -41,12 +60,10 @@ const Page: React.FC = () => {
         });
 
         const data = response.data;
-
-        // Set the slides and title in Zustand store
         setSlides(data.slides);
         setTitle(data.title);
       } catch (err) {
-        setError("Failed to fetch data.");
+        setError("Failed to fetch presentation data.");
       } finally {
         setLoading(false);
       }
@@ -57,35 +74,48 @@ const Page: React.FC = () => {
     }
   }, [id, setSlides, setTitle]);
 
-  const [theme, _setTheme] = useState<ThemeName>("ocean");
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-
-  const currentTheme = themes[theme];
-  const currentSlide = slides[currentSlideIndex];
-
-  // Key event listener for slide navigation
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // if (!isFullscreen) return;
-
-      if (
-        (e.key === "ArrowUp" || e.key == "ArrowLeft") &&
-        currentSlideIndex > 0
-      ) {
+      if (e.key === "ArrowLeft" && currentSlideIndex > 0) {
         setCurrentSlideIndex((prev) => prev - 1);
-      } else if (
-        (e.key === "ArrowDown" || e.key == "ArrowRight") &&
-        currentSlideIndex < slides.length - 1
-      ) {
+      } else if (e.key === "ArrowRight" && currentSlideIndex < slides.length - 1) {
         setCurrentSlideIndex((prev) => prev + 1);
+      } else if (e.key === "Escape" && isFullscreen) {
+        exitFullscreen();
+      } else if (e.key === "f" || e.key === "F") {
+        toggleFullscreen();
+      } else if (e.key === "g" || e.key === "G") {
+        setShowGrid(!showGrid);
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [currentSlideIndex, slides.length, isFullscreen, showGrid]);
+
+  // Auto-hide controls in fullscreen
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
+    const resetTimer = () => {
+      setShowControls(true);
+      clearTimeout(timer);
+      timer = setTimeout(() => setShowControls(false), 2000);
     };
-  }, [currentSlideIndex, slides.length, isFullscreen]);
+
+    if (isFullscreen) {
+      resetTimer();
+      const handleMouseMove = () => resetTimer();
+      document.addEventListener("mousemove", handleMouseMove);
+      return () => {
+        document.removeEventListener("mousemove", handleMouseMove);
+        clearTimeout(timer);
+      };
+    } else {
+      setShowControls(true);
+    }
+  }, [isFullscreen]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -94,232 +124,369 @@ const Page: React.FC = () => {
     } else {
       document.exitFullscreen();
       setIsFullscreen(false);
+      setShowControls(true); 
     }
   };
-  useEffect(() => {
-    // Function to check fullscreen state
-    const handleFullscreenChange = () => {
-      if (document.fullscreenElement) {
-        setIsFullscreen(true);
-      } else {
-        setIsFullscreen(false);
-      }
-    };
 
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-
-    // Cleanup the event listener when the component unmounts or the effect is re-run
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    };
-  }, []);
-  // Render bullet points (recursive to handle nested points)
-  const renderBulletPoint = (point: any, idx: number) => {
-    if (typeof point === "string") {
-      return (
-        <li key={idx} className="mb-2 md:text-lg lg:text-2xl py-6">
-          <Markdown>{point}</Markdown>
-        </li>
-      );
+  const exitFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+      setShowControls(true); 
     }
+  };
 
-    if (typeof point === "object" && point.heading) {
-      return (
-        <div key={idx} className="ml-4">
-          <div className="font-semibold md:text-lg lg:text-2xl">
-            {point.heading}
+  const nextSlide = () => {
+    if (currentSlideIndex < slides.length - 1) {
+      setCurrentSlideIndex(prev => prev + 1);
+    }
+  };
+
+  const prevSlide = () => {
+    if (currentSlideIndex > 0) {
+      setCurrentSlideIndex(prev => prev - 1);
+    }
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentSlideIndex(index);
+    setShowGrid(false);
+  };
+
+  // Render the appropriate layout component
+  const renderLayoutContent = (slide: SlideData) => {
+    const layoutProps = {
+      content: slide.content,
+      dominantColor: slide.dominant_color
+    };
+
+    switch (slide.layout_type) {
+      case 'columns':
+        return <ColumnsLayout {...layoutProps} />;
+      case 'bullets':
+        return <BulletsLayout {...layoutProps} />;
+      case 'icons':
+        return <IconsLayout {...layoutProps} />;
+      case 'timeline':
+        return <TimelineLayout {...layoutProps} />;
+      case 'chart':
+        return <ChartLayout {...layoutProps} />;
+      case 'cycle':
+        return <CycleLayout {...layoutProps} />;
+      case 'arrows':
+        return <ArrowsLayout {...layoutProps} />;
+      case 'pyramid':
+        return <PyramidLayout {...layoutProps} />;
+      case 'staircase':
+        return <StaircaseLayout {...layoutProps} />;
+      default:
+        return (
+          <div className="flex items-center justify-center py-20">
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 text-center max-w-md">
+              <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">⚡</span>
+              </div>
+              <h3 className="text-lg font-medium text-white mb-2">Advanced Layout</h3>
+              <p className="text-sm text-gray-400">Layout: {slide.layout_type}</p>
+            </div>
           </div>
-          <ul className="list-disc pl-6 md:text-lg lg:text-2xl">
-            {point.points?.map((nestedPoint: any, nestedIdx: number) =>
-              renderBulletPoint(nestedPoint, nestedIdx)
-            )}
-          </ul>
+        );
+    }
+  };
+
+  // Render slide content with proper layout based on section_layout and images
+  const renderSlideContent = (slide: SlideData) => {
+    const hasValidImage = slide.img_url && slide.img_url.trim() !== '';
+
+    if (slide.section_layout === 'vertical' && hasValidImage) {
+      return (
+        <div className="w-full max-w-7xl mx-auto">
+          <div className="space-y-12">
+            {/* Image Section */}
+            <div className="flex justify-center">
+              <div className="relative group max-w-4xl w-full">
+                <img 
+                  src={slide.img_url} 
+                  alt="Slide visual"
+                  className="w-full h-72 object-cover rounded-2xl shadow-xl border border-white/10"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                  }}
+                />
+                <div 
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-5 transition-opacity duration-300"
+                  style={{ backgroundColor: slide.dominant_color }}
+                />
+              </div>
+            </div>
+            
+            {/* Content Section */}
+            <div className="w-full">
+              {renderLayoutContent(slide)}
+            </div>
+          </div>
         </div>
       );
     }
 
-    return null; // Fallback for unexpected data
-  };
-
-  // Render double-column slides
-  const renderDoubleColumn = (columns: any[]) => {
-    return (
-      <div className="grid grid-cols-2 gap-6">
-        {columns.map((column, idx) => (
-          <div key={idx}>
-            <h3 className="font-semibold md:text-lg lg:text-2xl mb-2">
-              {column.heading}
-            </h3>
-            <ul className="list-disc pl-6 md:text-lg lg:text-2xl">
-              {column.points?.map((point: any, pointIdx: number) =>
-                renderBulletPoint(point, pointIdx)
-              )}
-            </ul>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  // Render icons in slides
-  const renderIconSlide = (points: any[]) => {
-    return (
-      <div className="grid grid-cols-2 gap-4">
-        {points.map((point, idx) => (
-          <div
-            key={idx}
-            className="flex space-x-2 rounded-md p-3"
-            style={{
-              boxShadow: `2px 2px 2px 2px rgba(0, 0, 0, 0.1)`,
-            }}
-          >
-            <span className="w-12 h-12 bg-zinc-100 rounded-lg flex items-center justify-center">
-              <img
-                src={`https://img.icons8.com/color/${
-                  point.match(/\[\[(.*?)\]\]/)?.[1] || "🎯"
-                }.png`}
-                alt="icon"
-                onError={(e: any) => {
-                  e.target.onerror = null;
-                  e.target.src = "https://img.icons8.com/color/idea.png"; // Default image URL
-                }}
-                className="w-full h-full object-center object-contain"
-              />
-            </span>
-
-            <p className="md:text-lg lg:text-2xl flex-1">
-              <Markdown>{point.replace(/\[\[(.*?)\]\]/, "").trim()}</Markdown>
-            </p>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const renderSequential = (points: any[]) => {
-    return (
-      <>
-        <ul className="list-disc pl-6">
-          {points?.map((point, idx) => (
-            <div
-              key={idx}
-              className="mb-2 md:text-lg lg:text-2xl text-lg flex space-x-2 items-center pb-3"
-            >
-              <div className="w-14 h-14 flex-shrink-0 bg-zinc-100 rounded-lg flex items-center justify-center">
-                <img
-                  src={`https://img.icons8.com/color/${idx + 1}.png`}
-                  alt="icon"
-                  className="w-full h-full object-center object-contain"
+    if (hasValidImage && (slide.section_layout === 'left' || slide.section_layout === 'right')) {
+      return (
+        <div className="w-full max-w-7xl mx-auto">
+          <div className="grid grid-cols-12 gap-12">
+            <div className={`col-span-8 ${slide.section_layout === 'right' ? 'order-2' : 'order-1'}`}>
+              {renderLayoutContent(slide)}
+            </div>
+            <div className={`col-span-4 ${slide.section_layout === 'right' ? 'order-1' : 'order-2'} flex justify-center`}>
+              <div>
+                <img 
+                  src={slide.img_url} 
+                  alt="Slide visual"
+                  className="w-full h-full object-cover rounded-2xl shadow-xl border border-white/10"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                  }}
                 />
               </div>
-              <div className="flex-1">
-                <Markdown>{point}</Markdown>
-              </div>
             </div>
-          ))}
-        </ul>
-      </>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-full max-w-7xl mx-auto">
+        {renderLayoutContent(slide)}
+      </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading presentation...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-900 via-gray-900 to-gray-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-red-500 text-2xl">⚠</span>
+          </div>
+          <p className="text-white text-lg">{error}</p>
+          <button
+            onClick={() => window.close()}
+            className="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="h-screen overflow-y-hidden ">
-      {/* Loading State */}
-      {loading && (
-        <Spin fullscreen size="large" tip="Loading slides..." spinning />
-      )}
-
-      {/* Error State */}
-      {error && (
-        <div className="fixed inset-0 flex items-center justify-center bg-opacity-90 z-50">
-          <div className="text-3xl font-semibold text-red-500">{error}</div>
-        </div>
-      )}
-      {/* Sidebar */}
-      {!error && !loading && (
-        <>
-          <nav
-            className={`flex justify-between relative items-center top-0 px-8 py-2 bg-zinc-100 text-black
-               ${isFullscreen ? "hidden hover:block" : "block"}
-               `}
-          >
-            <div className="font-medium">{title}</div>
-            <Button
-              onClick={toggleFullscreen}
-              type="primary"
-              icon={<PlaySquareOutlined />}
-            >
-              {isFullscreen ? "Exit Fullscreen" : "Fullscreen Present"}
-            </Button>
-          </nav>
-          {/* Main Content */}
-          <main>
-            {/* Slide Content */}
-            <div className={`min-h-screen p-5 ${currentTheme.text}`}>
-              <div
-                className={`${
-                  isFullscreen ? "min-h-[90dvh]" : "min-h-[86dvh] "
-                } w-full p-10 rounded-lg shadow-lg ${
-                  currentTheme.gradient
-                } flex`}
+    <div className={`relative ${isFullscreen ? 'h-screen' : 'min-h-screen'} bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden`}>
+      {/* Header - Hidden in fullscreen */}
+      {!isFullscreen && (
+        <header className="absolute top-0 left-0 right-0 z-20 bg-black/20 backdrop-blur-xl border-b border-white/10">
+          <div className="px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => window.close()}
+                className="flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-200"
               >
-                <div className="flex-[68%] pr-4">
-                  {/* Slide Heading */}
-                  <div
-                    className={`md:text-4xl lg:text-6xl font-semibold mb-6 ${currentTheme.accent}`}
-                  >
-                    {currentSlide?.content?.heading ||
-                      `Slide ${currentSlideIndex + 1}`}
-                  </div>
-
-                  {/* Slide Body */}
-                  <div>
-                    {currentSlide?.content?.style === "double_column" &&
-                      renderDoubleColumn(currentSlide?.content?.body.points)}
-
-                    {currentSlide?.content?.style === "icon" &&
-                      renderIconSlide(currentSlide?.content?.body.points)}
-
-                    {currentSlide?.content?.style === "sequential" &&
-                      renderSequential(currentSlide?.content?.body.points)}
-                    {currentSlide?.content?.style === "default" && (
-                      <ul className="list-disc pl-6">
-                        {currentSlide?.content?.body.points?.map((point, idx) =>
-                          renderBulletPoint(point, idx)
-                        )}
-                      </ul>
-                    )}
-                  </div>
-                </div>
-                <div className="w-[30%] flex items-center justify-center rounded-md"
-                style={{ backgroundColor: currentSlide.dominant_color }}
-                >
-                  <img
-                    src={currentSlide?.img_url}
-                    alt="Slide Visual"
-                    className={`max-w-full rounded-lg shadow-lg max-h-[50vh] ${
-                      imageLoaded ? "blur-0" : "blur-md"
-                    }`}
-                    onLoad={() => setImageLoaded(true)}
-                  />
-                </div>
-              </div>
-              <div className={`mt-6 ${isFullscreen ? "block" : "hidden"}`}>
-                <Steps
-                  progressDot={progressDotRender}
-                  current={currentSlideIndex}
-                  direction="horizontal"
-                  items={slides.map((_slide, _idx) => ({
-                    title: ``,
-                  }))}
-                />
+                <Home size={16} className="text-white" />
+                <span className="text-white text-sm">Exit</span>
+              </button>
+              <div className="text-white">
+                <h1 className="font-semibold">{title}</h1>
+                <p className="text-white/60 text-sm">
+                  Slide {currentSlideIndex + 1} of {slides.length}
+                </p>
               </div>
             </div>
-          </main>
-        </>
+            
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setShowGrid(!showGrid)}
+                className="p-3 bg-white/10 hover:bg-white/20 rounded-lg transition-all duration-200"
+                title="Show all slides (G)"
+              >
+                <Grid3X3 size={18} className="text-white" />
+              </button>
+              <button
+                onClick={toggleFullscreen}
+                className="p-3 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-all duration-200"
+                title="Toggle fullscreen (F)"
+              >
+                <Maximize size={18} className="text-blue-400" />
+              </button>
+            </div>
+          </div>
+        </header>
+      )}
+
+      {/* Main Presentation Area */}
+      <main className={`relative ${isFullscreen ? 'h-full' : 'min-h-screen pt-20'} flex items-center justify-center`}>
+        {/* Current Slide */}
+        {currentSlide && (
+          <div 
+            className="w-full h-full px-8 py-12 relative"
+            style={{ 
+              background: `radial-gradient(ellipse at center, ${currentSlide.dominant_color}04 0%, #0A0A0A 70%)`
+            }}
+          >
+            {/* Subtle Background Elements */}
+            <div className="absolute inset-0 opacity-[0.02] pointer-events-none">
+              <div 
+                className="absolute top-32 right-32 w-96 h-96 rounded-full blur-3xl"
+                style={{ backgroundColor: currentSlide.dominant_color }}
+              />
+              <div 
+                className="absolute bottom-32 left-32 w-80 h-80 rounded-full blur-3xl"
+                style={{ backgroundColor: currentSlide.dominant_color }}
+              />
+            </div>
+
+            <div className="relative z-10 h-full flex flex-col">
+             
+
+              {/* Slide Content and Header */}
+              <div className="flex-1 flex items-center justify-center">
+                <div className="w-full bg-black/40 backdrop-blur-sm border border-white/5 p-10 rounded-2xl shadow-xl">
+                  {renderSlideContent(currentSlide)}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Navigation Controls */}
+      <div 
+        className={`fixed bottom-8 left-1/2 transform -translate-x-1/2 z-30 transition-all duration-300 ${
+          isFullscreen && !showControls ? 'opacity-0 translate-y-4 pointer-events-none' : 'opacity-100 translate-y-0'
+        }`}
+      >
+        <div className="flex items-center space-x-4 bg-black/40 backdrop-blur-xl rounded-2xl px-6 py-4 border border-white/20">
+          {/* Previous Button */}
+          <button
+            onClick={prevSlide}
+            disabled={currentSlideIndex === 0}
+            className="p-3 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all duration-200"
+            title="Previous slide (←)"
+          >
+            <ChevronLeft size={20} className="text-white" />
+          </button>
+
+          {/* Slide Counter */}
+          <div className="text-white text-sm font-medium px-4">
+            {currentSlideIndex + 1} / {slides.length}
+          </div>
+
+          {/* Next Button */}
+          <button
+            onClick={nextSlide}
+            disabled={currentSlideIndex === slides.length - 1}
+            className="p-3 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all duration-200"
+            title="Next slide (→)"
+          >
+            <ChevronRight size={20} className="text-white" />
+          </button>
+
+          {/* Fullscreen Toggle */}
+          <div className="w-px h-8 bg-white/20 mx-2" />
+          <button
+            onClick={toggleFullscreen}
+            className="p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-200"
+            title={isFullscreen ? "Exit fullscreen (F)" : "Enter fullscreen (F)"}
+          >
+            {isFullscreen ? (
+              <Minimize size={20} className="text-white" />
+            ) : (
+              <Maximize size={20} className="text-white" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-20">
+        <div className="w-full h-1 bg-black/20">
+          <div 
+            className="h-full transition-all duration-300"
+            style={{ 
+              width: `${((currentSlideIndex + 1) / slides.length) * 100}%`,
+              backgroundColor: currentSlide?.dominant_color || '#3B82F6'
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Grid View */}
+      {showGrid && (
+        <div className="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm">
+          <div className="h-full overflow-y-auto p-8">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-bold text-white">All Slides</h2>
+                <button
+                  onClick={() => setShowGrid(false)}
+                  className="p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-200"
+                  title="Close grid view (G)"
+                >
+                  <X size={20} className="text-white" />
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                {slides.map((slide, index) => (
+                  <button
+                    key={slide.id}
+                    onClick={() => goToSlide(index)}
+                    className={`relative aspect-video bg-white rounded-lg overflow-hidden shadow-lg hover:scale-105 transition-all duration-200 ${
+                      index === currentSlideIndex ? 'ring-4 ring-blue-500' : ''
+                    }`}
+                  >
+                    {slide.img_url ? (
+                      <img 
+                        src={slide.img_url}
+                        alt={`Slide ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div 
+                        className="w-full h-full flex items-center justify-center"
+                        style={{ backgroundColor: `${slide.dominant_color}20` }}
+                      >
+                        <span className="text-2xl font-bold" style={{ color: slide.dominant_color }}>
+                          {index + 1}
+                        </span>
+                      </div>
+                    )}
+                    
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-2">
+                      <p className="text-xs truncate">
+                        {slide.content?.heading || `Slide ${index + 1}`}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
 };
 
-export default Page;
+export default PresentPage;

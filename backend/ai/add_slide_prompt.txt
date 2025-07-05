@@ -1,103 +1,55 @@
-Add a new slide on the topic {prompt} to the presentation titled "{presentation_title}".  
-The content should match the existing slides in tone and detail, and the style should best fit the purpose of the new slide.  
-Choose from one of the following styles:  
+You are an expert presentation designer. Create a single slide in XML format.
 
-1. **Default Style**: Use this for informational slides, providing bullet points and a key message.  
-   - JSON Format:  
-     ```json
-     {
-       "style": "default",
-       "heading": "Slide Heading",
-       "body": {
-         "points": [
-           "First bullet point",
-           "Second bullet point",
-           "Third bullet point"
-         ]
-       },
-       "key_message": "Summary of the slide's main idea.",
-       "img_keywords": ["keyword1", "keyword2"]
-     }
-     ```
+SLIDE DETAILS:
+- Title: {slide_title}
+- Project Context: {context['project_title']}
+- Project Description: {context['project_description']}
+- Existing Slides Count: {context['existing_slides_count']}
 
-2. **Sequential Style**: Use this for a step-by-step process or chronology. Bullet points should start with ">>" to indicate steps.  
-   - JSON Format:  
-     ```json
-     {
-       "style": "sequential",
-       "heading": "Step-by-step Heading",
-       "body": {
-         "points": [
-           ">> Step 1: Description",
-           ">> Step 2: Description",
-           ">> Step 3: Description"
-         ]
-       },
-       "key_message": "Takeaway from this sequential process.",
-       "img_keywords": ["process", "steps", "workflow"]
-     }
-     ```
+CRITICAL XML FORMATTING RULES:
+1. NO quotes inside text content - use apostrophes instead
+2. NO special characters like &, <, > in text content
+3. Keep all text content simple and clean
+4. Use only the exact XML structure shown below
 
-3. **Icon Style**: Use this when visual representation with icons is needed for clarity. Each bullet point should include an icon in the format `[[icon_name]]`.  
-   - JSON Format:  
-     ```json
-     {
-       "style": "icon",
-       "heading": "Heading for Icon Slide",
-       "body": {
-         "points": [
-           "[[icon1]] Explanation of concept 1",
-           "[[icon2]] Explanation of concept 2",
-           "[[icon3]] Explanation of concept 3"
-         ]
-       },
-       "key_message": "Overview of concepts represented by icons.",
-       "img_keywords": ["icon1", "icon2", "concepts"]
-     }
-     ```
+REQUIREMENTS:
+1. Create ONE SECTION with appropriate layout
+2. Choose from layouts: columns, bullets, icons, timeline, chart, arrows, cycle, pyramid, staircase
+3. Section layout can be: left, right, or vertical
+4. Include detailed content relevant to the slide title
+5. Add IMG tags with simple descriptive queries
+6. Make content professional and substantial
 
-4. **Double Column Layout**: Use this for comparing two related concepts or categories side by side.  
-   - JSON Format:  
-     ```json
-     {
-       "style": "double_column",
-       "heading": "Comparison Heading",
-       "body": {
-         "points": [
-           {
-             "heading": "Column 1 Heading",
-             "points": [
-               "Point 1 in column 1",
-               "Point 2 in column 1",
-               "Point 3 in column 1"
-             ]
-           },
-           {
-             "heading": "Column 2 Heading",
-             "points": [
-               "Point 1 in column 2",
-               "Point 2 in column 2",
-               "Point 3 in column 2"
-             ]
-           }
-         ]
-       },
-       "key_message": "Key takeaway from the comparison.",
-       "img_keywords": ["comparison", "column1", "column2"]
-     }
-     ```
+LAYOUT GUIDELINES:
+- bullets: For lists, key points, steps (RECOMMENDED)
+- columns: For comparisons, features, benefits
+- icons: For services, features, concepts
+- timeline: For processes, history, roadmap
+- arrows: For workflows, processes
 
-When generating the new slide, always return the output in **JSON format**, matching the appropriate structure above based on the chosen style.  
-Include:
-- **style**: Follow a specific style among the given styles. 
-- **Heading**: A clear and concise title for the slide.  
-- **Body**: Detailed bullet points or comparison, depending on the style.  
-- **Key Message**: A one-line summary of the main idea of the slide.  
-- **Image Keywords**: Relevant keywords to assist with generating a visual representation of the slide.
-**Important Guidelines**
-- Ensure no more than 3 points in the slide.
-- Ensure the points are concise, crisp, short, and to the point.
-- Each point should clearly communicate the slide’s core message in a brief and efficient manner.
-Analyze the context of the new slide and **choose the style that fits best**.
-### Output:
-  ```json
+EXACT OUTPUT FORMAT (use bullets layout):
+<PRESENTATION>
+<SECTION layout="vertical">
+<BULLETS>
+<DIV>
+<HEADING>Point Title 1</HEADING>
+<TEXT>Description without quotes or special chars</TEXT>
+</DIV>
+<DIV>
+<HEADING>Point Title 2</HEADING>
+<TEXT>Description without quotes or special chars</TEXT>
+</DIV>
+<DIV>
+<HEADING>Point Title 3</HEADING>
+<TEXT>Description without quotes or special chars</TEXT>
+</DIV>
+<DIV>
+<HEADING>Point Title 4</HEADING>
+<TEXT>Description without quotes or special chars</TEXT>
+</DIV>
+</BULLETS>
+<IMG query="simple image description">digital guidance parents teenagers</IMG>
+</SECTION>
+</PRESENTATION>
+
+Generate content about: {slide_title}
