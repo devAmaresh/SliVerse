@@ -19,7 +19,7 @@ import {
 import Cookies from "js-cookie";
 import ThemeToggler from "../../components/ThemeToggler";
 import { AiOutlineReload } from "react-icons/ai";
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, ThunderboltOutlined } from "@ant-design/icons";
 
 const Page = () => {
   const [loading, setLoading] = useState(false);
@@ -42,6 +42,7 @@ const Page = () => {
   const [numPages, setNumPages] = useState<number>(num_pages);
   const { id } = useParams();
   const [api, contextHolder1] = notification.useNotification();
+
   useEffect(() => {
     const fetchProjectDetails = async () => {
       try {
@@ -50,8 +51,8 @@ const Page = () => {
         });
 
         setProjectTitle(response.data.title || "");
-        setDescriptionInput(response.data.description || ""); // Initialize editable description
-        setSlideTitles(slide_titles || []); // Set slide titles if available
+        setDescriptionInput(response.data.description || "");
+        setSlideTitles(slide_titles || []);
       } catch (err) {
         console.error(err);
         messageApi.error("Failed to fetch project details");
@@ -67,7 +68,7 @@ const Page = () => {
     setGenerateLoading(true);
     if (descriptionInput.length < 20 || descriptionInput.trim() === "") {
       messageApi.error("Description must be at least 20 characters long");
-      setLoading(false);
+      setGenerateLoading(false);
       return;
     }
 
@@ -76,15 +77,15 @@ const Page = () => {
         `${backend_url}/api/generate-outline/`,
         {
           num_pages: numPages,
-          prompt: descriptionInput, // Send the updated description here
+          prompt: descriptionInput,
           project_id: id,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Assuming the API returns the updated title and slide_titles
       setProjectTitle(response.data.title || "");
       setSlideTitles(response.data.slide_titles || []);
+      messageApi.success("Outline regenerated successfully!");
     } catch (err) {
       console.error(err);
       messageApi.error("Failed to regenerate outline");
@@ -100,15 +101,19 @@ const Page = () => {
       setLoading(false);
       return;
     }
+
     api.info({
-      message: "Please wait while we generate the slides ...",
+      message: "Generating AI-Enhanced Presentation...",
       description:
-        "This may take a few seconds to few minutes depending on the number of slides",
+        "Creating your slides with advanced XML layouts and modern design. This may take a few moments.",
       duration: 0,
+      icon: <ThunderboltOutlined style={{ color: '#52c41a' }} />,
     });
+
     try {
+      // Use the new XML presentation generation endpoint
       const response = await axios.post(
-        `${backend_url}/api/generate-slide/${id}/`,
+        `${backend_url}/api/generate-xml-presentation/${id}/`,
         { slide_titles: slideTitles },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -117,18 +122,31 @@ const Page = () => {
       setTitle(response.data.title || "");
       const project_id = response.data.project_id;
 
-      navigate(`/dash/${project_id}`);
+      api.destroy();
+      api.success({
+        message: "Presentation Generated Successfully!",
+        description: "Your AI-enhanced slides are ready with modern layouts and designs.",
+        duration: 4,
+      });
+
+      // Navigate to the dashboard
+      setTimeout(() => {
+        navigate(`/dash/${project_id}`);
+      }, 1000);
+
     } catch (err) {
       console.error(err);
       api.destroy();
       api.error({
-        message: "Oops! We encountered an error ...",
-        description: "Please try again later!",
+        message: "Generation Failed",
+        description: "Unable to generate your presentation. Please try again.",
+        duration: 5,
       });
     } finally {
       setLoading(false);
     }
   };
+
   const handleDeleteSlide = (index: number) => {
     const updatedTitles = slideTitles.filter((_, i) => i !== index);
     setSlideTitles(updatedTitles);
@@ -154,82 +172,96 @@ const Page = () => {
           size="large"
           fullscreen
           percent={"auto"}
-          tip="Loading..."
+          tip="Loading project details..."
         />
       )}
       {!fetching && (
         <div className="p-5 mt-5 md:p-10 md:max-w-[70%]">
-          {/* Project Title */}
-          <div className="text-3xl font-semibold text-center mb-6 text-gray-900 dark:text-white">
-            {projectTitle}
+          {/* Header with AI Enhancement Badge */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <ThunderboltOutlined className="text-2xl text-green-500 mr-2" />
+              <Tag color="green" className="text-sm px-3 py-1">
+                AI-Enhanced Generation
+              </Tag>
+            </div>
+            <div className="text-3xl font-semibold mb-2 text-gray-900 dark:text-white">
+              {projectTitle}
+            </div>
+            <p className="text-gray-600 dark:text-gray-400">
+              Generate modern presentations with advanced XML layouts
+            </p>
           </div>
 
           {/* Editable Description */}
-          <div className="py-1">Prompt</div>
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <Input.TextArea
-              value={descriptionInput}
-              onChange={(e) => setDescriptionInput(e.target.value)}
-              minLength={20}
-              maxLength={500}
-              style={{ height: 60, maxHeight: 150 }}
-              placeholder="Enter project description..."
-            />
-
-            <Tooltip title="Regenerate Outline">
-              <Button
-                type="dashed"
-                onClick={handleRegenerateOutline}
-                loading={generateLoading}
-                disabled={generateLoading || loading}
-                icon={<AiOutlineReload />}
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Project Description
+            </label>
+            <div className="flex items-center gap-4">
+              <Input.TextArea
+                value={descriptionInput}
+                onChange={(e) => setDescriptionInput(e.target.value)}
+                minLength={20}
+                maxLength={500}
+                style={{ height: 80 }}
+                placeholder="Describe your presentation topic in detail..."
+                className="flex-1"
               />
-            </Tooltip>
+              <Tooltip title="Regenerate Outline with AI">
+                <Button
+                  type="dashed"
+                  onClick={handleRegenerateOutline}
+                  loading={generateLoading}
+                  disabled={generateLoading || loading}
+                  icon={<AiOutlineReload />}
+                  size="large"
+                />
+              </Tooltip>
+            </div>
           </div>
 
           {/* Number of Pages */}
           <div className="mb-6">
-            <Form.Item className="dark:text-white">
-              <InputNumber
-                value={numPages}
-                onChange={(value: number | null) => setNumPages(value ?? 10)}
-                min={10}
-                max={30}
-                formatter={(value) => `${value} pages`}
-              />
-            </Form.Item>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              Number of Slides
+            </label>
+            <InputNumber
+              value={numPages}
+              onChange={(value: number | null) => setNumPages(value ?? 10)}
+              min={5}
+              max={25}
+              formatter={(value) => `${value} slides`}
+              size="large"
+              className="w-full max-w-xs"
+            />
           </div>
 
           {/* Slide Titles */}
-          <div className="text-2xl font-semibold text-center mb-6 text-gray-900 dark:text-white">
-            Outline
-          </div>
-          {generateLoading && (
-            <Spin spinning size="large">
-              <Alert
-                type="info"
-                message="Loading..."
-                description="Please wait while we generate the outline ..."
-                style={{
-                  textAlign: "center",
-                  height: "200px",
-                }}
-              />
-            </Spin>
-          )}
-          {!generateLoading && (
-            <Form onFinish={handleGenerateSlides}>
-              {slideTitles.map((title, index) => (
-                <Form.Item
-                  key={index}
-                  name={`title_${index}`}
-                  initialValue={title}
-                  className="mb-4"
-                >
-                  <div className="flex items-center space-x-1">
-                    {/* Tag next to the input */}
-                    <Tag color="blue" className="">
-                      {index + 1}
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold text-center mb-6 text-gray-900 dark:text-white">
+              Presentation Outline
+            </h3>
+            
+            {generateLoading && (
+              <div className="text-center">
+                <Spin size="large" />
+                <Alert
+                  type="info"
+                  message="Generating Outline..."
+                  description="AI is creating your presentation structure..."
+                  className="mt-4"
+                  showIcon
+                />
+              </div>
+            )}
+            
+            {!generateLoading && (
+              <Form onFinish={handleGenerateSlides} className="space-y-4">
+                {slideTitles.map((title, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <Tag color="blue" className="min-w-[60px] text-center">
+                      Slide {index + 1}
                     </Tag>
                     <Input
                       value={title}
@@ -238,33 +270,39 @@ const Page = () => {
                         updatedTitles[index] = e.target.value;
                         setSlideTitles(updatedTitles);
                       }}
-                      className="p-2"
                       placeholder={`Enter title for Slide ${index + 1}`}
+                      size="large"
+                      className="flex-1"
                       suffix={
-                        <Tooltip title="Delete Slide">
-                          <DeleteOutlined
-                            onClick={() => handleDeleteSlide(index)}
-                            className="cursor-pointer text-red-500"
-                          />
-                        </Tooltip>
+                        slideTitles.length > 5 && (
+                          <Tooltip title="Delete Slide">
+                            <DeleteOutlined
+                              onClick={() => handleDeleteSlide(index)}
+                              className="cursor-pointer text-red-500 hover:text-red-700"
+                            />
+                          </Tooltip>
+                        )
                       }
                     />
                   </div>
-                </Form.Item>
-              ))}
+                ))}
 
-              <div className="flex justify-center">
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  loading={loading}
-                  disabled={loading}
-                >
-                  Generate Slides
-                </Button>
-              </div>
-            </Form>
-          )}
+                <div className="flex justify-center pt-6">
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={loading}
+                    disabled={loading || slideTitles.length === 0}
+                    size="large"
+                    icon={<ThunderboltOutlined />}
+                    className="px-8 py-2 h-auto"
+                  >
+                    {loading ? "Generating AI Presentation..." : "Generate AI-Enhanced Slides"}
+                  </Button>
+                </div>
+              </Form>
+            )}
+          </div>
         </div>
       )}
     </div>

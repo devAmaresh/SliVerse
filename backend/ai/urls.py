@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    GenerateSlideView,
+    GenerateXMLPresentationView,
     ProjectsView,
     ProjectsListView,
     GoogleAuthView,
@@ -12,10 +12,12 @@ from .views import (
     ReorderSlidesView,
     ProjectOutlineView,
 )
-from django.urls import include
 
 urlpatterns = [
-    path("generate-slide/<uuid:pk>/", GenerateSlideView.as_view(), name="generate_slide"),
+    # Modern XML-based slide generation (ONLY THIS)
+    path('generate-xml-presentation/<str:pk>/', GenerateXMLPresentationView.as_view(), name='generate-xml-presentation'),
+
+    # Project management
     path("generate-outline/", ProjectOutlineView.as_view(), name="generate_outline"),
     path("projects/", ProjectsListView.as_view(), name="projects"),
     path("project/<uuid:project_id>/", ProjectsView.as_view(), name="project_slides"),
@@ -24,7 +26,11 @@ urlpatterns = [
         ProjectRetrieveUpdateDestroyView.as_view(),
         name="project-update",
     ),
+
+    # Authentication
     path("google-auth/", GoogleAuthView.as_view(), name="google_auth"),
+
+    # Slide management
     path("slide-edit/<int:id>/", SlideEditView.as_view(), name="slide_edit"),
     path("user-profile/", UserProfileView.as_view(), name="user_profile"),
     path(
@@ -43,4 +49,7 @@ urlpatterns = [
         ReorderSlidesView.as_view(),
         name="reorder-slides",
     ),
+
+    # User profile
+    path("user-profile/", UserProfileView.as_view(), name="user_profile"),
 ]

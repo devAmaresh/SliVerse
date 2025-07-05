@@ -3,10 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from django.shortcuts import get_object_or_404
 from .gemini import (
-    generate_ai_content,
-    generate_ai_content_slide,
-    generate_ai_title_slide,
     generate_ai_outline,
+    generate_xml_presentation,
 )
 import json
 from .models import Project, Slide, UserProfile
@@ -22,19 +20,23 @@ from .pexel import get_img_link
 from .getImgColor import get_dominant_color
 from django.conf import settings
 from django.db import transaction
+from .xml_parser import parse_xml_presentation, extract_heading_from_xml, get_fallback_image_query
 
 load_dotenv()
 
 
-class GenerateSlideView(APIView):
+class GenerateXMLPresentationView(APIView):
+    """
+    Modern AI-powered XML presentation generation
+    Only XML-based generation is supported with intelligent image handling
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        # Generate AI content based on the prompt
         project_id = pk
         slide_titles = request.data.get("slide_titles", [])
-
         mode = settings.DEBUG
+
         try:
             project = Project.objects.get(id=project_id, user=request.user)
         except Project.DoesNotExist:
@@ -42,78 +44,116 @@ class GenerateSlideView(APIView):
                 {"error": "Project not found or access denied."},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
         title = project.title
-        response = generate_ai_content(title, slide_titles)
+        num_slides = len(slide_titles)
 
-        try:
-            slides_data = json.loads(response)
-        except json.JSONDecodeError:
+        # Generate XML presentation using AI
+        xml_content = generate_xml_presentation(title, slide_titles, num_slides)
+
+        if not xml_content:
             return Response(
-                {"error": "Failed to decode JSON response."},
+                {"error": "Failed to generate XML presentation."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        
+        # Clean XML content
+        xml_content = xml_content.replace("```xml", "").replace("```", "").strip()
+        print("Generated XML Content:")
+        print(xml_content)
+
+        # Parse XML and create slides
+        slides_data = parse_xml_presentation(xml_content, title)
+
+        if not slides_data:
+            return Response(
+                {"error": "Failed to parse generated XML."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Validate response structure
-        if not isinstance(slides_data, dict) or "slides" not in slides_data:
-            return Response(
-                {"error": "Invalid JSON structure: Missing 'slides' or 'title'."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        # Save XML content to project
+        project.xml_content = xml_content
+        project.save()
 
-        # Create Project and associated Slides
         try:
+            # Delete existing slides
+            Slide.objects.filter(project=project).delete()
 
-            for i, slide in enumerate(slides_data["slides"]):
+            # Create new slides from parsed XML
+            for slide_data in slides_data:
                 img_url = None
-                img_keywords = slide.get("img_keywords", [])
+                dominant_color = "#667eea"  # Default color
 
-                if img_keywords:
-                    img_query = " ".join(img_keywords)
+                # Only fetch image if XML contains IMG tags
+                if slide_data["has_images"] and slide_data["img_queries"]:
+                    print(f"Slide {slide_data['slide_number']}: Found IMG tags, fetching image...")
+                    img_query = slide_data["img_queries"][0]  # Use first query
                     img_url = get_img_link(img_query)
-                if img_url is None:
-                    img_url = "https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"
-                dominant_color = "#ffdbac"
-                if mode:
-                    dominant_color = get_dominant_color(img_url)
+                    print(f"Image URL from Pexels: {img_url}")
+                elif slide_data["section_layout"] in ["left", "right", "vertical"]:
+                    # If section layout expects an image but no IMG tag, use fallback
+                    print(f"Slide {slide_data['slide_number']}: No IMG tags but layout expects image, using fallback...")
+                    fallback_query = get_fallback_image_query(
+                        slide_data["content"], 
+                        slide_data["layout_type"], 
+                        title
+                    )
+                    img_url = get_img_link(fallback_query)
+                    print(f"Fallback image URL: {img_url}")
+                else:
+                    print(f"Slide {slide_data['slide_number']}: No images required for this layout")
 
-                # Create Slide object with image URL
+                # Set default image if none found and layout needs one
+                if img_url is None and slide_data["section_layout"] in ["left", "right", "vertical"]:
+                    img_url = "https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"
+
+                # Get dominant color only if we have an image
+                if img_url and mode:
+                    try:
+                        dominant_color = get_dominant_color(img_url)
+                        print(f"Dominant color extracted: {dominant_color}")
+                    except Exception as e:
+                        print(f"Failed to extract dominant color: {e}")
+                        dominant_color = "#667eea"
+
+                # Extract heading from XML content
+                heading = extract_heading_from_xml(slide_data["xml_content"])
+
+                # Create slide content
                 slide_content = {
-                    "style": slide.get("style", "default"),
-                    "heading": slide.get("heading", ""),
-                    "body": slide.get("body", {}),
-                    "key_message": slide.get("key_message", ""),
-                    "img_keywords": img_keywords,
+                    "heading": heading,
+                    **slide_data["content"]  # Merge the parsed content
                 }
 
-                # Save each slide one-by-one
+                # Save slide
                 slide_instance = Slide(
                     project=project,
-                    slide_number=i + 1,
+                    slide_number=slide_data["slide_number"],
                     content=slide_content,
-                    img_url=img_url,  # Save generated image URL
+                    xml_content=slide_data["xml_content"],
+                    layout_type=slide_data["layout_type"],
+                    section_layout=slide_data["section_layout"],
+                    img_url=img_url,
                     dominant_color=dominant_color,
                 )
-                slide_instance.save()  # Save the slide one by one
+                slide_instance.save()
+                print(f"Saved slide {slide_data['slide_number']} with layout {slide_data['layout_type']}")
 
-            # Fetch the slides from the database
-            saved_slides = Slide.objects.filter(project=project).order_by(
-                "slide_number"
-            )
-
-            serialized_slides = SlideSerializer(
-                saved_slides, many=True
-            ).data  # Serialize slides
+            # Fetch and serialize slides
+            saved_slides = Slide.objects.filter(project=project).order_by("slide_number")
+            serialized_slides = SlideSerializer(saved_slides, many=True).data
 
         except Exception as e:
+            print(f"Error creating slides: {str(e)}")
             return Response(
                 {"error": f"Failed to create slides: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-        # Construct response matching the structure of slides_data
         response_data = {
             "project_id": project.id,
-            "title": slides_data.get("title", "Untitled"),
+            "title": project.title,
+            "xml_content": xml_content,
             "slides": serialized_slides,
         }
 
@@ -124,15 +164,11 @@ class ProjectsView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, project_id=None):
-        # Case where project_id is provided (single project with slides)
         if project_id:
             try:
-                # First, check if the user is authenticated
                 if request.user.is_authenticated:
-                    # If the user is authenticated, get the project belonging to that user
                     project = Project.objects.get(id=project_id, user=request.user)
                 else:
-                    # If the user is not authenticated, check if the project is public
                     project = Project.objects.get(id=project_id, is_public=True)
 
             except Project.DoesNotExist:
@@ -141,10 +177,7 @@ class ProjectsView(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            # Get the slides for the project
-            slides = Slide.objects.filter(project=project)
-
-            # Serialize the slides
+            slides = Slide.objects.filter(project=project).order_by("slide_number")
             serialized_slides = SlideSerializer(slides, many=True).data
             response_data = {
                 "project_id": project_id,
@@ -152,11 +185,11 @@ class ProjectsView(APIView):
                 "title": project.title,
                 "slides": serialized_slides,
                 "description": project.description,
+                "xml_content": project.xml_content,
             }
 
             return Response(response_data, status=status.HTTP_200_OK)
 
-        # If no project_id is provided, return an error or another appropriate response
         return Response(
             {"detail": "Project ID is required."},
             status=status.HTTP_400_BAD_REQUEST,
@@ -165,44 +198,24 @@ class ProjectsView(APIView):
 
 class ProjectRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
-    queryset = Project.objects.all()  # Use all projects as the base queryset
-    serializer_class = (
-        ProjectSerializer  # Specify the serializer to use for updating the project
-    )
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
 
     def get_object(self):
-        """
-        Override the get_object method to get the project based on the pk (primary key)
-        and ensure the project belongs to the authenticated user.
-        """
-        # Use the default get_object method, which looks up by 'pk' automatically
         project = super().get_object()
-
-        # Check if the project belongs to the authenticated user
         if project.user != self.request.user:
             raise PermissionDenied("You do not have permission to edit this project.")
         return project
 
     def patch(self, request, *args, **kwargs):
-        """
-        Handle partial updates (PATCH request) using the ProjectSerializer.
-        """
-        project = self.get_object()  # Get the project instance based on pk
-
-        # Serialize the incoming data for validation and update
-        serializer = self.get_serializer(
-            project, data=request.data, partial=True
-        )  # partial=True allows partial updates
+        project = self.get_object()
+        serializer = self.get_serializer(project, data=request.data, partial=True)
 
         if serializer.is_valid():
-            serializer.save()  # Save the updated project
-            return Response(
-                serializer.data, status=status.HTTP_200_OK
-            )  # Return the updated project data
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )  # Return validation errors
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProjectsListView(APIView):
@@ -211,7 +224,6 @@ class ProjectsListView(APIView):
     def get(self, request):
         projects = Project.objects.filter(user=request.user).order_by("-updated_at")
         serialized_projects = ProjectSerializer(projects, many=True).data
-
         return Response(serialized_projects, status=status.HTTP_200_OK)
 
     def delete(self, request, project_id):
@@ -238,7 +250,6 @@ class GoogleAuthView(APIView):
                 {"error": "Token is required"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Verify token with Google
         google_token_info_url = (
             f"https://oauth2.googleapis.com/tokeninfo?id_token={token}"
         )
@@ -261,8 +272,6 @@ class GoogleAuthView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Check if user already exists
-        # print(google_data)
         user, created = User.objects.get_or_create(
             email=email,
             defaults={
@@ -279,7 +288,6 @@ class GoogleAuthView(APIView):
             ),
         )
 
-        # Generate JWT Token
         refresh = RefreshToken.for_user(user)
         return Response(
             {
@@ -298,15 +306,15 @@ class SlideEditView(APIView):
     def patch(self, request, id, *args, **kwargs):
         slide = get_object_or_404(Slide, pk=id, project__user=request.user)
 
-        # Check if 'img_url' is in the request data
         img_url = request.data.get("img_url")
         if img_url:
-            # Get the dominant color if the img_url is being updated
-            dominant_color = get_dominant_color(img_url)
-            if dominant_color:
-                request.data["dominant_color"] = dominant_color
+            try:
+                dominant_color = get_dominant_color(img_url)
+                if dominant_color:
+                    request.data["dominant_color"] = dominant_color
+            except Exception as e:
+                print(f"Failed to extract dominant color: {e}")
 
-        # Deserialize and validate input data
         serializer = SlideSerializer(slide, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -315,7 +323,14 @@ class SlideEditView(APIView):
                 status=status.HTTP_200_OK,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
+    def delete(self, request, id, *args, **kwargs):
+        slide = get_object_or_404(Slide, pk=id, project__user=request.user)
+        slide.delete()
+        return Response(
+            {"message": "Slide deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT,
+        )
 
 class UserProfileView(generics.RetrieveDestroyAPIView):
     permission_classes = [IsAuthenticated]
@@ -326,133 +341,10 @@ class UserProfileView(generics.RetrieveDestroyAPIView):
         return self.request.user
 
 
-class AddSlideView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, pk):
-        project_id = pk
-        prompt = request.data.get("title")  # User-provided text for the new slide
-        mode = settings.DEBUG
-
-        # Validate inputs
-        if not project_id or not prompt:
-            return Response(
-                {"error": "Both 'project_id' and 'prompt' are required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        try:
-            # Fetch the project
-            project = Project.objects.get(id=project_id, user=request.user)
-            project_title = project.title
-            response = generate_ai_content_slide(prompt, project_title)
-            slide_data = response
-            # Fetch the last slide number
-            last_slide = (
-                Slide.objects.filter(project=project).order_by("-slide_number").first()
-            )
-            next_slide_number = (last_slide.slide_number if last_slide else 0) + 1
-
-            # Generate image for the slide
-            img_url = None
-            img_keywords = slide_data.get("img_keywords", [])
-            if img_keywords:
-                img_query = " ".join(img_keywords)
-                img_url = get_img_link(img_query)
-            if img_url is None:
-                img_url = "https://img.freepik.com/free-photo/fantasy-style-scene-international-day-education_23-2151040298.jpg"
-            dominant_color = "#ffdbac"
-            if mode:
-                dominant_color = get_dominant_color(img_url)
-
-            # Save the new slide
-            slide_instance = Slide(
-                project=project,
-                slide_number=next_slide_number,
-                content=slide_data,
-                img_url=img_url,
-                dominant_color=dominant_color,
-            )
-            slide_instance.save()
-
-            # Serialize and return the updated slides
-            updated_slides = Slide.objects.filter(project=project).order_by(
-                "slide_number"
-            )
-            serialized_slides = SlideSerializer(updated_slides, many=True).data
-
-            return Response(
-                {"message": "Slide added successfully.", "slides": serialized_slides},
-                status=status.HTTP_200_OK,
-            )
-
-        except Project.DoesNotExist:
-            return Response(
-                {"error": "Project not found or access denied."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Exception as e:
-            return Response(
-                {"error": f"Failed to add slide: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-
-class GenerateSlideTitleView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, pk):
-        try:
-            # Fetch project by ID
-            project = Project.objects.get(id=pk, user=request.user)
-            project_title = project.title
-
-            # Extract existing slide titles
-            existing_slides = Slide.objects.filter(project=project).order_by(
-                "slide_number"
-            )
-            existing_titles = [
-                slide.content.get("heading", "") for slide in existing_slides
-            ]
-
-            response = generate_ai_title_slide(project_title, existing_titles)
-
-            # Parse the response and ensure it's in valid JSON format
-            try:
-                slide_titles_data = json.loads(response)
-                if "slide_titles" not in slide_titles_data:
-                    raise ValueError("Missing 'slide_titles' key in AI response.")
-            except (json.JSONDecodeError, ValueError) as e:
-                return Response(
-                    {"error": "Failed to parse AI response. Invalid format."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            # Return the generated slide titles
-            return Response(
-                {"slide_titles": slide_titles_data["slide_titles"]},
-                status=status.HTTP_200_OK,
-            )
-
-        except Project.DoesNotExist:
-            return Response(
-                {
-                    "error": "Project not found or you do not have permission to access it."
-                },
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Exception as e:
-            return Response(
-                {"error": f"An unexpected error occurred: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-
 class ReorderSlidesView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, project_id):
-        # Get the project
         try:
             project = Project.objects.get(id=project_id, user=request.user)
         except Project.DoesNotExist:
@@ -461,22 +353,17 @@ class ReorderSlidesView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Extract the new order of slide IDs from the request
         new_order = request.data.get("new_order")
         if not new_order or len(new_order) != len(project.slides.all()):
             return Response(
                 {"detail": "Invalid slide order."}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Begin a transaction to update the slides atomically
         with transaction.atomic():
-            # For each slide in the new order, update the slide_number
             for index, slide_id in enumerate(new_order):
                 try:
                     slide = Slide.objects.get(id=slide_id, project=project)
-                    slide.slide_number = (
-                        index + 1
-                    )  # Set the slide number based on the new order
+                    slide.slide_number = index + 1
                     slide.save()
                 except Slide.DoesNotExist:
                     return Response(
@@ -484,7 +371,6 @@ class ReorderSlidesView(APIView):
                         status=status.HTTP_404_NOT_FOUND,
                     )
 
-        # Return success response
         return Response(
             {"detail": "Slides reordered successfully."}, status=status.HTTP_200_OK
         )
@@ -511,6 +397,7 @@ class ProjectOutlineView(APIView):
                 {"error": "Failed to decode JSON response."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        
         if project_id:
             try:
                 project = Project.objects.get(id=project_id, user=request.user)
@@ -530,17 +417,19 @@ class ProjectOutlineView(APIView):
                 },
                 status=status.HTTP_200_OK,
             )
+        
         try:
             project = Project.objects.create(
                 user=request.user,
                 title=outline_data.get("title", "Untitled"),
-                description=prompt,  # Assuming 'description' refers to the prompt
+                description=prompt,
             )
         except Exception as e:
             return Response(
                 {"error": f"Failed to create project: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+        
         return Response(
             {
                 "project_id": project.id,
@@ -549,3 +438,193 @@ class ProjectOutlineView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class GenerateSlideTitleView(APIView):
+    """
+    Generate AI-suggested slide titles based on existing presentation content
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            project = Project.objects.get(id=pk, user=request.user)
+        except Project.DoesNotExist:
+            return Response(
+                {"error": "Project not found or access denied."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Get existing slides for context
+        existing_slides = Slide.objects.filter(project=project).order_by("slide_number")
+        
+        # Create context from existing slides
+        context_info = {
+            "project_title": project.title,
+            "project_description": project.description,
+            "existing_slides": [
+                {
+                    "slide_number": slide.slide_number,
+                    "heading": slide.content.get("heading", ""),
+                    "layout_type": slide.layout_type
+                }
+                for slide in existing_slides
+            ]
+        }
+
+        # Generate suggested titles using AI
+        try:
+            from .gemini import generate_slide_title_suggestions
+            
+            # Call AI function to generate titles
+            slide_titles = generate_slide_title_suggestions(
+                project.title,
+                project.description,
+                context_info
+            )
+            
+            return Response(
+                {"slide_titles": slide_titles},
+                status=status.HTTP_200_OK,
+            )
+            
+        except Exception as e:
+            print(f"Error generating slide titles: {str(e)}")
+            # Fallback titles if AI fails
+            fallback_titles = [
+                f"Key Insights for {project.title}",
+                f"Strategic Overview of {project.title}",
+                f"Implementation Framework",
+                f"Next Steps and Recommendations",
+                f"Conclusion and Takeaways"
+            ]
+            
+            return Response(
+                {"slide_titles": fallback_titles},
+                status=status.HTTP_200_OK,
+            )
+
+
+class AddSlideView(APIView):
+    """
+    Add a new slide to an existing presentation
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            project = Project.objects.get(id=pk, user=request.user)
+        except Project.DoesNotExist:
+            return Response(
+                {"error": "Project not found or access denied."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        slide_title = request.data.get("title")
+        if not slide_title:
+            return Response(
+                {"error": "Slide title is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            # Get the next slide number
+            last_slide = Slide.objects.filter(project=project).order_by("-slide_number").first()
+            next_slide_number = (last_slide.slide_number + 1) if last_slide else 1
+
+            # Generate single slide content using AI
+            from .gemini import generate_single_slide_xml
+            
+            # Create context for AI generation
+            context = {
+                "project_title": project.title,
+                "project_description": project.description,
+                "slide_title": slide_title,
+                "existing_slides_count": Slide.objects.filter(project=project).count()
+            }
+            
+            # Generate XML for this single slide
+            xml_content = generate_single_slide_xml(slide_title, context)
+            
+            if not xml_content:
+                raise Exception("Failed to generate slide content")
+
+            # Clean XML content
+            xml_content = xml_content.replace("```xml", "").replace("```", "").strip()
+
+            # Parse the generated XML
+            from .xml_parser import parse_single_slide_xml
+            slide_data = parse_single_slide_xml(xml_content, next_slide_number, slide_title)
+
+            if not slide_data:
+                raise Exception("Failed to parse generated slide XML")
+
+            # Handle image generation
+            img_url = None
+            dominant_color = "#667eea"
+            
+            # Get image if layout requires it
+            if slide_data["section_layout"] in ["left", "right", "vertical"]:
+                if slide_data["has_images"] and slide_data["img_queries"]:
+                    img_query = slide_data["img_queries"][0]
+                    img_url = get_img_link(img_query)
+                else:
+                    # Generate fallback image query
+                    from .xml_parser import get_fallback_image_query
+                    fallback_query = get_fallback_image_query(
+                        slide_data["content"], 
+                        slide_data["layout_type"], 
+                        project.title
+                    )
+                    img_url = get_img_link(fallback_query)
+
+                # Extract dominant color if we have an image
+                if img_url and settings.DEBUG:
+                    try:
+                        dominant_color = get_dominant_color(img_url)
+                    except Exception as e:
+                        print(f"Failed to extract dominant color: {e}")
+                        dominant_color = "#667eea"
+
+            # Extract heading from XML
+            from .xml_parser import extract_heading_from_xml
+            heading = extract_heading_from_xml(slide_data["xml_content"])
+
+            # Create slide content
+            slide_content = {
+                "heading": heading,
+                **slide_data["content"]
+            }
+
+            # Create and save the new slide
+            new_slide = Slide(
+                project=project,
+                slide_number=next_slide_number,
+                content=slide_content,
+                xml_content=slide_data["xml_content"],
+                layout_type=slide_data["layout_type"],
+                section_layout=slide_data["section_layout"],
+                img_url=img_url,
+                dominant_color=dominant_color,
+            )
+            new_slide.save()
+
+            # Return all slides for the project (updated)
+            all_slides = Slide.objects.filter(project=project).order_by("slide_number")
+            serialized_slides = SlideSerializer(all_slides, many=True).data
+
+            return Response(
+                {
+                    "message": "Slide added successfully",
+                    "slide": SlideSerializer(new_slide).data,
+                    "slides": serialized_slides
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+        except Exception as e:
+            print(f"Error adding slide: {str(e)}")
+            return Response(
+                {"error": f"Failed to add slide: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

@@ -6,6 +6,9 @@ interface Project {
   description: string;
   updated_at: string;
   is_public: boolean;
+  xml_content?: string;
+  is_favorite: boolean;
+  created_at: string;
 }
 
 interface ProjectStore {

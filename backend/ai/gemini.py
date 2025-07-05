@@ -17,8 +17,8 @@ def generate_ai_content(presentation_title: str, slide_titles):
     # Configure the API with the provided key
     genai.configure(api_key=api_key)
 
-    # Instantiate the model (ensure "gemini-1.5-flash" is valid)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    # Instantiate the model (ensure "gemini-2.5-flash" is valid)
+    model = genai.GenerativeModel("gemini-2.5-flash")
 
     try:
         # Get the absolute path for the prompt.txt file
@@ -59,7 +59,7 @@ def generate_ai_content_slide(prompt: str, project_title: str):
     genai.configure(api_key=api_key)
 
     # Instantiate the model
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-2.5-flash")
 
     try:
         # Get the absolute path for the prompt.txt file
@@ -106,8 +106,8 @@ def generate_ai_title_slide(project_title: str, existing_titles):
 
     genai.configure(api_key=api_key)
 
-    # Instantiate the model (ensure "gemini-1.5-flash" is valid)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    # Instantiate the model (ensure "gemini-2.5-flash" is valid)
+    model = genai.GenerativeModel("gemini-2.5-flash")
 
     try:
         # Get the absolute path for the prompt.txt file
@@ -146,8 +146,8 @@ def generate_ai_outline(prompt: str, pages: int):
 
     genai.configure(api_key=api_key)
 
-    # Instantiate the model (ensure "gemini-1.5-flash" is valid)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    # Instantiate the model (ensure "gemini-2.5-flash" is valid)
+    model = genai.GenerativeModel("gemini-2.5-flash")
 
     try:
         # Get the absolute path for the prompt.txt file
@@ -173,3 +173,229 @@ def generate_ai_outline(prompt: str, pages: int):
     except Exception as e:
         # Return the error message in case of any issues
         return f"Error during API request: {e}"
+
+
+def generate_xml_presentation(title, slide_titles, num_slides):
+    """
+    Generate XML presentation using the new prompt template
+    """
+    try:
+        # Read the prompt template
+        with open(os.path.join(os.path.dirname(__file__), "prompt.txt"), "r") as file:
+            prompt_template = file.read()
+
+        # Format slide titles for the prompt
+        slide_titles_formatted = "\n".join([f"- {title}" for title in slide_titles])
+
+        # Replace placeholders in the prompt
+        prompt = prompt_template.format(
+            presentation_title=title,
+            slide_titles=slide_titles_formatted,
+            num_slides=num_slides
+        )
+
+        # Generate content using Gemini
+        model = genai.GenerativeModel("gemini-2.5-flash")
+        response = model.generate_content(prompt)
+
+        return response.text.strip()
+
+    except Exception as e:
+        print(f"Error generating XML presentation: {e}")
+        return None
+
+
+def generate_slide_title_suggestions(project_title, project_description, context_info):
+    """
+    Generate AI-suggested slide titles based on project context
+    """
+    # Retrieve the API key from the environment variable
+    api_key = os.getenv("GEMINI_API")
+    if not api_key:
+        raise ValueError("GEMINI_API environment variable is not set.")
+
+    # Configure the API with the provided key
+    genai.configure(api_key=api_key)
+
+    existing_slides_text = ""
+    if context_info["existing_slides"]:
+        existing_slides_text = "\n".join([
+            f"Slide {slide['slide_number']}: {slide['heading']} ({slide['layout_type']})"
+            for slide in context_info["existing_slides"]
+        ])
+
+    prompt = f"""
+You are an expert presentation designer. Generate 5 relevant slide title suggestions for a presentation.
+
+PROJECT DETAILS:
+- Title: {project_title}
+- Description: {project_description}
+
+EXISTING SLIDES:
+{existing_slides_text if existing_slides_text else "No existing slides"}
+
+REQUIREMENTS:
+1. Suggest 5 unique slide titles that would complement the existing presentation
+2. Titles should be professional and relevant to the project theme
+3. Avoid duplicating existing slide topics
+4. Each title should be 3-8 words maximum
+5. Focus on different aspects: analysis, strategy, implementation, results, future
+
+Return ONLY a JSON array of 5 strings:
+["Title 1", "Title 2", "Title 3", "Title 4", "Title 5"]
+"""
+
+    try:
+        model = genai.GenerativeModel("gemini-2.5-flash")
+        response = model.generate_content(prompt)
+        
+        # Clean and parse response
+        content = response.text.strip()
+        content = content.replace("```json", "").replace("```", "").strip()
+        
+        # Parse JSON
+        titles = json.loads(content)
+        
+        if isinstance(titles, list) and len(titles) >= 3:
+            return titles[:5]  # Return max 5 titles
+        else:
+            raise Exception("Invalid response format")
+            
+    except Exception as e:
+        print(f"Error generating slide titles: {e}")
+        # Return fallback titles
+        return [
+            f"Key Insights for {project_title}",
+            f"Strategic Analysis",
+            f"Implementation Framework", 
+            f"Results and Impact",
+            f"Future Recommendations"
+        ]
+
+
+def generate_single_slide_xml(slide_title, context):
+    """
+    Generate XML content for a single slide
+    """
+    # Retrieve the API key from the environment variable
+    api_key = os.getenv("GEMINI_API")
+    if not api_key:
+        raise ValueError("GEMINI_API environment variable is not set.")
+
+    # Configure the API with the provided key
+    genai.configure(api_key=api_key)
+    
+    try:
+        # Read the prompt template
+        with open(os.path.join(os.path.dirname(__file__), "add_slide_prompt.txt"), "r") as file:
+            prompt_template = file.read()
+
+        # Format the prompt with the context data
+        prompt = prompt_template.format(
+            slide_title=slide_title,
+            project_title=context['project_title'],
+            project_description=context['project_description'],
+            existing_slides_count=context['existing_slides_count']
+        )
+
+    except Exception as e:
+        print(f"Error reading prompt template: {e}")
+        # Fallback inline prompt if file reading fails
+        prompt = f"""
+You are an expert presentation designer. Create a single slide in XML format.
+
+SLIDE DETAILS:
+- Title: {slide_title}
+- Project Context: {context['project_title']}
+- Project Description: {context['project_description']}
+- Existing Slides Count: {context['existing_slides_count']}
+
+CRITICAL XML FORMATTING RULES:
+1. NO quotes inside text content - use apostrophes instead
+2. NO special characters like &, <, > in text content
+3. Keep all text content simple and clean
+4. Use only the exact XML structure shown below
+
+REQUIREMENTS:
+1. Create ONE SECTION with appropriate layout
+2. Choose from layouts: columns, bullets, icons, timeline, chart, arrows, cycle, pyramid, staircase
+3. Section layout can be: left, right, or vertical
+4. Include detailed content relevant to the slide title
+5. Add IMG tags with simple descriptive queries
+6. Make content professional and substantial
+
+LAYOUT GUIDELINES:
+- bullets: For lists, key points, steps
+- columns: For comparisons, features, benefits
+- icons: For services, features, concepts
+- timeline: For processes, history, roadmap
+- arrows: For workflows, processes
+
+EXACT OUTPUT FORMAT (use bullets layout):
+<PRESENTATION>
+<SECTION layout="vertical">
+<BULLETS>
+<DIV>
+<H3>Point Title 1</H3>
+<P>Description without quotes or special chars</P>
+</DIV>
+<DIV>
+<H3>Point Title 2</H3>
+<P>Description without quotes or special chars</P>
+</DIV>
+<DIV>
+<H3>Point Title 3</H3>
+<P>Description without quotes or special chars</P>
+</DIV>
+<DIV>
+<H3>Point Title 4</H3>
+<P>Description without quotes or special chars</P>
+</DIV>
+</BULLETS>
+<IMG query="simple image description">digital guidance parents teenagers</IMG>
+</SECTION>
+</PRESENTATION>
+
+Generate content about: {slide_title}
+"""
+
+    try:
+        model = genai.GenerativeModel("gemini-2.5-flash")
+        response = model.generate_content(prompt)
+        xml_content = response.text.strip()
+        
+        # Clean the XML content to remove problematic characters
+        xml_content = xml_content.replace("```xml", "").replace("```", "").strip()
+        
+        # Remove XML declaration if present as it might cause issues
+        if xml_content.startswith("<?xml"):
+            lines = xml_content.split('\n')
+            xml_content = '\n'.join(lines[1:])
+        
+        # Escape any remaining problematic characters
+        xml_content = xml_content.replace('"', "'")
+        xml_content = xml_content.replace("&", "and")
+        
+        return xml_content
+        
+    except Exception as e:
+        print(f"Error generating single slide XML: {e}")
+        # Return a fallback XML structure
+        return f"""<PRESENTATION>
+<SECTION layout="vertical">
+<BULLETS>
+<DIV>
+<H3>Key Point 1</H3>
+<P>First important point about {slide_title}</P>
+</DIV>
+<DIV>
+<H3>Key Point 2</H3>
+<P>Second important point about {slide_title}</P>
+</DIV>
+<DIV>
+<H3>Key Point 3</H3>
+<P>Third important point about {slide_title}</P>
+</DIV>
+</BULLETS>
+</SECTION>
+</PRESENTATION>"""

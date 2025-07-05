@@ -1,36 +1,39 @@
 import { create } from "zustand";
 
-interface NestedPoint {
-  heading: string;
-  points: Array<string | NestedPoint>; // Recursive type for deeply nested points
-}
-
-interface Slide {
+interface XMLSlide {
   content: {
-    style: string;
     heading: string;
-    key_message: string;
-    body: {
-      points: Array<string | NestedPoint>; // Updated to handle nested points for any style
+    layout_type?: string;
+    section_layout?: string;
+    bullets?: any;
+    img_queries?: string[];
+    // Legacy support
+    style?: string;
+    key_message?: string;
+    body?: {
+      points: Array<string | any>;
     };
-    img_keywords: string[];
+    img_keywords?: string[];
   };
-  img_url: string;
+  img_url?: string;
   slide_number: number;
   id: string;
   dominant_color: string;
+  xml_content: string;
+  layout_type: string;
+  section_layout: string;
 }
 
 interface SlidesState {
-  slides: Slide[];
+  slides: XMLSlide[];
   title: string;
   is_public: boolean;
-  setSlides: (slides: Slide[]) => void;
+  setSlides: (slides: XMLSlide[]) => void;
   setTitle: (title: string) => void;
   setPublic: (is_public: boolean) => void;
-  updateSlide: (index: number, updatedSlide: Slide) => void; // Update an individual slide
-  addSlide: (slide: Slide) => void; // Add a new slide
-  deleteSlide: (index: number) => void; // Delete a specific slide
+  updateSlide: (index: number, updatedSlide: XMLSlide) => void;
+  addSlide: (slide: XMLSlide) => void;
+  deleteSlide: (index: number) => void;
 }
 
 const useSlidesStore = create<SlidesState>((set) => ({
@@ -40,21 +43,16 @@ const useSlidesStore = create<SlidesState>((set) => ({
   setSlides: (slides) => set({ slides }),
   setTitle: (title) => set({ title }),
   setPublic: (is_public) => set({ is_public }),
-  // Method to update a specific slide by index
   updateSlide: (index, updatedSlide) =>
     set((state) => {
       const updatedSlides = [...state.slides];
       updatedSlides[index] = updatedSlide;
       return { slides: updatedSlides };
     }),
-
-  // Method to add a new slide
   addSlide: (slide) =>
     set((state) => ({
       slides: [...state.slides, slide],
     })),
-
-  // Method to delete a specific slide by index
   deleteSlide: (index) =>
     set((state) => ({
       slides: state.slides.filter((_, idx) => idx !== index),

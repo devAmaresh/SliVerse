@@ -12,6 +12,9 @@ class SlideSerializer(serializers.ModelSerializer):
             "img_url",
             "id",
             "dominant_color",
+            "xml_content",
+            "layout_type",
+            "section_layout"
         ]  # Include only necessary fields
 
 
@@ -25,6 +28,8 @@ class ProjectSerializer(serializers.ModelSerializer):
             "description",
             "updated_at",
             "is_public",
+            "xml_content",
+            "is_favorite"
         ]  # Include only necessary fields
 
 

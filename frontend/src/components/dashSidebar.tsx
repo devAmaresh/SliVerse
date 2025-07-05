@@ -1,4 +1,4 @@
-import { Home, Settings, Star, Plus, LogOut } from "lucide-react";
+import { Home, Settings, Plus, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const Sidebar = () => {
@@ -39,19 +39,7 @@ const Sidebar = () => {
               Dashboard
             </Link>
           </li>
-          <li>
-            <Link
-              to="/dashboard/favorites"
-              className={`flex items-center gap-3 px-4 py-2 ${
-                isActive("/dashboard/favorites")
-                  ? "bg-indigo-600 text-white"
-                  : "text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700"
-              } rounded-lg`}
-            >
-              <Star className="w-5 h-5" />
-              Favorites
-            </Link>
-          </li>
+
           <li>
             <Link
               to="/dashboard/settings"

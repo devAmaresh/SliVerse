@@ -5,49 +5,40 @@
 html {
   scroll-behavior: smooth;
 }
-/* Ant Design Dark Mode Overrides */
-/* .dark .ant-collapse {
- background: transparent;
+
+/* Hide scrollbars */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-.dark .ant-collapse-header {
- color: white !important;
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.dark .ant-collapse-content {
- background: transparent !important;
+/* Custom scrollbar for sidebar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
 }
 
-.ant-collapse-header {
- padding: 1.5rem !important;
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.ant-collapse-content-box {
- padding: 0 1.5rem 1.5rem 1.5rem !important;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
 }
 
-.ant-collapse-item {
- margin-bottom: 1rem !important;
- border: 1px solid #e5e7eb !important;
- border-radius: 0.5rem !important;
- overflow: hidden;
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
-
-.dark .ant-collapse-item {
- border-color: #374151 !important;
-}
-
-.ant-collapse-item:last-child {
- margin-bottom: 0 !important;
-}
-
-.ant-collapse-header-text {
- width: 100%;
-} */
 
 @layer base {
   body {
     font-family: "Inter", sans-serif;
+    background-color: #0a0a0a;
+    color: white;
   }
   :root {
     --background: 0 0% 100%;

@@ -8,7 +8,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import Logout from "./pages/logout/page";
 import GenerateSlide from "./pages/generate_slide/page";
 import GenerateSlide1 from "./pages/generate_slide/page1";
-import Favorites from "./pages/favorites/page";
+
 import Settings from "./pages/settings/page";
 import useTheme from "./store/theme";
 import Dashboard from "./pages/dashboard/page";
@@ -52,10 +52,6 @@ function App() {
                 <Route
                   path="/dashboard"
                   element={<ProtectedRoute element={<Dashboard />} />}
-                />
-                <Route
-                  path="/dashboard/favorites"
-                  element={<ProtectedRoute element={<Favorites />} />}
                 />
                 <Route
                   path="/dashboard/settings"
