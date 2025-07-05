@@ -53,18 +53,18 @@ const SlideItem = memo(
       {...provided.draggableProps}
       {...provided.dragHandleProps}
       className={`
-        group relative rounded-xl transition-all duration-200 overflow-hidden cursor-pointer
+        group relative h-44 rounded-md transition-all duration-200 overflow-hidden cursor-pointer
         ${
           isSelected
-            ? "bg-gray-800 ring-2 ring-blue-500 shadow-lg"
-            : "bg-gray-900 hover:bg-gray-800"
+            ? "bg-zinc-800 ring-2 ring-blue-500 shadow-lg"
+            : "bg-zinc-900 hover:bg-zinc-800"
         }
         ${isDragging ? "shadow-2xl scale-105 rotate-2 z-50" : ""}
       `}
       onClick={onClick}
     >
       {/* Delete Button */}
-      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      <div className="absolute top-1 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -77,7 +77,7 @@ const SlideItem = memo(
       </div>
 
       {/* Slide Preview */}
-      <div className="aspect-[16/9] relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg m-2">
+      <div className="h-32 relative bg-gradient-to-br from-zinc-800 to-zinc-900 rounded-lg m-2">
         {slide.img_url ? (
           <img
             src={slide.img_url}
@@ -120,7 +120,7 @@ const SlideItem = memo(
         </div>
 
         {/* Layout Type Badge */}
-        <div className="absolute top-2 right-8">
+        <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
           <div className="bg-black/70 text-white text-xs px-2 py-1 rounded capitalize">
             {slide.layout_type}
           </div>
@@ -132,7 +132,7 @@ const SlideItem = memo(
         <h3
           className={`
             text-sm font-medium truncate text-left transition-colors duration-200
-            ${isSelected ? "text-white" : "text-gray-300"}
+            ${isSelected ? "text-white" : "text-zinc-300"}
           `}
         >
           {slide.content.heading || slide.content.title || `Slide ${index + 1}`}
@@ -141,7 +141,7 @@ const SlideItem = memo(
 
       {/* Active Indicator */}
       {isSelected && (
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r" />
+        <div className="absolute left-0 top-0 bottom-0 w-1  rounded-r" />
       )}
     </div>
   )
@@ -280,8 +280,8 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
   };
 
   return (
-    <div className="w-[280px] bg-[#1A1A1A] border-r border-gray-800 flex flex-col h-[90%] mt-16">
-      <div className="px-6 py-8 border-b border-gray-800">
+    <div className="w-[280px] bg-[#1A1A1A] border-r border-zinc-800 flex flex-col h-[90%] mt-16">
+      <div className="px-6 py-8 border-b border-zinc-800">
         {/* Controls */}
         <div className="flex items-center space-x-2">
           <button
@@ -317,9 +317,9 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
       {/* Add Slide Modal */}
       {showAddSlide && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-[#1A1A1A] border border-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+          <div className="bg-[#1A1A1A] border border-zinc-800 rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-800">
+            <div className="flex items-center justify-between p-6 border-b border-zinc-800">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center">
                   <svg
@@ -340,7 +340,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                   <h2 className="text-white font-semibold text-lg">
                     Add New Slide
                   </h2>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-zinc-400 text-sm">
                     Create AI-generated content for your presentation
                   </p>
                 </div>
@@ -348,7 +348,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
 
               <button
                 onClick={() => setShowAddSlide(false)}
-                className="p-2 hover:bg-gray-800 rounded-lg transition-colors duration-200 text-gray-400 hover:text-white"
+                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors duration-200 text-zinc-400 hover:text-white"
               >
                 <svg
                   className="w-5 h-5"
@@ -376,20 +376,20 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && slideToDelete && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-[#1A1A1A] border border-gray-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+          <div className="bg-[#1A1A1A] border border-zinc-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-red-600/20 flex items-center justify-center">
                 <AlertTriangle className="w-5 h-5 text-red-500" />
               </div>
               <div>
                 <h3 className="text-white font-semibold">Delete Slide</h3>
-                <p className="text-gray-400 text-sm">
+                <p className="text-zinc-400 text-sm">
                   Slide {slides.findIndex((s) => s.id === slideToDelete) + 1}
                 </p>
               </div>
             </div>
 
-            <p className="text-gray-300 text-sm mb-6">
+            <p className="text-zinc-300 text-sm mb-6">
               Are you sure you want to delete this slide? This action cannot be
               undone.
             </p>
@@ -401,7 +401,7 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
                   setSlideToDelete(null);
                 }}
                 disabled={isDeleting}
-                className="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 py-2.5 px-4 rounded-lg transition-colors duration-200 text-sm font-medium"
+                className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-2.5 px-4 rounded-lg transition-colors duration-200 text-sm font-medium"
               >
                 Cancel
               </button>
@@ -473,8 +473,8 @@ const NavigationSidebar: React.FC<NavigationSidebarProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-800">
-        <div className="flex items-center justify-between text-gray-400 text-xs">
+      <div className="p-4 border-t border-zinc-800">
+        <div className="flex items-center justify-between text-zinc-400 text-xs">
           <span>
             Slide {selectedSlide + 1} of {slides.length}
           </span>

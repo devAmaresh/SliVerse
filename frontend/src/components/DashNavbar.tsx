@@ -149,9 +149,6 @@ const DashNavbar = () => {
               <ChevronRight size={16} className="text-gray-400" />
 
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                  <div className="w-4 h-4 bg-white rounded-sm"></div>
-                </div>
                 <div>
                   <h1 className="text-sm font-semibold text-gray-900 dark:text-gray-100 max-w-[300px] truncate">
                     {title}

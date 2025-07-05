@@ -4,7 +4,6 @@ import {
   Search,
   Star,
   Grid3X3,
-  Sparkles,
   LayoutGrid,
 } from "lucide-react";
 import PresentationCard from "../../components/PresentationCard";
@@ -144,13 +143,8 @@ const Dashboard = () => {
                     {mode.count > 0 && (
                       <Badge
                         count={mode.count}
-                        size="small"
-                        style={{
-                          backgroundColor:
-                            viewMode === mode.key ? "#6366f1" : "#71717a",
-                          color: "white",
-                          fontSize: "11px",
-                        }}
+                        size="default"
+                        color={viewMode === mode.key ? "blue" : "gray"}
                       />
                     )}
                   </button>
@@ -205,12 +199,6 @@ const Dashboard = () => {
                 )}
               </div>
 
-              {viewMode === "favorites" && filteredProjects.length > 0 && (
-                <div className="flex items-center space-x-2 text-yellow-500">
-                  <Sparkles className="w-4 h-4" />
-                  <span className="text-sm font-medium">Your favorites</span>
-                </div>
-              )}
             </div>
           </div>
 
