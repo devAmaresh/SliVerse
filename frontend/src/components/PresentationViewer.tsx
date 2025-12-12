@@ -3,6 +3,7 @@ import PPTSlideRenderer from "./PPTSlideRenderer";
 import NavigationSidebar from "./NavigationSidebar";
 import DashNavbar from "./DashNavbar";
 import useSlidesStore from "../store/useSlidesStore";
+import LazySlideWrapper from "./LazySlideWrapper"; 
 
 interface SlideData {
   id: string;
@@ -24,193 +25,104 @@ const PresentationViewer: React.FC<PresentationViewerProps> = ({
   slides: initialSlides,
   title,
 }) => {
+  // We keep this state for keybinding navigation, but we don't pass it to Sidebar
   const [selectedSlide, setSelectedSlide] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
   const isScrollingProgrammatically = useRef(false);
 
-  // Get slides from store
   const { slides, setSlides, setTitle } = useSlidesStore();
 
-  // Initialize store with props data if store is empty
   useEffect(() => {
     if (slides.length === 0 && initialSlides.length > 0) {
       setSlides(initialSlides);
     }
-    if (title) {
-      setTitle(title);
-    }
+    if (title) setTitle(title);
   }, [initialSlides, title, slides.length, setSlides, setTitle]);
 
-  // Function to determine which slide is currently in viewport
-  const getCurrentSlideInViewport = useCallback(() => {
-    if (!containerRef.current) return 0;
-
-    const container = containerRef.current;
-    const containerRect = container.getBoundingClientRect();
-    const containerCenter = containerRect.top + containerRect.height / 2;
-
-    let closestSlideIndex = 0;
-    let closestDistance = Infinity;
-
-    slideRefs.current.forEach((slideElement, index) => {
-      if (slideElement) {
-        const slideRect = slideElement.getBoundingClientRect();
-        const slideCenter = slideRect.top + slideRect.height / 2;
-        const distance = Math.abs(slideCenter - containerCenter);
-
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestSlideIndex = index;
-        }
-      }
-    });
-
-    return closestSlideIndex;
-  }, []);
-
-  // Handle scroll to detect current slide
+  // Scroll detection to update local state (for keyboard nav)
   const handleScroll = useCallback(() => {
-    if (isScrollingProgrammatically.current) {
-      return;
+    if (isScrollingProgrammatically.current || !containerRef.current) return;
+    
+    // Simple logic: update 'selectedSlide' roughly so keyboard nav works from current position
+    // We heavily throttle this because we don't need UI updates for it
+    const container = containerRef.current;
+    const center = container.scrollTop + container.clientHeight / 2;
+    
+    // Quick find
+    const index = slideRefs.current.findIndex(el => 
+        el && el.offsetTop <= center && (el.offsetTop + el.clientHeight) > center
+    );
+    
+    if (index !== -1 && index !== selectedSlide) {
+        setSelectedSlide(index);
     }
+  }, [selectedSlide]);
 
-    const currentSlideIndex = getCurrentSlideInViewport();
-    if (currentSlideIndex !== selectedSlide) {
-      setSelectedSlide(currentSlideIndex);
-    }
-  }, [getCurrentSlideInViewport, selectedSlide]);
-
-  // Throttled scroll handler for better performance
-  const throttledScrollHandler = useCallback(() => {
-    let timeoutId: NodeJS.Timeout;
-    return () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(handleScroll, 100); // Throttle to 100ms
-    };
-  }, [handleScroll]);
-
-  // Set up scroll listener
+  // Throttled scroll listener
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
-    const scrollHandler = throttledScrollHandler();
-    container.addEventListener("scroll", scrollHandler, { passive: true });
-
-    return () => {
-      container.removeEventListener("scroll", scrollHandler);
-    };
-  }, [throttledScrollHandler]);
-
-  // Simple scroll to slide function
-  const scrollToSlide = useCallback(
-    (index: number) => {
-      if (!slideRefs.current[index] || !containerRef.current) return;
-
-      const slideElement = slideRefs.current[index];
-      const container = containerRef.current;
-
-     
-      isScrollingProgrammatically.current = true;
-
     
-      setSelectedSlide(index);
-
-      // Calculate the target scroll position
-      const slideOffsetTop = slideElement.offsetTop;
-      const containerHeight = container.clientHeight;
-      const slideHeight = slideElement.clientHeight;
-
-      // Center the slide in the viewport
-      const targetScrollTop = slideOffsetTop - (containerHeight - slideHeight) / 2;
-
-      // Smooth scroll to the target position
-      container.scrollTo({
-        top: Math.max(0, targetScrollTop),
-        behavior: "smooth",
-      });
-
-
-      setTimeout(() => {
-        isScrollingProgrammatically.current = false;
-      }, 1000);
-    },
-    [slideRefs, containerRef]
-  );
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
-        event.preventDefault();
-        const previousIndex = Math.max(selectedSlide - 1, 0);
-        scrollToSlide(previousIndex);
-      } else if (event.key === "ArrowDown" || event.key === "ArrowRight") {
-        event.preventDefault();
-        const nextIndex = Math.min(selectedSlide + 1, slides.length - 1);
-        scrollToSlide(nextIndex);
-      } else if (event.key === " ") {
-        // Spacebar
-        event.preventDefault();
-        const nextIndex = Math.min(selectedSlide + 1, slides.length - 1);
-        scrollToSlide(nextIndex);
-      }
+    let tick = false;
+    const onScroll = () => {
+        if (!tick) {
+            window.requestAnimationFrame(() => {
+                handleScroll();
+                tick = false;
+            });
+            tick = true;
+        }
     };
+    
+    container.addEventListener("scroll", onScroll, { passive: true });
+    return () => container.removeEventListener("scroll", onScroll);
+  }, [handleScroll]);
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [selectedSlide, slides.length, scrollToSlide]);
+  const scrollToSlide = useCallback((index: number) => {
+    if (!slideRefs.current[index] || !containerRef.current) return;
+    
+    isScrollingProgrammatically.current = true;
+    setSelectedSlide(index);
 
-  // Adjust selected slide if it's out of bounds after deletion
-  useEffect(() => {
-    if (selectedSlide >= slides.length && slides.length > 0) {
-      const newIndex = slides.length - 1;
-      setSelectedSlide(newIndex);
-      scrollToSlide(newIndex);
-    }
-  }, [slides.length, selectedSlide, scrollToSlide]);
+    containerRef.current.scrollTo({
+      top: slideRefs.current[index]!.offsetTop - 20,
+      behavior: "smooth",
+    });
+
+    setTimeout(() => { isScrollingProgrammatically.current = false; }, 800);
+  }, []);
 
   return (
-    <div className="h-screen bg-gray-50 dark:bg-[#0A0A0A] flex overflow-hidden">
-      {/* Modern Navbar */}
+    <div className="h-screen bg-[#000] flex overflow-hidden">
       <DashNavbar />
-
-      {/* Sidebar Navigation */}
+      
+      {/* Sidebar is now detached from scroll state */}
       <NavigationSidebar
-        selectedSlide={selectedSlide}
         onSlideClick={scrollToSlide}
         title={title}
       />
 
-      {/* Main Content Area */}
-      <div className="flex-1 pt-16">
-        {/* Slides Container */}
+      <div className="flex-1 pt-16 h-full bg-[#09090b]">
         <div
           ref={containerRef}
           className="h-full overflow-y-auto scroll-smooth"
-          style={{
-            msOverflowStyle: "none",
-            WebkitOverflowScrolling: "touch",
-          }}
         >
-          <div className="">
+          <div className="pb-40 px-6 pt-10">
             {slides.map((slide, index) => (
               <div
                 key={slide.id}
                 ref={(el) => (slideRefs.current[index] = el)}
-                className="flex items-center justify-center"
-                style={{
-                  scrollSnapAlign: "start",
-                }}
+                className="flex items-center justify-center mb-16"
               >
-                <PPTSlideRenderer
-                  slideIndex={index}
-                  isActive={selectedSlide === index}
-                  slideNumber={index + 1}
-                />
+                {/* Virtualization Wrapper */}
+                <LazySlideWrapper height="600px" placeholderColor={slide.dominant_color}>
+                    <PPTSlideRenderer
+                      slideIndex={index}
+                      isActive={selectedSlide === index} // Only this updates on scroll
+                      slideNumber={index + 1}
+                    />
+                </LazySlideWrapper>
               </div>
             ))}
           </div>
