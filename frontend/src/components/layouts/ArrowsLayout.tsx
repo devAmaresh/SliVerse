@@ -3,9 +3,10 @@ import React from 'react';
 interface ArrowsLayoutProps {
   content: any;
   dominantColor: string;
+  textColor?: string;
 }
 
-const ArrowsLayout: React.FC<ArrowsLayoutProps> = ({ content, dominantColor }) => {
+const ArrowsLayout: React.FC<ArrowsLayoutProps> = ({ content, dominantColor, textColor: _textColor = "#ffffff" }) => {
   const steps = content.steps || [];
 
   return (

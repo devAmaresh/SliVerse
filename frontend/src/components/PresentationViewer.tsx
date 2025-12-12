@@ -103,9 +103,10 @@ const PresentationViewer: React.FC<PresentationViewerProps> = ({
         title={title}
       />
 
-      <div className="flex-1 pt-16 h-full bg-[#09090b]">
+      <div className="flex-1 pt-16 h-full bg-zinc-300 dark:bg-[#09090b]">
         <div
           ref={containerRef}
+          data-slides-container
           className="h-full overflow-y-auto scroll-smooth"
         >
           <div className="pb-40 px-6 pt-10">

@@ -1,6 +1,26 @@
 from rest_framework import serializers
-from .models import Slide, Project, UserProfile
+from .models import Slide, Project, UserProfile, Theme
 from django.contrib.auth.models import User
+
+
+class ThemeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Theme
+        fields = [
+            "id",
+            "name",
+            "display_name",
+            "description",
+            "background_color",
+            "text_color",
+            "accent_color",
+            "accent_color_2",
+            "accent_color_3",
+            "gradient_start",
+            "gradient_end",
+            "preview_image_url",
+            "is_active",
+        ]
 
 
 class SlideSerializer(serializers.ModelSerializer):
@@ -14,11 +34,12 @@ class SlideSerializer(serializers.ModelSerializer):
             "dominant_color",
             "xml_content",
             "layout_type",
-            "section_layout"
+            "section_layout",
         ]  # Include only necessary fields
 
 
 class ProjectSerializer(serializers.ModelSerializer):
+    theme = ThemeSerializer(read_only=True)
 
     class Meta:
         model = Project
@@ -29,8 +50,17 @@ class ProjectSerializer(serializers.ModelSerializer):
             "updated_at",
             "is_public",
             "xml_content",
-            "is_favorite"
+            "is_favorite",
+            "theme"
         ]  # Include only necessary fields
+
+
+class ProjectUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for updating project theme"""
+    
+    class Meta:
+        model = Project
+        fields = ["theme"]
 
 
 class UserProfileModelSerializer(serializers.ModelSerializer):

@@ -3,9 +3,10 @@ import React from 'react';
 interface ChartLayoutProps {
   content: any;
   dominantColor: string;
+  textColor?: string;
 }
 
-const ChartLayout: React.FC<ChartLayoutProps> = ({ content, dominantColor }) => {
+const ChartLayout: React.FC<ChartLayoutProps> = ({ content, dominantColor, textColor: _textColor = "#ffffff" }) => {
   const data = content.data || [];
 
   return (

@@ -7,8 +7,8 @@ from .gemini import (
     generate_xml_presentation,
 )
 import json
-from .models import Project, Slide, UserProfile
-from .serializers import SlideSerializer, ProjectSerializer, UserProfileSerializer
+from .models import Project, Slide, UserProfile, Theme
+from .serializers import SlideSerializer, ProjectSerializer, UserProfileSerializer, ThemeSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -179,6 +179,12 @@ class ProjectsView(APIView):
 
             slides = Slide.objects.filter(project=project).order_by("slide_number")
             serialized_slides = SlideSerializer(slides, many=True).data
+            
+            # Serialize theme if it exists
+            theme_data = None
+            if project.theme:
+                theme_data = ThemeSerializer(project.theme).data
+            
             response_data = {
                 "project_id": project_id,
                 "is_public": project.is_public,
@@ -186,6 +192,7 @@ class ProjectsView(APIView):
                 "slides": serialized_slides,
                 "description": project.description,
                 "xml_content": project.xml_content,
+                "theme": theme_data,
             }
 
             return Response(response_data, status=status.HTTP_200_OK)
@@ -619,3 +626,194 @@ class AddSlideView(APIView):
                 {"error": f"Failed to add slide: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+# Theme Views
+class ThemesListView(APIView):
+    """Get all available themes"""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        themes = Theme.objects.filter(is_active=True)
+        serializer = ThemeSerializer(themes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ProjectSetThemeView(APIView):
+    """Update project theme"""
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, project_id):
+        try:
+            project = Project.objects.get(id=project_id, user=request.user)
+            theme_id = request.data.get("theme_id")
+
+            if theme_id:
+                try:
+                    theme = Theme.objects.get(id=theme_id)
+                    project.theme = theme
+                except Theme.DoesNotExist:
+                    return Response(
+                        {"error": "Theme not found"},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+            else:
+                project.theme = None
+
+            project.save()
+            serializer = ProjectSerializer(project)
+            return Response(
+                {
+                    "message": "Theme updated successfully",
+                    "project": serializer.data
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except Project.DoesNotExist:
+            return Response(
+                {"error": "Project not found or access denied"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class CreateDefaultThemesView(APIView):
+    """Admin endpoint to create default themes"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Check if user is superuser
+        if not request.user.is_superuser:
+            return Response(
+                {"error": "Only admins can create themes"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        default_themes = [
+            {
+                "name": "dark",
+                "display_name": "Dark",
+                "description": "Classic dark theme with white text",
+                "background_color": "#1a1a1a",
+                "text_color": "#ffffff",
+                "accent_color": "#667eea",
+                "accent_color_2": "#ff6b6b",
+                "accent_color_3": "#51cf66",
+            },
+            {
+                "name": "light",
+                "display_name": "Light",
+                "description": "Bright light theme with dark text",
+                "background_color": "#ffffff",
+                "text_color": "#1a1a1a",
+                "accent_color": "#667eea",
+                "accent_color_2": "#ff6b6b",
+                "accent_color_3": "#51cf66",
+            },
+            {
+                "name": "professional",
+                "display_name": "Professional",
+                "description": "Professional blue and gray theme",
+                "background_color": "#f5f5f5",
+                "text_color": "#2c3e50",
+                "accent_color": "#3498db",
+                "accent_color_2": "#2980b9",
+                "accent_color_3": "#27ae60",
+            },
+            {
+                "name": "vibrant",
+                "display_name": "Vibrant",
+                "description": "Colorful vibrant theme",
+                "background_color": "#1a1a2e",
+                "text_color": "#eaeaea",
+                "accent_color": "#00d4ff",
+                "accent_color_2": "#ff006e",
+                "accent_color_3": "#ffbe0b",
+                "gradient_start": "#1a1a2e",
+                "gradient_end": "#16213e",
+            },
+            {
+                "name": "ocean",
+                "display_name": "Ocean",
+                "description": "Cool ocean blues and teals",
+                "background_color": "#0f1419",
+                "text_color": "#e0f7ff",
+                "accent_color": "#00d9ff",
+                "accent_color_2": "#0096c7",
+                "accent_color_3": "#06aed5",
+                "gradient_start": "#0f1419",
+                "gradient_end": "#003d5c",
+            },
+            {
+                "name": "sunset",
+                "display_name": "Sunset",
+                "description": "Warm sunset orange and pink",
+                "background_color": "#1a0f0f",
+                "text_color": "#ffe8d6",
+                "accent_color": "#ff6b35",
+                "accent_color_2": "#f7931e",
+                "accent_color_3": "#ffa500",
+                "gradient_start": "#1a0f0f",
+                "gradient_end": "#4a0e0e",
+            },
+            {
+                "name": "forest",
+                "display_name": "Forest",
+                "description": "Natural forest green theme",
+                "background_color": "#0d2818",
+                "text_color": "#d4f1d4",
+                "accent_color": "#2d6a4f",
+                "accent_color_2": "#40916c",
+                "accent_color_3": "#52b788",
+            },
+            {
+                "name": "midnight",
+                "display_name": "Midnight",
+                "description": "Deep midnight purple",
+                "background_color": "#0a0e27",
+                "text_color": "#e0d5ff",
+                "accent_color": "#7c3aed",
+                "accent_color_2": "#a78bfa",
+                "accent_color_3": "#c4b5fd",
+            },
+            {
+                "name": "minimal",
+                "display_name": "Minimal",
+                "description": "Minimal black and white",
+                "background_color": "#fafafa",
+                "text_color": "#000000",
+                "accent_color": "#666666",
+                "accent_color_2": "#333333",
+                "accent_color_3": "#999999",
+            },
+            {
+                "name": "cyberpunk",
+                "display_name": "Cyberpunk",
+                "description": "Futuristic cyberpunk neon",
+                "background_color": "#0d0221",
+                "text_color": "#00f0ff",
+                "accent_color": "#ff006e",
+                "accent_color_2": "#00f0ff",
+                "accent_color_3": "#ffbe0b",
+                "gradient_start": "#0d0221",
+                "gradient_end": "#3a0061",
+            },
+        ]
+
+        created_count = 0
+        for theme_data in default_themes:
+            theme, created = Theme.objects.get_or_create(
+                name=theme_data["name"],
+                defaults=theme_data
+            )
+            if created:
+                created_count += 1
+
+        return Response(
+            {"message": f"Created {created_count} new themes"},
+            status=status.HTTP_201_CREATED,
+        )

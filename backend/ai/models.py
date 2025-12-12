@@ -28,6 +28,37 @@ class Template(models.Model):
         return self.name
 
 
+# Theme model for slide themes
+class Theme(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    display_name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    
+    # Color scheme
+    background_color = models.CharField(max_length=7, default="#1a1a1a")  # Hex color
+    text_color = models.CharField(max_length=7, default="#ffffff")
+    accent_color = models.CharField(max_length=7, default="#667eea")
+    accent_color_2 = models.CharField(max_length=7, default="#ff6b6b")
+    accent_color_3 = models.CharField(max_length=7, default="#51cf66")
+    
+    # Gradient backgrounds (optional)
+    gradient_start = models.CharField(max_length=7, blank=True, null=True)
+    gradient_end = models.CharField(max_length=7, blank=True, null=True)
+    
+    # Preview image
+    preview_image_url = models.URLField(blank=True, null=True)
+    
+    # Status
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.display_name
+
+    class Meta:
+        ordering = ["name"]
+
+
 # Project model
 class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -37,6 +68,9 @@ class Project(models.Model):
     is_public = models.BooleanField(default=False)
     xml_content = models.TextField(blank=True, null=True)
     is_favorite = models.BooleanField(default=True)
+    theme = models.ForeignKey(
+        Theme, on_delete=models.SET_NULL, null=True, blank=True, related_name="projects"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

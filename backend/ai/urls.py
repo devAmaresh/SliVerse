@@ -11,6 +11,9 @@ from .views import (
     GenerateSlideTitleView,
     ReorderSlidesView,
     ProjectOutlineView,
+    ThemesListView,
+    ProjectSetThemeView,
+    CreateDefaultThemesView,
 )
 
 urlpatterns = [
@@ -52,4 +55,9 @@ urlpatterns = [
 
     # User profile
     path("user-profile/", UserProfileView.as_view(), name="user_profile"),
+
+    # Themes
+    path("themes/", ThemesListView.as_view(), name="themes_list"),
+    path("project/<uuid:project_id>/set-theme/", ProjectSetThemeView.as_view(), name="set_theme"),
+    path("create-default-themes/", CreateDefaultThemesView.as_view(), name="create_default_themes"),
 ]

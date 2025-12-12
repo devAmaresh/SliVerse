@@ -3,9 +3,10 @@ import React from 'react';
 interface CycleLayoutProps {
   content: any;
   dominantColor: string;
+  textColor?: string;
 }
 
-const CycleLayout: React.FC<CycleLayoutProps> = ({ content, dominantColor }) => {
+const CycleLayout: React.FC<CycleLayoutProps> = ({ content, dominantColor, textColor: _textColor = "#ffffff" }) => {
   const steps = content.steps || [];
 
   return (
@@ -27,7 +28,11 @@ const CycleLayout: React.FC<CycleLayoutProps> = ({ content, dominantColor }) => 
               <div className="flex items-center gap-4 mb-4">
                 <div 
                   className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-sm"
-                  style={{ backgroundColor: dominantColor }}
+                  style={{ 
+                      background: `linear-gradient(135deg, ${dominantColor}90, ${dominantColor}60)`,
+                      boxShadow: `0 8px 32px ${dominantColor}20`,
+                      color: _textColor
+                    }}
                 >
                   {index + 1}
                 </div>

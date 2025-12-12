@@ -18,15 +18,18 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { backend_url } from "../utils/backend";
 import useSlidesStore from "../store/useSlidesStore";
+import useSlideThemeStore from "../store/slideThemeStore";
 import handleDownloadPPT from "../utils/handleDownloadPPT";
 import handleDownloadPDF from "../utils/handleDownloadPDF";
 import useTheme from "@/store/theme";
+import ThemeSelector from "./ThemeSelector";
 import { Button, message, Popover } from "antd";
 
 const DashNavbar = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { title, is_public, setPublic, slides } = useSlidesStore();
+  const { selectedTheme } = useSlideThemeStore();
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -76,9 +79,10 @@ const DashNavbar = () => {
         "The PPTX downloader is currently in development. Please bear with us if you encounter any issues."
       );
 
-      await handleDownloadPPT({ slides, title });
+      await handleDownloadPPT({ slides, title, selectedTheme });
     } catch (error) {
       console.error("Error downloading PPT:", error);
+      messageApi.error("Failed to download PPT. Please try again.");
     } finally {
       setDownloadLoading(false);
     }
@@ -162,6 +166,9 @@ const DashNavbar = () => {
 
             {/* Right Section */}
             <div className="flex items-center space-x-2">
+              {/* Theme Selector for Slides */}
+              {id && <ThemeSelector projectId={id as string} />}
+
               {/* Theme Toggle */}
               <Button
                 onClick={toggleTheme}

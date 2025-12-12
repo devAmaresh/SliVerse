@@ -4,12 +4,14 @@ import PresentationViewer from "../../components/PresentationViewer";
 import ModernLoader from "../../components/Loader";
 import ErrorDisplay from "../../components/ErrorDisplay";
 import useSlidesStore from "../../store/useSlidesStore";
+import useSlideThemeStore from "../../store/slideThemeStore";
 import { backend_url } from "../../utils/backend";
 import axios from "axios";
 import Cookies from "js-cookie";
 const Page: React.FC = () => {
   const { id } = useParams();
   const { slides, setSlides, setTitle, setPublic } = useSlidesStore();
+  const { setThemes, setSelectedTheme } = useSlideThemeStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [projectTitle, setProjectTitle] = useState("");
@@ -36,6 +38,19 @@ const Page: React.FC = () => {
       setTitle(res.title);
       setProjectTitle(res.title);
       setPublic(res.is_public);
+
+      // Set theme from project
+      if (res.theme) {
+        setSelectedTheme(res.theme);
+      }
+
+      // Fetch all themes
+      try {
+        const themesResponse = await axios.get(`${backend_url}/api/themes/`);
+        setThemes(themesResponse.data);
+      } catch (themeErr) {
+        console.error("Error fetching themes:", themeErr);
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {

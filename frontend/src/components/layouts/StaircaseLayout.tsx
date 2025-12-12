@@ -3,9 +3,10 @@ import React from 'react';
 interface StaircaseLayoutProps {
   content: any;
   dominantColor: string;
+  textColor?: string;
 }
 
-const StaircaseLayout: React.FC<StaircaseLayoutProps> = ({ content, dominantColor }) => {
+const StaircaseLayout: React.FC<StaircaseLayoutProps> = ({ content, dominantColor, textColor: _textColor = "#ffffff" }) => {
   const steps = content.steps || [];
 
   return (
@@ -40,7 +41,11 @@ const StaircaseLayout: React.FC<StaircaseLayoutProps> = ({ content, dominantColo
               <div className="flex items-start gap-4">
                 <div 
                   className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-semibold text-sm flex-shrink-0"
-                  style={{ backgroundColor: dominantColor }}
+                  style={{ 
+                      background: `linear-gradient(135deg, ${dominantColor}90, ${dominantColor}60)`,
+                      boxShadow: `0 8px 32px ${dominantColor}20`,
+                      color: _textColor
+                    }}
                 >
                   {index + 1}
                 </div>

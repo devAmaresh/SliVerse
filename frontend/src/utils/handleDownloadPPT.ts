@@ -1,8 +1,9 @@
 import pptxgen from "pptxgenjs";
 import { themes } from "./theme";
 
-const handleDownloadPPT = async ({ slides, title }: any) => {
-  const currentTheme = themes.ocean;
+const handleDownloadPPT = async ({ slides, title, selectedTheme }: any) => {
+  // Use selectedTheme if provided, otherwise fall back to themes.ocean
+  const currentTheme = selectedTheme || themes.ocean;
 
   const pptx = new pptxgen();
   pptx.author = "Sliverse";
@@ -10,9 +11,24 @@ const handleDownloadPPT = async ({ slides, title }: any) => {
   pptx.title = `${title}`;
 
   // Define current theme colors dynamically
-  const themeTextColor = currentTheme.text_hex || "FFFFFF";
-  const themeAccentColor = currentTheme.accent_hex || "3B82F6";
-  const themeBackgroundColor = currentTheme.background_hex || "0A0A0A";
+  // Try multiple possible color property names for compatibility
+  const themeTextColor = 
+    currentTheme.text_color || 
+    currentTheme.text_hex || 
+    currentTheme.textColor || 
+    "FFFFFF";
+  
+  const themeAccentColor = 
+    currentTheme.accent_color || 
+    currentTheme.accent_hex || 
+    currentTheme.accentColor || 
+    "3B82F6";
+  
+  const themeBackgroundColor = 
+    currentTheme.background_color || 
+    currentTheme.background_hex || 
+    currentTheme.backgroundColor || 
+    "0A0A0A";
 
   // Clean color function - remove # and ensure 6 digits
   const cleanColor = (color: string) => {

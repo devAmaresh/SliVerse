@@ -3,11 +3,13 @@ import React from "react";
 interface ColumnsLayoutProps {
   content: any;
   dominantColor: string;
+  textColor?: string;
 }
 
 const ColumnsLayout: React.FC<ColumnsLayoutProps> = ({
   content,
   dominantColor,
+  textColor = "#ffffff",
 }) => {
   const columns = content.columns || [];
 
@@ -15,7 +17,7 @@ const ColumnsLayout: React.FC<ColumnsLayoutProps> = ({
     <div className="w-full space-y-8">
       {(content.title || content.heading) && (
         <div className="text-center space-y-3">
-          <h2 className="text-2xl md:text-3xl font-semibold text-white">
+          <h2 className="text-2xl md:text-3xl font-semibold" style={{ color: textColor }}>
             {content.title || content.heading}
           </h2>
           <div
@@ -39,10 +41,11 @@ const ColumnsLayout: React.FC<ColumnsLayoutProps> = ({
                 {/* Modern Icon/Number */}
                 <div className="flex items-center space-x-3">
                   <div
-                    className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg transition-all duration-300 border border-white/10"
+                    className="w-14 h-14 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg transition-all duration-300 border border-white/10"
                     style={{ 
                       background: `linear-gradient(135deg, ${dominantColor}90, ${dominantColor}60)`,
-                      boxShadow: `0 8px 32px ${dominantColor}20`
+                      boxShadow: `0 8px 32px ${dominantColor}20`,
+                      color: textColor
                     }}
                   >
                     {index + 1}
@@ -57,10 +60,10 @@ const ColumnsLayout: React.FC<ColumnsLayoutProps> = ({
 
                 {/* Content */}
                 <div className="space-y-3 flex-1 flex flex-col">
-                  <h3 className="font-bold text-xl text-white leading-tight tracking-tight">
+                  <h3 className="font-bold text-xl leading-tight tracking-tight" style={{ color: textColor }}>
                     {column.heading}
                   </h3>
-                  <p className="text-sm text-gray-300/90 leading-relaxed font-medium">
+                  <p className="text-sm leading-relaxed font-medium" style={{ color: textColor, opacity: 0.8 }}>
                     {column.description}
                   </p>
                 </div>

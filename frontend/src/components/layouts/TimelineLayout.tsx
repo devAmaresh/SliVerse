@@ -3,9 +3,10 @@ import React from 'react';
 interface TimelineLayoutProps {
   content: any;
   dominantColor: string;
+  textColor?: string;
 }
 
-const TimelineLayout: React.FC<TimelineLayoutProps> = ({ content, dominantColor }) => {
+const TimelineLayout: React.FC<TimelineLayoutProps> = ({ content, dominantColor, textColor: _textColor = "#ffffff" }) => {
   const steps = content.steps || [];
 
   return (

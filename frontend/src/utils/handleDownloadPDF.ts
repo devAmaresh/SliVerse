@@ -20,100 +20,130 @@ const handleDownloadPDF = async ({
   title: string;
 }) => {
   try {
-    console.log("Starting PDF generation with slides:", slides);
+    console.log("PDF: Starting generation for", slides.length, "slides");
 
     if (!slides || slides.length === 0) {
       throw new Error("No slides to export");
     }
 
-    // Find all slide elements that are currently rendered
-    const slideElements = document.querySelectorAll("[data-slide-renderer]");
+    const container = document.querySelector("[data-slides-container]");
+    if (!container) {
+      throw new Error("Presentation not found");
+    }
+
+    // Hide UI elements
+    const navbar = document.querySelector("nav");
+    const originalNavDisplay = navbar ? window.getComputedStyle(navbar).display : "";
+    if (navbar) (navbar as HTMLElement).style.display = "none";
+
+    const sidebar = document.querySelector("[class*='sidebar'], nav + div");
+    const originalSidebarDisplay = sidebar ? window.getComputedStyle(sidebar).display : "";
+    if (sidebar) (sidebar as HTMLElement).style.display = "none";
+
+    // --- FORCE LOAD SLIDES ---
+    console.log("PDF: Force-loading all slides...");
+    const containerEl = container as HTMLElement;
+    containerEl.scrollTop = containerEl.scrollHeight;
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    containerEl.scrollTop = 0;
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const slideElements = Array.from(
+      container.querySelectorAll("[data-slide-renderer]")
+    ) as HTMLElement[];
 
     if (slideElements.length === 0) {
-      throw new Error("No slide elements found. Make sure slides are visible on the page.");
+      throw new Error("No slides found for export");
     }
 
-    console.log(`Found ${slideElements.length} slide elements`);
-
-    // Create PDF instance - no initial page
-    const pdf = new jsPDF({
-      orientation: "landscape",
-      unit: "mm",
-      format: "a4",
-    });
-    
-
-    // Process each slide element
-    for (let i = 0; i < slideElements.length; i++) {
-      const slideElement = slideElements[i] as HTMLElement;
-
-      console.log(`Processing slide ${i + 1}/${slideElements.length}`);
-
-      // Temporarily make the slide fully visible
-      const originalOpacity = slideElement.style.opacity;
-      const parentElement = slideElement.parentElement;
-      
-      // Make sure the slide is visible
-      slideElement.style.opacity = "1";
-      if (parentElement) {
-        parentElement.style.opacity = "1";
-      }
-
-      // Wait for rendering
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      // Capture the slide element with optimized settings
-      const canvas = await html2canvas(slideElement, {
-        scale: 2, 
-        backgroundColor: "#0A0A0A",
-        useCORS: true,
-        allowTaint: true,
-        logging: true, 
-        removeContainer: true,
-        imageTimeout: 5000,
+    // --- PRELOAD IMAGES ---
+    console.log("PDF: Preloading images...");
+    const allImages = Array.from(container.querySelectorAll("img")) as HTMLImageElement[];
+    const imagePromises = allImages.map((img) => {
+      return new Promise<void>((resolve) => {
+        if (img.complete) return resolve();
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+        setTimeout(resolve, 12000);
       });
+    });
+    await Promise.all(imagePromises);
 
-      // Restore original opacity
-      slideElement.style.opacity = originalOpacity;
-      if (parentElement) {
-        parentElement.style.opacity = originalOpacity;
+    // --- PDF GENERATION ---
+    // We declare pdf as null initially and create it with the dimensions of the first slide
+    let pdf: jsPDF | null = null;
+
+    for (let i = 0; i < slideElements.length; i++) {
+      try {
+        const slideElement = slideElements[i];
+        console.log(`PDF: Processing slide ${i + 1}/${slideElements.length}`);
+
+        // 1. Scroll slide into view for capture
+        slideElement.scrollIntoView({ behavior: "auto", block: "center" });
+        await new Promise((resolve) => setTimeout(resolve, 600));
+
+        // 2. Get Natural Dimensions of the slide
+        // This is crucial: we use the DOM element's actual pixel size
+        const slideWidth = slideElement.offsetWidth;
+        const slideHeight = slideElement.offsetHeight;
+
+        console.log(`PDF: Slide dimensions: ${slideWidth}x${slideHeight}`);
+
+        // 3. Capture High-Res Canvas
+        const canvas = await html2canvas(slideElement, {
+          scale: 2, // 2x scale for crisp text
+          useCORS: true,
+          allowTaint: true,
+          logging: false,
+          backgroundColor: null, // Transparent background from html2canvas
+          windowWidth: slideWidth,
+          windowHeight: slideHeight,
+        });
+
+        const imgData = canvas.toDataURL("image/png");
+
+        // 4. Initialize or Add Page
+        // Determine orientation based on THIS SPECIFIC SLIDE
+        const orientation = slideWidth > slideHeight ? "landscape" : "portrait";
+
+        if (i === 0) {
+          // Initialize PDF with the dimensions of the FIRST slide
+          // We use 'px' unit to match HTML/Canvas pixels 1:1
+          pdf = new jsPDF({
+            orientation: orientation,
+            unit: "px",
+            format: [slideWidth, slideHeight],
+          });
+        } else {
+          // For subsequent slides, add a new page with THAT slide's dimensions
+          // This allows mixed heights/widths in a single PDF
+          pdf?.addPage([slideWidth, slideHeight], orientation);
+        }
+
+        // 5. Draw Image
+        // We draw at 0,0 with exactly the width/height of the page
+        // This eliminates white borders/margins completely
+        pdf?.addImage(imgData, "PNG", 0, 0, slideWidth, slideHeight);
+
+      } catch (error) {
+        console.error(`PDF: Error on slide ${i + 1}:`, error);
       }
-
-      console.log(`Canvas captured for slide ${i + 1}:`, canvas.width, "x", canvas.height);
-
-      // Add page to PDF (this creates a new page)
-      pdf.addPage("a4", "landscape");
-
-      // Get PDF dimensions
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-
-      // Convert canvas to image with lower quality to reduce file size
-      const imgData = canvas.toDataURL("image/jpeg", 0.7); // Use JPEG with 70% quality
-      
-      // Add image to PDF, fitting to page
-      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
-
-      console.log(`Added slide ${i + 1} to PDF`);
     }
 
-    // Remove the last blank page that gets created
-    const totalPages = pdf.internal.getNumberOfPages();
-    if (totalPages > slideElements.length) {
-      pdf.deletePage(totalPages);
+    if (pdf) {
+      pdf.save(`${title || "presentation"}.pdf`);
+      console.log("PDF: Export complete");
+    } else {
+      throw new Error("Failed to initialize PDF");
     }
-    //Remove the first blank page that gets created
-    if (pdf.internal.getNumberOfPages() > 1) {
-      pdf.deletePage(1);
-    }
-    // Save the PDF
-    const fileName = `${title || "presentation"}.pdf`;
-    pdf.save(fileName);
-    console.log("PDF saved successfully:", fileName);
-    
+
+    // Restore UI
+    if (navbar) (navbar as HTMLElement).style.display = originalNavDisplay;
+    if (sidebar) (sidebar as HTMLElement).style.display = originalSidebarDisplay;
+
   } catch (error) {
-    console.error("Error generating PDF:", error);
-    throw new Error(`Failed to generate PDF: ${error}`);
+    console.error("PDF Error:", error);
+    alert("Failed to export PDF. Please try again.");
   }
 };
 

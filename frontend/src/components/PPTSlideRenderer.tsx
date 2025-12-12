@@ -9,8 +9,12 @@ import CycleLayout from "./layouts/CycleLayout";
 import ArrowsLayout from "./layouts/ArrowsLayout";
 import PyramidLayout from "./layouts/PyramidLayout";
 import StaircaseLayout from "./layouts/StaircaseLayout";
+import CirclesLayout from "./layouts/CirclesLayout";
+import GridLayout from "./layouts/GridLayout";
+import ProcessFlowLayout from "./layouts/ProcessFlowLayout";
 import SlideEditor from "./SlideEditor";
 import useSlidesStore from "../store/useSlidesStore";
+import useSlideThemeStore from "../store/slideThemeStore";
 
 interface ModernSlideRendererProps {
   slideIndex: number;
@@ -25,6 +29,7 @@ const ModernSlideRenderer: React.FC<ModernSlideRendererProps> = ({
   const [showEditor, setShowEditor] = useState(false);
   
   const { slides } = useSlidesStore();
+  const { selectedTheme } = useSlideThemeStore();
   const slide = slides[slideIndex];
   
   if (!slide) {
@@ -35,7 +40,8 @@ const ModernSlideRenderer: React.FC<ModernSlideRendererProps> = ({
 
   // Optimized Layout Switcher
   const renderLayoutContent = () => {
-    const layoutProps = { content, dominantColor: dominant_color };
+    const textColor = (selectedTheme as any)?.text_color || "#ffffff";
+    const layoutProps = { content, dominantColor: dominant_color, textColor };
 
     switch (layout_type) {
       case "columns": return <ColumnsLayout {...layoutProps} />;
@@ -47,12 +53,15 @@ const ModernSlideRenderer: React.FC<ModernSlideRendererProps> = ({
       case "arrows": return <ArrowsLayout {...layoutProps} />;
       case "pyramid": return <PyramidLayout {...layoutProps} />;
       case "staircase": return <StaircaseLayout {...layoutProps} />;
+      case "circles": return <CirclesLayout {...layoutProps} />;
+      case "grid": return <GridLayout {...layoutProps} />;
+      case "process": return <ProcessFlowLayout {...layoutProps} />;
       default:
         return (
           <div className="flex items-center justify-center py-20">
-             <div className="text-white text-center">
+             <div style={{ color: textColor }} className="text-center">
                 <h3>Unknown Layout</h3>
-                <p className="text-sm text-gray-400">{layout_type}</p>
+                <p className="text-sm opacity-60">{layout_type}</p>
              </div>
           </div>
         );
@@ -114,9 +123,15 @@ const ModernSlideRenderer: React.FC<ModernSlideRendererProps> = ({
   return (
     <>
       <div
-        className="w-full px-8 py-12 relative group transition-colors duration-500"
+        className="relative group"
+        data-slide-renderer
         style={{
-          background: `radial-gradient(ellipse at center, ${dominant_color}08 0%, #0A0A0A 80%)`,
+          // background: selectedTheme
+          //   ? `linear-gradient(135deg, ${(selectedTheme as any).background_color} 50%, ${
+          //       (selectedTheme as any).gradient_end || (selectedTheme as any).background_color
+          //     } 10%)`
+          //   : "#000000",
+          color: (selectedTheme as any)?.text_color || "#ffffff",
         }}
       >
         {isActive && (
@@ -129,8 +144,20 @@ const ModernSlideRenderer: React.FC<ModernSlideRendererProps> = ({
           </button>
         )}
 
-        <div className={`relative z-10 ${isActive ? "border border-zinc-800 rounded-lg" : ""}`}>
-          <div className="w-full bg-black/40 p-10 rounded-lg shadow-lg backdrop-blur-sm">
+        <div className={`relative z-10 ${isActive ? "border border-zinc-800" : ""}`}>
+          <div
+            className="w-full p-10 shadow-lg"
+            style={{
+              background: selectedTheme
+            ? `linear-gradient(135deg, ${(selectedTheme as any).background_color} 0%, ${
+                (selectedTheme as any).gradient_end || (selectedTheme as any).background_color
+              } 100%)`
+            : "#000000",
+              backgroundColor: `${(selectedTheme as any)?.background_color || "#000000"}40`,
+              color: (selectedTheme as any)?.text_color || "#ffffff",
+              backdropFilter: "blur(8px)",
+            }}
+          >
             {renderSlideContent()}
           </div>
         </div>

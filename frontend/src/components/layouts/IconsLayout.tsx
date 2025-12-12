@@ -3,12 +3,15 @@ import React from "react";
 interface IconsLayoutProps {
   content: any;
   dominantColor: string;
+  textColor?: string;
 }
 
 const IconsLayout: React.FC<IconsLayoutProps> = ({
   content,
   dominantColor,
+  textColor: _textColor = "#ffffff",
 }) => {
+  const textColor = _textColor;
   const getIconByQuery = (query: string) => {
     const iconMap: { [key: string]: string } = {
       rocket: "🚀",
@@ -54,7 +57,7 @@ const IconsLayout: React.FC<IconsLayoutProps> = ({
     <div className="w-full space-y-8">
       {(content.title || content.heading) && (
         <div className="text-center space-y-3">
-          <h2 className="text-2xl md:text-3xl font-semibold text-white">
+          <h2 className="text-2xl md:text-3xl font-semibold" style={{ color: textColor }}>
             {content.title || content.heading}
           </h2>
           <div
@@ -79,10 +82,10 @@ const IconsLayout: React.FC<IconsLayoutProps> = ({
               </div>
 
               <div className="space-y-3 flex-1 flex flex-col justify-center">
-                <h3 className="font-semibold text-lg text-white leading-tight">
+                <h3 className="font-semibold text-lg leading-tight" style={{ color: textColor }}>
                   {icon.heading}
                 </h3>
-                <p className="text-sm text-gray-300 leading-relaxed">
+                <p className="text-sm leading-relaxed" style={{ color: textColor, opacity: 0.8 }}>
                   {icon.description}
                 </p>
               </div>
